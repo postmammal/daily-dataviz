@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Figma's Market Monopoly · 2026-03-18</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --rule: #2a2a2a; --muted: #666;
+      --text: #f0ece2; --accent: #f5c518; --accent-dim: rgba(245,197,24,0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; min-height: 100vh; }
+    .wrapper { max-width: 840px; margin: 0 auto; padding: 40px 24px 80px; }
+    .back-link { font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: inline-block; margin-bottom: 28px; transition: color .15s; }
+    .back-link:hover { color: var(--accent); }
+    .eyebrow { font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    h1 { font-size: clamp(1.5rem,4vw,2.3rem); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; margin-bottom: 14px; }
+    .subtitle { font-size: .88rem; color: var(--muted); line-height: 1.6; max-width: 560px; margin-bottom: 36px; }
+    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 36px; }
+    @media (max-width: 540px) { .stats-row { grid-template-columns: 1fr; } }
+    .stat-card { background: var(--surface); border: 1px solid var(--rule); padding: 20px 18px 18px; position: relative; overflow: hidden; }
+    .stat-card.highlight { border-color: var(--accent); }
+    .stat-card.highlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+    .stat-number { font-size: clamp(1.8rem,4vw,2.6rem); font-weight: 900; letter-spacing: -.03em; line-height: 1; color: var(--text); margin-bottom: 6px; }
+    .stat-number.accent { color: var(--accent); }
+    .stat-delta { font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .stat-label { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+    .ctrl-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
+    .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .chart-panel { background: var(--surface); border: 1px solid var(--rule); padding: 28px 24px 20px; margin-bottom: 24px; }
+    .chart-title { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .chart-container { position: relative; width: 100%; height: 300px; }
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+    .annotation-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 32px; }
+    @media (max-width: 540px) { .annotation-row { grid-template-columns: 1fr; } }
+    .annotation { padding: 14px 0; border-top: 1px solid var(--rule); }
+    .ann-pct { font-size: 1.4rem; font-weight: 900; letter-spacing: -.02em; color: var(--text); margin-bottom: 4px; }
+    .ann-label { font-size: .7rem; color: var(--muted); line-height: 1.4; }
+    .source { font-size: .6rem; color: var(--muted); letter-spacing: .05em; line-height: 1.8; border-top: 1px solid var(--rule); padding-top: 20px; }
+    .source a { color: var(--muted); text-decoration: none; }
+    .source a:hover { color: var(--accent); }
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <a href="./index.html" class="back-link">← All Visualizations</a>
+  <div class="eyebrow">UX Design · March 18, 2026</div>
+  <h1>Figma's Nine-Year Monopoly:<br>7% to 90% Faster Than Any Design Tool Ever</h1>
+  <p class="subtitle">In 2017, Figma had 7% of the UI design tool market. By 2023, it controlled 90%. Now 95% of Fortune 500 companies use it — while every credible competitor has either shut down, pivoted, or become an afterthought.</p>
+
+  <div class="stats-row">
+    <div class="stat-card highlight">
+      <div class="stat-number accent">40.65%</div>
+      <div class="stat-delta">↑ from 7% in 2017</div>
+      <div class="stat-label">overall design tool market share — and 90% of the UI design subcategory</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">13M</div>
+      <div class="stat-delta">↑ 225% from 4M in 2022</div>
+      <div class="stat-label">monthly active users as of March 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">95%</div>
+      <div class="stat-delta">Fortune 500 adoption</div>
+      <div class="stat-label">of Fortune 500 companies now use Figma — an almost unheard-of enterprise penetration rate</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn active" data-view="competitors">Market Share</button>
+    <button class="ctrl-btn" data-view="growth">User Growth</button>
+    <button class="ctrl-btn" data-view="trajectory">Rise to Dominance</button>
+  </div>
+
+  <!-- Competitors -->
+  <div class="view-panel active" id="view-competitors">
+    <div class="chart-panel">
+      <div class="chart-title">Design Tool Market Share — Collaborative Design Category (2026)</div>
+      <div class="chart-container"><canvas id="chart-competitors"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">Adobe paid $20B to acquire Figma — then regulators blocked the deal. Figma then IPO'd at an estimated $45B valuation. Meanwhile, Adobe XD (which Adobe killed in 2024) still clings to 13.5% market share through legacy contracts, while InVision, once valued at $2B, has faded to 7.6%.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">Adobe XD</div><div class="ann-label">13.5% — still #2 despite being officially discontinued by Adobe in 2024</div></div>
+      <div class="annotation"><div class="ann-pct">InVision</div><div class="ann-label">7.6% — once valued at $2B, now a cautionary tale of prototype-only tools</div></div>
+      <div class="annotation"><div class="ann-pct">Others</div><div class="ann-label">38.25% — Sketch, Framer, Penpot, Canva, and dozens of niche tools combined</div></div>
+    </div>
+  </div>
+
+  <!-- User Growth -->
+  <div class="view-panel" id="view-growth">
+    <div class="chart-panel">
+      <div class="chart-title">Figma Monthly Active Users (Millions)</div>
+      <div class="chart-container"><canvas id="chart-growth"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">Figma's user growth didn't slow after the failed Adobe acquisition — it accelerated. The product-led growth model (free tier, multiplayer editing, community templates) drove adoption faster than any enterprise sales motion could. 13M MAU in 2025 is more than double the 4M from 2022.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">4M</div><div class="ann-label">MAU in 2022 — the year Adobe attempted its $20B acquisition</div></div>
+      <div class="annotation"><div class="ann-pct">8M</div><div class="ann-label">MAU in 2023 — after acquisition blocked, independent momentum continued</div></div>
+      <div class="annotation"><div class="ann-pct">13M</div><div class="ann-label">MAU in early 2025 — 159% annual growth rate sustained over three years</div></div>
+    </div>
+  </div>
+
+  <!-- Rise to Dominance -->
+  <div class="view-panel" id="view-trajectory">
+    <div class="chart-panel">
+      <div class="chart-title">Figma's Share of the UI Design Tool Market — 2017 to 2026</div>
+      <div class="chart-container"><canvas id="chart-trajectory"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">No design tool has ever achieved market dominance this fast. Sketch peaked around 30% before Figma's cloud-first multiplayer approach made local-file tools feel obsolete overnight. The shift happened in just 4 years (2018–2022) — driven by remote work forcing teams to abandon desktop-only software.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">2017</div><div class="ann-label">7% market share — still a niche tool fighting against Sketch's dominance</div></div>
+      <div class="annotation"><div class="ann-pct">2020</div><div class="ann-label">~45% — remote work surge made browser-based multiplayer editing essential</div></div>
+      <div class="annotation"><div class="ann-pct">2023</div><div class="ann-label">90% — effectively the only choice for new product design teams</div></div>
+    </div>
+  </div>
+
+  <div class="source">
+    Sources: <a href="https://6sense.com/tech/collaborative-design-and-prototyping/figma-market-share" target="_blank">6sense Market Share Data</a> ·
+    <a href="https://sqmagazine.co.uk/figma-statistics/" target="_blank">SQ Magazine Figma Statistics 2026</a> ·
+    <a href="https://www.figma.com/resource-library/design-statistics/" target="_blank">Figma Design Statistics Resource Library</a>
+  </div>
+</div>
+
+<script>
+  Chart.defaults.color = '#666';
+  Chart.defaults.borderColor = '#222';
+  Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+  const ACCENT = '#f5c518';
+  const DIM = '#2a2a2a';
+  const MUTED = '#3a3a3a';
+
+  // Competitors chart
+  new Chart(document.getElementById('chart-competitors'), {
+    type: 'bar',
+    data: {
+      labels: ['Figma', 'Adobe XD', 'InVision', 'Sketch', 'Framer', 'Others'],
+      datasets: [{
+        data: [40.65, 13.5, 7.6, 5.2, 3.1, 29.95],
+        backgroundColor: [ACCENT, MUTED, MUTED, MUTED, MUTED, '#222'],
+        borderColor: 'transparent', borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}%` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: '#666' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 50 }
+      }
+    }
+  });
+
+  // User Growth
+  new Chart(document.getElementById('chart-growth'), {
+    type: 'bar',
+    data: {
+      labels: ['2022', '2023', '2024 (est.)', '2025'],
+      datasets: [{
+        data: [4, 8, 11, 13],
+        backgroundColor: [MUTED, MUTED, '#7a6800', ACCENT],
+        borderColor: 'transparent', borderRadius: 2,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}M MAU` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: '#666' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + 'M' }, max: 16 }
+      }
+    }
+  });
+
+  // Trajectory
+  new Chart(document.getElementById('chart-trajectory'), {
+    type: 'line',
+    data: {
+      labels: ['2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+      datasets: [{
+        label: 'Figma UI design market share',
+        data: [7, 14, 26, 45, 70, 82, 90, 90, 90],
+        borderColor: ACCENT, backgroundColor: 'rgba(245,197,24,0.08)',
+        fill: true, tension: 0.35, pointBackgroundColor: ACCENT, pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}% market share` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 100, min: 0 }
+      }
+    }
+  });
+
+  document.querySelectorAll('.ctrl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

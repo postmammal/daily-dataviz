@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Dataviz · Design, AI & Tech</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #1e1e1e;
+      --rule: #2a2a2a;
+      --muted: #666;
+      --text: #f0ece2;
+      --accent: #f5c518;
+      --accent-dim: rgba(245, 197, 24, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    .wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 52px 24px 80px;
+    }
+
+    /* ── Header ── */
+    .site-eyebrow {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .site-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900; letter-spacing: -0.025em;
+      line-height: 1.1; margin-bottom: 12px;
+    }
+    .site-desc {
+      font-size: 0.83rem; color: var(--muted); max-width: 520px;
+      line-height: 1.65; margin-bottom: 40px;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .filter-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 13px;
+      cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+    }
+    .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+    .filter-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+
+    /* ── Grid ── */
+    .viz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    /* ── Card ── */
+    .viz-card {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      text-decoration: none;
+      display: flex; flex-direction: column;
+      transition: border-color 0.15s, background 0.15s;
+      cursor: pointer;
+    }
+    .viz-card:hover {
+      border-color: var(--accent);
+      background: #181818;
+    }
+    .viz-card.hidden { display: none; }
+
+    /* mini-viz preview area */
+    .card-preview {
+      height: 148px;
+      background: #0d0d0d;
+      border-bottom: 1px solid var(--rule);
+      display: flex; flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .mini-label {
+      font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #444;
+      padding: 9px 14px 0;
+      flex-shrink: 0;
+    }
+    .card-preview canvas {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      display: block;
+    }
+
+    .card-body { padding: 16px 18px 18px; flex: 1; }
+
+    .card-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px;
+    }
+    .card-date {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .card-category {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--accent);
+    }
+
+    .card-title {
+      font-size: 0.9rem; font-weight: 800; line-height: 1.3;
+      color: var(--text); margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .card-insight {
+      font-size: 0.73rem; color: var(--muted); line-height: 1.5;
+    }
+
+    .card-tags {
+      padding: 12px 18px;
+      border-top: 1px solid var(--rule);
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .tag {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      background: var(--bg); border: 1px solid var(--rule);
+      padding: 3px 8px;
+    }
+
+    .empty-state {
+      display: none; grid-column: 1/-1;
+      padding: 48px 0; text-align: center;
+      font-size: 0.78rem; color: var(--muted);
+    }
+
+    /* ── Count ── */
+    .result-count {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 20px;
+    }
+    #count-n { color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="site-eyebrow">Daily Data Visualization</div>
+  <h1 class="site-title">Design, AI &amp; Tech<br>Intelligence</h1>
+  <p class="site-desc">
+    One data-driven story per day — across UX research, design leadership, AI tools, and developer trends.
+    Built for designers and researchers who want the numbers behind the narratives.
+  </p>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="AI">AI</button>
+    <button class="filter-btn" data-filter="UX Research">UX Research</button>
+    <button class="filter-btn" data-filter="UX Design">UX Design</button>
+    <button class="filter-btn" data-filter="Design Leadership">Design Leadership</button>
+    <button class="filter-btn" data-filter="Tech">Tech</button>
+  </div>
+
+  <div class="result-count"><span id="count-n">—</span> visualization<span id="count-plural">s</span></div>
+
+  <div class="viz-grid" id="viz-grid">
+    <!-- injected by JS -->
+    <div class="empty-state" id="empty-state">No visualizations match this filter.</div>
+  </div>
+
+</div>
+
+<script>
+  // ── Data ──────────────────────────────────────────────────────────────
+  const vizzes = [
+      {
+        date: "2026-03-20",
+        slug: "2026-03-20-ux-research-strategic-paradox",
+        title: "UX Research's Strategic Paradox: Influence Triples, Headcount Shrinks",
+        category: "UX RESEARCH · Maze 2026 Report",
+        insight: "Organizations treating research as essential to business strategy nearly tripled (8%→22%) in a single year, yet dedicated researcher headcount is shrinking as AI handles execution.",
+        tags: ["UX Research"],
+        miniViz: {
+          type: "hbars",
+          labels: ["Essential to strategy", "Increased demand", "Using AI", "Hybrid orgs"],
+          data: [22, 66, 69, 78],
+          keyIdx: 0,
+          label: "Key metrics (%)"
+        }
+      },
+      {
+        date: "2026-03-19",
+        slug: "2026-03-19-ai-pricing-collapse",
+        title: "The AI Pricing Collapse: 98% Cheaper in Three Years",
+        category: "AI · LLM Pricing",
+        insight: "GPT-4-class intelligence cost $60/M tokens in 2023. The same capability now costs $0.75 — a 98% drop — yet the spread between the cheapest and priciest model is now 420×.",
+        tags: ["AI"],
+        miniViz: {
+          type: "sparkline",
+          data: [60, 30, 10, 4, 2.5, 1.5, 0.75],
+          logScale: true,
+          label: "GPT-4-class $/1M tokens (log)"
+        }
+      },
+      {
+        date: "2026-03-18",
+        slug: "2026-03-18-figma-monopoly",
+        title: "Figma's Nine-Year Monopoly: 7% to 90% Faster Than Any Design Tool Ever",
+        category: "UX DESIGN · Market Share",
+        insight: "From 7% market share in 2017 to 90% of the UI design category by 2023. Figma now has 13M MAU, 95% Fortune 500 penetration, and no credible rival — despite being blocked from its $20B acquisition.",
+        tags: ["UX Design"],
+        miniViz: {
+          type: "sparkline",
+          data: [7, 14, 26, 45, 70, 82, 90, 90, 90],
+          logScale: false,
+          label: "Figma UI design market share (%)"
+        }
+      },
+      {
+        date: "2026-03-17",
+        slug: "2026-03-17-designer-developer-ratio",
+        title: "1 Researcher : 5 Designers : 50 Devs — The Ratio Nobody's Hitting",
+        category: "DESIGN LEADERSHIP · Team Staffing",
+        insight: "Most organizations run at 1 designer per 20 developers and 1 researcher per 100 — far below the 1:8 and 1:50 benchmarks linked to measurably better product outcomes.",
+        tags: ["Design Leadership"],
+        miniViz: {
+          type: "hbars",
+          labels: ["Researchers (actual)", "Researchers (rec.)", "Designers (actual)", "Designers (rec.)"],
+          data: [1, 2, 5, 12.5],
+          keyIdx: 3,
+          label: "Per 100 developers"
+        }
+      },
+      {
+        date: "2026-03-16",
+        slug: "2026-03-16-design-systems-disillusionment",
+        title: "Design Systems Are in Gartner's Trough of Disillusionment",
+        category: "UX DESIGN · Design Systems",
+        insight: "Design system buy-in satisfaction dropped from 42% to 32% in a single year. 76% of teams have no onboarding materials — yet systems that survive past 3 years show 12% higher trust scores.",
+        tags: ["UX Design", "Design Leadership"],
+        miniViz: {
+          type: "hbars",
+          labels: ["Buy-in (2025)", "Buy-in (2026)", "Has onboarding", "3yr+ trust"],
+          data: [42, 32, 24, 84],
+          keyIdx: 1,
+          label: "Design system health (%)"
+        }
+      },
+  ];
+
+  // ── Mini-viz renderer ─────────────────────────────────────────────────
+  const DPR = window.devicePixelRatio || 1;
+
+  function setupCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const W = rect.width  || 280;
+    const H = rect.height || 110;
+    canvas.width  = W * DPR;
+    canvas.height = H * DPR;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(DPR, DPR);
+    return { ctx, W, H };
+  }
+
+  function fmtVal(v, spec) {
+    const lbl = (spec.label || '').toLowerCase();
+    if (lbl.includes('$')) return v >= 1 ? `$${v}` : `$${v.toFixed(2)}`;
+    if (lbl.includes('%') || lbl.includes('(%)')) return `${v}%`;
+    return String(v);
+  }
+
+  function renderMiniViz(canvas, spec) {
+    const { ctx, W, H } = setupCanvas(canvas);
+    const ACCENT  = '#f5c518';
+    const TRACK   = '#1e1e1e';
+    const BARFILL = '#2e2e2e';
+    const TEXTMUT = '#555';
+    const TEXTHI  = '#999';
+
+    ctx.clearRect(0, 0, W, H);
+
+    // ── Horizontal bars ─────────────────────────────────────────────
+    if (spec.type === 'hbars') {
+      const rows    = spec.data.length;
+      const PAD_L   = 8;
+      const PAD_R   = 6;
+      const PAD_T   = 6;
+      const PAD_B   = 6;
+      const VAL_W   = 32;   // reserved space for value text on right
+      const rowH    = (H - PAD_T - PAD_B) / rows;
+      const barH    = Math.min(Math.max(rowH * 0.38, 5), 10);
+      const maxVal  = Math.max(...spec.data);
+      const barZone = W - PAD_L - PAD_R - VAL_W;
+
+      spec.data.forEach((val, i) => {
+        const isKey  = i === spec.keyIdx;
+        const cy     = PAD_T + i * rowH + rowH / 2;
+        const barY   = cy - barH / 2;
+        const barW   = (val / maxVal) * barZone;
+
+        // Track
+        ctx.fillStyle = TRACK;
+        ctx.fillRect(PAD_L, barY, barZone, barH);
+
+        // Bar fill
+        ctx.fillStyle = isKey ? ACCENT : BARFILL;
+        ctx.fillRect(PAD_L, barY, barW, barH);
+
+        // Short label (left-aligned, above bar center)
+        const shortLabel = (spec.labels[i] || '').replace(/\(.*\)/, '').trim();
+        ctx.font         = `${isKey ? 700 : 500} 8.5px 'Helvetica Neue', sans-serif`;
+        ctx.fillStyle    = isKey ? ACCENT : TEXTMUT;
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(shortLabel, PAD_L, barY - 1.5);
+
+        // Value label (right side)
+        ctx.font         = `700 9px 'Helvetica Neue', sans-serif`;
+        ctx.fillStyle    = isKey ? ACCENT : TEXTHI;
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fmtVal(val, spec), PAD_L + barZone + 5, cy);
+      });
+    }
+
+    // ── Sparkline ───────────────────────────────────────────────────
+    if (spec.type === 'sparkline') {
+      const PAD_L = 12;
+      const PAD_R = 12;
+      const PAD_T = 22; // room for value labels at very top
+      const PAD_B = 8;
+
+      const raw = spec.data;
+      const d   = spec.logScale
+        ? raw.map(v => Math.log10(Math.max(v, 0.0001)))
+        : raw;
+      const minV  = Math.min(...d);
+      const maxV  = Math.max(...d);
+      const range = maxV - minV || 1;
+      const aW    = W - PAD_L - PAD_R;
+      const aH    = H - PAD_T - PAD_B;
+
+      const pts = d.map((v, i) => ({
+        x: PAD_L + (i / (d.length - 1)) * aW,
+        y: PAD_T + aH - ((v - minV) / range) * aH,
+      }));
+
+      // Gradient area fill
+      const grad = ctx.createLinearGradient(0, PAD_T, 0, PAD_T + aH);
+      grad.addColorStop(0, 'rgba(245,197,24,0.18)');
+      grad.addColorStop(1, 'rgba(245,197,24,0)');
+      ctx.beginPath();
+      pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.lineTo(pts[pts.length - 1].x, PAD_T + aH);
+      ctx.lineTo(pts[0].x, PAD_T + aH);
+      ctx.closePath();
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Baseline
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD_L, PAD_T + aH);
+      ctx.lineTo(PAD_L + aW, PAD_T + aH);
+      ctx.stroke();
+
+      // Line
+      ctx.beginPath();
+      pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth   = 1.75;
+      ctx.lineJoin    = 'round';
+      ctx.stroke();
+
+      // Start dot (muted)
+      ctx.beginPath();
+      ctx.arc(pts[0].x, pts[0].y, 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#555';
+      ctx.fill();
+
+      // End dot (accent)
+      ctx.beginPath();
+      ctx.arc(pts[pts.length - 1].x, pts[pts.length - 1].y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = ACCENT;
+      ctx.fill();
+
+      // Start value (top-left, muted)
+      ctx.font         = '600 9px "Helvetica Neue", sans-serif';
+      ctx.fillStyle    = '#555';
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(fmtVal(raw[0], spec), PAD_L, 5);
+
+      // End value (top-right, accent)
+      ctx.font         = '700 9px "Helvetica Neue", sans-serif';
+      ctx.fillStyle    = ACCENT;
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillText(fmtVal(raw[raw.length - 1], spec), W - PAD_R, 5);
+
+      // Arrow between them
+      ctx.font         = '600 9px "Helvetica Neue", sans-serif';
+      ctx.fillStyle    = '#3a3a3a';
+      ctx.textAlign    = 'center';
+      ctx.fillText('→', W / 2, 5);
+    }
+
+    // ── Scatter ─────────────────────────────────────────────────────
+    if (spec.type === 'scatter') {
+      const PAD = 14;
+      const aW  = W - PAD * 2;
+      const aH  = H - PAD * 2;
+      const yRange = spec.yMax - spec.yMin;
+
+      // Axes
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD, PAD);
+      ctx.lineTo(PAD, PAD + aH);
+      ctx.lineTo(PAD + aW, PAD + aH);
+      ctx.stroke();
+
+      spec.points.forEach(pt => {
+        const px = PAD + (pt.x / 100) * aW;
+        const py = PAD + aH - ((pt.y - spec.yMin) / yRange) * aH;
+        ctx.beginPath();
+        ctx.arc(px, py, pt.key ? 5 : 3, 0, Math.PI * 2);
+        ctx.fillStyle = pt.key ? ACCENT : BARFILL;
+        ctx.fill();
+        if (pt.key) {
+          ctx.strokeStyle = 'rgba(245,197,24,0.3)';
+          ctx.lineWidth   = 4;
+          ctx.beginPath();
+          ctx.arc(px, py, 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+    }
+  }
+
+  // ── Build cards ──────────────────────────────────────────────────────
+  const grid = document.getElementById('viz-grid');
+  const emptyState = document.getElementById('empty-state');
+
+  vizzes.forEach(v => {
+    const card = document.createElement('a');
+    card.className = 'viz-card';
+    card.href = `./${v.slug}.html`;
+    card.dataset.tags = JSON.stringify(v.tags);
+
+    // mini-viz preview
+    const preview = document.createElement('div');
+    preview.className = 'card-preview';
+
+    const miniLabel = document.createElement('div');
+    miniLabel.className = 'mini-label';
+    miniLabel.textContent = v.miniViz.label;
+    preview.appendChild(miniLabel);
+
+    const canvas = document.createElement('canvas');
+    canvas.style.width  = '100%';
+    canvas.style.height = '100%';
+    preview.appendChild(canvas);
+    card.appendChild(preview);
+
+    // body
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    body.innerHTML = `
+      <div class="card-meta">
+        <span class="card-date">${v.date}</span>
+        <span class="card-category">${v.category}</span>
+      </div>
+      <div class="card-title">${v.title}</div>
+      <div class="card-insight">${v.insight}</div>
+    `;
+    card.appendChild(body);
+
+    // tags
+    const tagRow = document.createElement('div');
+    tagRow.className = 'card-tags';
+    v.tags.forEach(t => {
+      const span = document.createElement('span');
+      span.className = 'tag';
+      span.textContent = t;
+      tagRow.appendChild(span);
+    });
+    card.appendChild(tagRow);
+
+    grid.insertBefore(card, emptyState);
+
+    // render after two rAF ticks so layout is settled and getBoundingClientRect has dimensions
+    requestAnimationFrame(() => requestAnimationFrame(() => renderMiniViz(canvas, v.miniViz)));
+  });
+
+  // ── Filtering ────────────────────────────────────────────────────────
+  const countN = document.getElementById('count-n');
+  const countPlural = document.getElementById('count-plural');
+
+  function applyFilter(filter) {
+    const cards = document.querySelectorAll('.viz-card');
+    let visible = 0;
+    cards.forEach(card => {
+      const tags = JSON.parse(card.dataset.tags || '[]');
+      const show = filter === 'all' || tags.includes(filter);
+      card.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+    countN.textContent = visible;
+    countPlural.textContent = visible === 1 ? '' : 's';
+  }
+
+  document.getElementById('filter-bar').addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter(btn.dataset.filter);
+  });
+
+  applyFilter('all');
+</script>
+</body>
+</html>

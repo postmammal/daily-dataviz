@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The AI Pricing Collapse · 2026-03-19</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0a; --surface: #141414; --rule: #2a2a2a; --muted: #666;
+      --text: #f0ece2; --accent: #f5c518; --accent-dim: rgba(245,197,24,0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; min-height: 100vh; }
+    .wrapper { max-width: 840px; margin: 0 auto; padding: 40px 24px 80px; }
+    .back-link { font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: inline-block; margin-bottom: 28px; transition: color .15s; }
+    .back-link:hover { color: var(--accent); }
+    .eyebrow { font-size: .6rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+    h1 { font-size: clamp(1.5rem,4vw,2.3rem); font-weight: 800; line-height: 1.15; letter-spacing: -.02em; margin-bottom: 14px; }
+    .subtitle { font-size: .88rem; color: var(--muted); line-height: 1.6; max-width: 560px; margin-bottom: 36px; }
+    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 36px; }
+    @media (max-width: 540px) { .stats-row { grid-template-columns: 1fr; } }
+    .stat-card { background: var(--surface); border: 1px solid var(--rule); padding: 20px 18px 18px; position: relative; overflow: hidden; }
+    .stat-card.highlight { border-color: var(--accent); }
+    .stat-card.highlight::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+    .stat-number { font-size: clamp(1.8rem,4vw,2.6rem); font-weight: 900; letter-spacing: -.03em; line-height: 1; color: var(--text); margin-bottom: 6px; }
+    .stat-number.accent { color: var(--accent); }
+    .stat-delta { font-size: .63rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .stat-label { font-size: .75rem; color: var(--muted); line-height: 1.5; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+    .ctrl-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
+    .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .chart-panel { background: var(--surface); border: 1px solid var(--rule); padding: 28px 24px 20px; margin-bottom: 24px; }
+    .chart-title { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .chart-container { position: relative; width: 100%; height: 300px; }
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+    .annotation-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 32px; }
+    @media (max-width: 540px) { .annotation-row { grid-template-columns: 1fr; } }
+    .annotation { padding: 14px 0; border-top: 1px solid var(--rule); }
+    .ann-pct { font-size: 1.4rem; font-weight: 900; letter-spacing: -.02em; color: var(--text); margin-bottom: 4px; }
+    .ann-label { font-size: .7rem; color: var(--muted); line-height: 1.4; }
+    .source { font-size: .6rem; color: var(--muted); letter-spacing: .05em; line-height: 1.8; border-top: 1px solid var(--rule); padding-top: 20px; }
+    .source a { color: var(--muted); text-decoration: none; }
+    .source a:hover { color: var(--accent); }
+    .view-panel { display: none; }
+    .view-panel.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <a href="./index.html" class="back-link">← All Visualizations</a>
+  <div class="eyebrow">AI · March 19, 2026</div>
+  <h1>The AI Pricing Collapse:<br>98% Cheaper in Three Years</h1>
+  <p class="subtitle">GPT-4-class intelligence cost $60/million tokens in 2023. The same capability now costs $0.75 — a 98% price drop. Yet the gap between budget and frontier models has never been wider: a 420× spread from cheapest to priciest.</p>
+
+  <div class="stats-row">
+    <div class="stat-card highlight">
+      <div class="stat-number accent">−98%</div>
+      <div class="stat-delta">2023 → 2026</div>
+      <div class="stat-label">price drop for GPT-4-class intelligence (from $60 to $0.75/M tokens)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">420×</div>
+      <div class="stat-delta">budget vs. frontier</div>
+      <div class="stat-label">spread between cheapest input ($0.05 GPT-5 nano) and most expensive ($21 GPT-5.2 Pro)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">4×</div>
+      <div class="stat-delta">every model</div>
+      <div class="stat-label">median ratio of output-to-input token pricing across all major providers</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn active" data-view="input">Input Prices</button>
+    <button class="ctrl-btn" data-view="output">Output Prices</button>
+    <button class="ctrl-btn" data-view="history">Price History</button>
+  </div>
+
+  <!-- Input Prices -->
+  <div class="view-panel active" id="view-input">
+    <div class="chart-panel">
+      <div class="chart-title">Input Token Pricing — March 2026 ($ per million tokens, log scale)</div>
+      <div class="chart-container"><canvas id="chart-input"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">DeepSeek's entry at $0.55/M input tokens triggered a race to the bottom, forcing every incumbent to respond with cheaper tiers. The result: frontier quality (GPT-5.2 Pro) is for enterprises with premium needs, while budget models now offer 2023-era GPT-4 performance at 1/120th the price.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">$0.05</div><div class="ann-label">GPT-5 nano — the cheapest input available from a major provider</div></div>
+      <div class="annotation"><div class="ann-pct">$0.10</div><div class="ann-label">Gemini Flash-Lite — Google's most aggressive budget tier</div></div>
+      <div class="annotation"><div class="ann-pct">$21.00</div><div class="ann-label">GPT-5.2 Pro — 420× more expensive than the cheapest option</div></div>
+    </div>
+  </div>
+
+  <!-- Output Prices -->
+  <div class="view-panel" id="view-output">
+    <div class="chart-panel">
+      <div class="chart-title">Output Token Pricing — March 2026 ($ per million tokens, log scale)</div>
+      <div class="chart-container"><canvas id="chart-output"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">Output tokens cost 3–8× more than input tokens across every model — because generation is computationally heavier than context processing. For agentic workflows that produce long outputs, this asymmetry dramatically changes total cost calculations.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">$0.40</div><div class="ann-label">GPT-5 nano output — 8× its input price ($0.05)</div></div>
+      <div class="annotation"><div class="ann-pct">$15.00</div><div class="ann-label">Claude Sonnet 4.6 output — 5× its input price ($3.00)</div></div>
+      <div class="annotation"><div class="ann-pct">$168</div><div class="ann-label">GPT-5.2 Pro output — the most expensive output token in the market</div></div>
+    </div>
+  </div>
+
+  <!-- Price History -->
+  <div class="view-panel" id="view-history">
+    <div class="chart-panel">
+      <div class="chart-title">Price of GPT-4-Class Intelligence Over Time ($/million input tokens)</div>
+      <div class="chart-container"><canvas id="chart-history"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">The AI pricing curve follows a faster Moore's Law equivalent: every 12 months, the price of equivalent intelligence has dropped roughly 60–75%. This compression is driven by model efficiency improvements, hardware cost declines, and intensifying competition — not just commoditization.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">$60</div><div class="ann-label">2023: GPT-4 input price per million tokens at launch</div></div>
+      <div class="annotation"><div class="ann-pct">$2.50</div><div class="ann-label">2025: GPT-4o class models after competition from Claude/Gemini</div></div>
+      <div class="annotation"><div class="ann-pct">$0.75</div><div class="ann-label">2026: GPT-4 quality today, a 98.75% reduction in three years</div></div>
+    </div>
+  </div>
+
+  <div class="source">
+    Sources: <a href="https://intuitionlabs.ai/articles/ai-api-pricing-comparison-grok-gemini-openai-claude" target="_blank">IntuitionLabs AI Pricing Comparison</a> ·
+    <a href="https://www.cloudidr.com/blog/llm-pricing-comparison-2026" target="_blank">CloudIDR LLM Pricing 2026</a> ·
+    <a href="https://www.tldl.io/resources/llm-api-pricing-2026" target="_blank">TLDL LLM API Pricing March 2026</a>
+  </div>
+</div>
+
+<script>
+  Chart.defaults.color = '#666';
+  Chart.defaults.borderColor = '#222';
+  Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+
+  const ACCENT = '#f5c518';
+  const DIM = '#2a2a2a';
+  const MUTED = '#3a3a3a';
+  const COLORS = {
+    openai: ACCENT,
+    anthropic: '#c9a114',
+    google: '#7a6800',
+    other: MUTED,
+  };
+
+  const models = [
+    { name: 'GPT-5.2 Pro',     input: 21.00,  output: 168.0, provider: 'openai' },
+    { name: 'Claude Opus 4.6', input:  5.00,  output:  25.0, provider: 'anthropic' },
+    { name: 'GPT-5.2',         input:  1.75,  output:  14.0, provider: 'openai' },
+    { name: 'Claude Sonnet 4.6',input: 3.00,  output:  15.0, provider: 'anthropic' },
+    { name: 'Gemini 2.5 Pro',  input:  1.25,  output:  10.0, provider: 'google' },
+    { name: 'Gemini Flash',    input:  0.30,  output:   2.50, provider: 'google' },
+    { name: 'GPT-5.2 mini',   input:  0.25,  output:   2.00, provider: 'openai' },
+    { name: 'Claude Haiku 4.5',input:  0.25,  output:   1.25, provider: 'anthropic' },
+    { name: 'Gemini Flash-Lite',input: 0.10,  output:   0.40, provider: 'google' },
+    { name: 'GPT-5 nano',      input:  0.05,  output:   0.40, provider: 'openai' },
+  ];
+
+  const colors = models.map(m => COLORS[m.provider]);
+
+  // Chart 1: Input
+  new Chart(document.getElementById('chart-input'), {
+    type: 'bar',
+    data: {
+      labels: models.map(m => m.name),
+      datasets: [{ data: models.map(m => m.input), backgroundColor: colors, borderColor: 'transparent', borderRadius: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 35 } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+      }
+    }
+  });
+
+  // Chart 2: Output
+  new Chart(document.getElementById('chart-output'), {
+    type: 'bar',
+    data: {
+      labels: models.map(m => m.name),
+      datasets: [{ data: models.map(m => m.output), backgroundColor: colors, borderColor: 'transparent', borderRadius: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 35 } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+      }
+    }
+  });
+
+  // Chart 3: History
+  new Chart(document.getElementById('chart-history'), {
+    type: 'line',
+    data: {
+      labels: ['Q2 2023', 'Q4 2023', 'Q2 2024', 'Q4 2024', 'Q1 2025', 'Q3 2025', 'Q1 2026'],
+      datasets: [{
+        label: 'GPT-4-class input price ($/M tokens)',
+        data: [60, 30, 10, 4, 2.5, 1.5, 0.75],
+        borderColor: ACCENT, backgroundColor: 'rgba(245,197,24,0.08)',
+        fill: true, tension: 0.3, pointBackgroundColor: ACCENT, pointRadius: 4, pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
+      scales: {
+        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+      }
+    }
+  });
+
+  // Toggle
+  document.querySelectorAll('.ctrl-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.ctrl-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
