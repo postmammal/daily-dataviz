@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,9 +7,48 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0a0a0a; --surface: #141414; --rule: #2a2a2a; --muted: #666;
-      --text: #f0ece2; --accent: #f5c518; --accent-dim: rgba(245,197,24,0.1);
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --accent:     #f5c518;
+      --accent-dim: rgba(245,197,24,0.1);
     }
+    /* ── Light/Dark theme system ── */
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+    }
+    [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+    }
+    /* ── Theme toggle button ── */
+    #theme-toggle {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      vertical-align: middle;
+    }
+    #theme-toggle:hover { color: var(--text); border-color: var(--text); }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: var(--bg); color: var(--text); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; min-height: 100vh; }
     .wrapper { max-width: 840px; margin: 0 auto; padding: 40px 24px 80px; }
@@ -52,6 +91,7 @@
 <body>
 <div class="wrapper">
   <a href="./index.html" class="back-link">← All Visualizations</a>
+  <button id="theme-toggle" aria-label="Toggle color theme" style="float:right;margin-top:-4px;margin-left:12px;">☾</button>
   <div class="eyebrow">UX Design · March 18, 2026</div>
   <h1>Figma's Nine-Year Monopoly:<br>7% to 90% Faster Than Any Design Tool Ever</h1>
   <p class="subtitle">In 2017, Figma had 7% of the UI design tool market. By 2023, it controlled 90%. Now 95% of Fortune 500 companies use it — while every credible competitor has either shut down, pivoted, or become an afterthought.</p>
@@ -139,11 +179,14 @@
 </div>
 
 <script>
-  Chart.defaults.color = '#666';
-  Chart.defaults.borderColor = '#222';
+  // ── CSS variable helper ───────────────────────────────────────────────────
+  function _cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+  Chart.defaults.color = _cssVar('--muted') || '#888880';
+  Chart.defaults.borderColor = _cssVar('--rule') || '#CCCAC2';
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
   const ACCENT = '#f5c518';
-  const DIM = '#2a2a2a';
+  const DIM = _cssVar('--rule') || '#CCCAC2';
   const MUTED = '#3a3a3a';
 
   // ── Treemap (Canvas 2D) ──
@@ -212,7 +255,7 @@
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}M MAU` } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}M MAU` } } },
       scales: {
         x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: '#666' } },
         y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + 'M' }, max: 16 }
@@ -234,7 +277,7 @@
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}% market share` } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}% market share` } } },
       scales: {
         x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
         y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 100, min: 0 }
@@ -250,6 +293,23 @@
       document.getElementById('view-' + btn.dataset.view).classList.add('active');
     });
   });
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  ;(function() {
+    var root = document.documentElement;
+    var btn  = document.getElementById('theme-toggle');
+    if (!btn) return;
+    var dark = false;
+    root.setAttribute('data-theme', 'light');
+    btn.textContent = '☾';
+    btn.addEventListener('click', function() {
+      dark = !dark;
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      btn.textContent = '☾'; // default light
+      if (typeof refreshChartColors === 'function') refreshChartColors();
+    });
+  })();
+
 </script>
 </body>
 </html>

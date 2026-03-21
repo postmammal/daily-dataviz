@@ -1,19 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Daily Dataviz · Design, AI & Tech</title>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #141414;
-      --border: #1e1e1e;
-      --rule: #2a2a2a;
-      --muted: #666;
-      --text: #f0ece2;
-      --accent: #f5c518;
-      --accent-dim: rgba(245, 197, 24, 0.1);
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --border:     #2A2A2A;
+      --rule:       #2A2A2A;
+      --muted:      #555550;
+      --text:       #F0EFE8;
+      --accent:     #E8C940;
+      --accent-dim: rgba(232,201,64,0.10);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --border:     #CCCAC2;
+      --rule:       #CCCAC2;
+      --muted:      #888880;
+      --text:       #1C1C1A;
+    }
+    [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --border:     #2A2A2A;
+      --rule:       #2A2A2A;
+      --muted:      #555550;
+      --text:       #F0EFE8;
+    }
+    #theme-toggle-index {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -167,6 +195,8 @@
     One data-driven story per day — across UX research, design leadership, AI tools, and developer trends.
     Built for designers and researchers who want the numbers behind the narratives.
   </p>
+
+  <button id="theme-toggle-index" aria-label="Toggle color theme" style="float:right;margin-top:-44px;">☾</button>
 
   <div class="filter-bar" id="filter-bar">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -746,6 +776,22 @@
   });
 
   applyFilter('all');
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  ;(function() {
+    var root = document.documentElement;
+    var btn  = document.getElementById('theme-toggle-index');
+    if (!btn) return;
+    var dark = false;
+    root.setAttribute('data-theme', 'light');
+    btn.textContent = '☾';
+    btn.addEventListener('click', function() {
+      dark = !dark;
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      btn.textContent = dark ? '☀' : '☾';
+    });
+  })();
+
 </script>
 </body>
 </html>

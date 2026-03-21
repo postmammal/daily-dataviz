@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,15 +7,48 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #0a0a0a;
-      --surface: #141414;
-      --border: #222;
-      --rule: #2a2a2a;
-      --muted: #666;
-      --text: #f0ece2;
-      --accent: #f5c518;
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --accent:     #f5c518;
       --accent-dim: rgba(245, 197, 24, 0.12);
     }
+    /* ── Light/Dark theme system ── */
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+    }
+    [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #141414;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+    }
+    /* ── Theme toggle button ── */
+    #theme-toggle {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      vertical-align: middle;
+    }
+    #theme-toggle:hover { color: var(--text); border-color: var(--text); }
+
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -193,6 +226,7 @@
 <div class="wrapper">
 
   <a href="./index.html" class="back-link">← All Visualizations</a>
+  <button id="theme-toggle" aria-label="Toggle color theme" style="float:right;margin-top:-4px;margin-left:12px;">☾</button>
 
   <div class="eyebrow">UX Research · March 20, 2026</div>
   <h1>UX Research's Strategic Paradox:<br>Influence Triples, Headcount Shrinks</h1>
@@ -333,13 +367,16 @@
 </div>
 
 <script>
+  // ── CSS variable helper ───────────────────────────────────────────────────
+  function _cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
   /* ── Shared chart defaults ── */
-  Chart.defaults.color = '#666';
-  Chart.defaults.borderColor = '#222';
+  Chart.defaults.color = _cssVar('--muted') || '#888880';
+  Chart.defaults.borderColor = _cssVar('--rule') || '#CCCAC2';
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
 
   const ACCENT = '#f5c518';
-  const DIM    = '#2a2a2a';
+  const DIM = _cssVar('--rule') || '#CCCAC2';
   const MUTED  = '#444';
   const TEXT   = '#f0ece2';
 
@@ -451,11 +488,11 @@
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1a1a1a',
-          borderColor: '#333',
+          backgroundColor: _cssVar('--surface') || '#ECEAE3',
+          borderColor: _cssVar('--rule') || '#CCCAC2',
           borderWidth: 1,
           titleColor: TEXT,
-          bodyColor: '#aaa',
+          bodyColor: _cssVar('--muted') || '#888880',
           callbacks: {
             label: ctx => ` ${ctx.parsed.x}%`
           }
@@ -501,11 +538,11 @@
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1a1a1a',
-          borderColor: '#333',
+          backgroundColor: _cssVar('--surface') || '#ECEAE3',
+          borderColor: _cssVar('--rule') || '#CCCAC2',
           borderWidth: 1,
           titleColor: TEXT,
-          bodyColor: '#aaa',
+          bodyColor: _cssVar('--muted') || '#888880',
           callbacks: {
             label: ctx => ` ${ctx.parsed.y}%`
           }
@@ -545,6 +582,23 @@
       }, 10);
     });
   });
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  ;(function() {
+    var root = document.documentElement;
+    var btn  = document.getElementById('theme-toggle');
+    if (!btn) return;
+    var dark = false;
+    root.setAttribute('data-theme', 'light');
+    btn.textContent = '☾';
+    btn.addEventListener('click', function() {
+      dark = !dark;
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      btn.textContent = '☾'; // default light
+      if (typeof refreshChartColors === 'function') refreshChartColors();
+    });
+  })();
+
 </script>
 </body>
 </html>

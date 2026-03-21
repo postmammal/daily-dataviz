@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg:         #0E0E0E;
-      --surface:    #1A1A1A;
+      --surface:    #141414;
       --rule:       #2A2A2A;
       --rule-light: #222222;
       --text:       #F0EFE8;
@@ -295,7 +295,7 @@
     <div class="header-meta">
       <span class="meta-tag">AI/ML</span>
       <span class="meta-tag">21 Mar 2026</span>
-      <button id="theme-toggle">☀</button>
+      <button id="theme-toggle">☾</button>
     </div>
   </div>
 
@@ -409,11 +409,14 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
+  // ── CSS variable helper ───────────────────────────────────────────────────
+  function _cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
 // ── Theme toggle ─────────────────────────────────────────────
 const root = document.documentElement;
 const themBtn = document.getElementById('theme-toggle');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-let dark = prefersDark;
+let dark = false /* default: light */;
 themBtn.textContent = dark ? '☀' : '☾';
 themBtn.addEventListener('click', () => {
   dark = !dark;
@@ -487,11 +490,11 @@ const costChart = new Chart(costCtx, {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1A1A1A',
-        borderColor: '#2A2A2A',
+        backgroundColor: _cssVar('--surface') || '#ECEAE3',
+        borderColor: _cssVar('--rule') || '#CCCAC2',
         borderWidth: 1,
-        titleColor: '#F0EFE8',
-        bodyColor: '#888880',
+        titleColor: _cssVar('--text') || '#1C1C1A',
+        bodyColor: _cssVar('--muted') || '#888880',
         padding: 14,
         cornerRadius: 0,
         callbacks: {
@@ -501,16 +504,16 @@ const costChart = new Chart(costCtx, {
     },
     scales: {
       x: {
-        grid: { color: '#1E1E1E', drawTicks: false },
+        grid: { color: _cssVar('--rule') || '#CCCAC2', drawTicks: false },
         border: { display: false },
-        ticks: { color: '#555550', font: { size: 10, weight: '600' }, padding: 10 }
+        ticks: { color: _cssVar('--muted') || '#888880', font: { size: 10, weight: '600' }, padding: 10 }
       },
       y: {
         type: 'logarithmic',
-        grid: { color: '#1E1E1E' },
+        grid: { color: _cssVar('--rule') || '#CCCAC2' },
         border: { display: false },
         ticks: {
-          color: '#555550',
+          color: _cssVar('--muted') || '#888880',
           font: { size: 10, weight: '600' },
           padding: 12,
           callback: v => {
@@ -576,11 +579,11 @@ const pricingChart = new Chart(pricingCtx, {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1A1A1A',
-        borderColor: '#2A2A2A',
+        backgroundColor: _cssVar('--surface') || '#ECEAE3',
+        borderColor: _cssVar('--rule') || '#CCCAC2',
         borderWidth: 1,
-        titleColor: '#F0EFE8',
-        bodyColor: '#888880',
+        titleColor: _cssVar('--text') || '#1C1C1A',
+        bodyColor: _cssVar('--muted') || '#888880',
         padding: 14,
         cornerRadius: 0,
         callbacks: {
@@ -592,14 +595,14 @@ const pricingChart = new Chart(pricingCtx, {
       x: {
         grid: { display: false },
         border: { display: false },
-        ticks: { color: '#555550', font: { size: 9, weight: '600' }, padding: 8 }
+        ticks: { color: _cssVar('--muted') || '#888880', font: { size: 9, weight: '600' }, padding: 8 }
       },
       y: {
         type: 'logarithmic',
-        grid: { color: '#1E1E1E' },
+        grid: { color: _cssVar('--rule') || '#CCCAC2' },
         border: { display: false },
         ticks: {
-          color: '#555550',
+          color: _cssVar('--muted') || '#888880',
           font: { size: 10, weight: '600' },
           padding: 12,
           callback: v => {
