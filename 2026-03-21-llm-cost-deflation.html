@@ -451,6 +451,8 @@
 <script>
   // ── CSS variable helper ───────────────────────────────────────────────────
   function _cssVar(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+  const ACCENT = '#1E9E7A';
+  const ACCENT_DIM = 'rgba(30,158,122,0.07)';
 
 // ─── DATA ───────────────────────────────────────────────────────────────────
 
@@ -479,11 +481,11 @@ const lineChart = new Chart(ctxLine, {
     labels: allData.labels,
     datasets: [{
       data: allData.values,
-      borderColor: '#E8C940',
-      backgroundColor: 'rgba(232, 201, 64, 0.07)',
+      borderColor: ACCENT,
+      backgroundColor: ACCENT_DIM,
       borderWidth: 2.5,
       pointBackgroundColor: '#0E0E0E',
-      pointBorderColor: '#E8C940',
+      pointBorderColor: ACCENT,
       pointBorderWidth: 2,
       pointRadius: 5,
       pointHoverRadius: 7,
@@ -557,8 +559,8 @@ const models = [
 
 const keyBarIndex = 2; // Gemini Flash-Lite as highlight (cheapest frontier)
 
-const barColors = models.map((_, i) => i === 0 ? '#E8C940' : '#2E2E2E');
-const barHoverColors = models.map((_, i) => i === 0 ? '#E8C940' : '#404040');
+const barColors = models.map((_, i) => i === 0 ? ACCENT : (_cssVar('--rule') || '#CCCAC2'));
+const barHoverColors = models.map((_, i) => i === 0 ? ACCENT : (_cssVar('--border') || '#CCCAC2'));
 
 const ctxBar = document.getElementById('barChart').getContext('2d');
 
@@ -620,7 +622,7 @@ const barChart = new Chart(ctxBar, {
       if (elements.length) {
         const idx = elements[0].index;
         ds.backgroundColor = barColors.map((c, i) =>
-          i === idx ? '#E8C940' : '#252525'
+          i === idx ? ACCENT : (_cssVar('--rule') || '#CCCAC2')
         );
       } else {
         ds.backgroundColor = barColors.slice();

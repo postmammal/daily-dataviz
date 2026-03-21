@@ -66,7 +66,7 @@
     /* ── Header ── */
     .site-eyebrow {
       font-size: 0.58rem; font-weight: 700; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--accent);
+      text-transform: uppercase; color: var(--muted);
       margin-bottom: 10px;
     }
     .site-title {
@@ -92,7 +92,7 @@
       text-transform: uppercase; padding: 5px 13px;
       cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
     }
-    .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+    .filter-btn.active { border-color: var(--text); color: var(--text); }
     .filter-btn:hover:not(.active) { border-color: var(--rule); color: var(--text); }
 
     /* ── Grid ── */
@@ -187,7 +187,7 @@
       text-transform: uppercase; color: var(--muted);
       margin-bottom: 20px;
     }
-    #count-n { color: var(--accent); }
+    #count-n { color: var(--text); }
   </style>
 </head>
 <body>
@@ -372,7 +372,12 @@
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  function renderMiniViz(canvas, spec, accentColor) {
+  // Read a CSS custom property from :root at call time (theme-aware)
+  function _cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+    function renderMiniViz(canvas, spec, accentColor) {
     const { ctx, W, H } = setupCanvas(canvas);
     const ACCENT  = accentColor || '#E8C940';
     const TRACK   = _cssVar('--rule') || '#CCCAC2';
