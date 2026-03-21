@@ -788,6 +788,22 @@
     requestAnimationFrame(() => requestAnimationFrame(() => renderMiniViz(canvas, v.miniViz, v.accent || 'var(--accent)')));
   });
 
+  // ── Canvas re-render registry (for theme switching) ───────────────────────
+  // Store every canvas so we can repaint them in the new theme's colors
+  const canvasRegistry = vizzes.map((v, i) => ({
+    canvas: document.querySelectorAll('.card-preview canvas')[i],
+    spec:   v.miniViz,
+    accent: v.accent || '#E8C940',
+  }));
+
+  function repaintAllCanvases() {
+    requestAnimationFrame(() => {
+      canvasRegistry.forEach(({ canvas, spec, accent }) => {
+        renderMiniViz(canvas, spec, accent);
+      });
+    });
+  }
+
   // ── Filtering ────────────────────────────────────────────────────────
   const countN = document.getElementById('count-n');
   const countPlural = document.getElementById('count-plural');
@@ -828,6 +844,8 @@
       dark = !dark;
       root.setAttribute('data-theme', dark ? 'dark' : 'light');
       btn.textContent = dark ? '☀' : '☾';
+      // Repaint all mini-viz canvases so they use the new theme's CSS variables
+      repaintAllCanvases();
     });
   })();
 
