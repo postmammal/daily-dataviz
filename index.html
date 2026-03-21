@@ -197,11 +197,13 @@
         insight: "Organizations treating research as essential to business strategy nearly tripled (8%→22%) in a single year, yet dedicated researcher headcount is shrinking as AI handles execution.",
         tags: ["UX Research"],
         miniViz: {
-          type: "hbars",
-          labels: ["Essential to strategy", "Increased demand", "Using AI", "Hybrid orgs"],
-          data: [22, 66, 69, 78],
-          keyIdx: 0,
-          label: "Key metrics (%)"
+          type: "slope",
+          lines: [
+            { label: "Essential to strategy", v1: 8,  v2: 22, key: true  },
+            { label: "Increased demand",       v1: 55, v2: 66, key: false },
+            { label: "Using AI tools",         v1: 41, v2: 69, key: false },
+          ],
+          label: "Strategic shift (2025→2026)"
         }
       },
       {
@@ -240,11 +242,10 @@
         insight: "Most organizations run at 1 designer per 20 developers and 1 researcher per 100 — far below the 1:8 and 1:50 benchmarks linked to measurably better product outcomes.",
         tags: ["Design Leadership"],
         miniViz: {
-          type: "hbars",
-          labels: ["Researchers (actual)", "Researchers (rec.)", "Designers (actual)", "Designers (rec.)"],
-          data: [1, 2, 5, 12.5],
-          keyIdx: 3,
-          label: "Per 100 developers"
+          type: "waffle",
+          researchers: 1,
+          designers: 5,
+          label: "Per 100 developers (actual)"
         }
       },
       {
@@ -255,11 +256,11 @@
         insight: "Design system buy-in satisfaction dropped from 42% to 32% in a single year. 76% of teams have no onboarding materials — yet systems that survive past 3 years show 12% higher trust scores.",
         tags: ["UX Design", "Design Leadership"],
         miniViz: {
-          type: "hbars",
-          labels: ["Buy-in (2025)", "Buy-in (2026)", "Has onboarding", "3yr+ trust"],
-          data: [42, 32, 24, 84],
-          keyIdx: 1,
-          label: "Design system health (%)"
+          type: "dumbbell",
+          labels: ["Buy-in", "Resources", "Exec support", "Team capacity"],
+          v2025: [42, 38, 35, 44],
+          v2026: [32, 29, 27, 38],
+          label: "Satisfaction drop (2025→2026)"
         }
       },
   ];
@@ -429,7 +430,6 @@
       const aH  = H - PAD * 2;
       const yRange = spec.yMax - spec.yMin;
 
-      // Axes
       ctx.strokeStyle = '#222';
       ctx.lineWidth   = 1;
       ctx.beginPath();
@@ -451,6 +451,186 @@
           ctx.beginPath();
           ctx.arc(px, py, 8, 0, Math.PI * 2);
           ctx.stroke();
+        }
+      });
+    }
+
+    // ── Waffle ──────────────────────────────────────────────────────
+    if (spec.type === 'waffle') {
+      const COLS = 10, ROWS = 10;
+      const PAD_T = 6, PAD_B = 6, PAD_L = 8, PAD_R = 8;
+      const aW   = W - PAD_L - PAD_R;
+      const aH   = H - PAD_T - PAD_B;
+      const cell = Math.min(aW / COLS, aH / ROWS);
+      const gap  = 2;
+      const totalW = COLS * cell - gap;
+      const totalH = ROWS * cell - gap;
+      const startX = PAD_L + (aW - totalW) / 2;
+      const startY = PAD_T + (aH - totalH) / 2;
+
+      const researchers = spec.researchers || 1;
+      const designers   = spec.designers   || 5;
+
+      for (let i = 0; i < ROWS * COLS; i++) {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const x = startX + col * cell;
+        const y = startY + row * cell;
+        const w = cell - gap;
+        const h = cell - gap;
+
+        let fill;
+        if (i < researchers)                         fill = ACCENT;
+        else if (i < researchers + designers)        fill = '#7a6800';
+        else                                         fill = '#1e1e1e';
+
+        ctx.fillStyle = fill;
+        ctx.fillRect(x, y, w, h);
+      }
+
+      // Legend dots bottom-right
+      const items = [
+        { color: ACCENT,   label: `${researchers} researcher` + (researchers !== 1 ? 's' : '') },
+        { color: '#7a6800', label: `${designers} designers` },
+      ];
+      let lx = W - PAD_R;
+      let ly = H - 4;
+      ctx.font = '600 7px "Helvetica Neue", sans-serif';
+      ctx.textBaseline = 'bottom';
+      for (let i = items.length - 1; i >= 0; i--) {
+        const { color, label } = items[i];
+        const tw = ctx.measureText(label).width;
+        lx -= tw;
+        ctx.fillStyle = color;
+        ctx.textAlign  = 'left';
+        ctx.fillText(label, lx, ly);
+        lx -= 11;
+        ctx.beginPath();
+        ctx.arc(lx + 3, ly - 3, 3, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        lx -= 8;
+      }
+    }
+
+    // ── Dumbbell ─────────────────────────────────────────────────────
+    if (spec.type === 'dumbbell') {
+      const rows   = spec.labels.length;
+      const PAD_L  = 10;
+      const PAD_R  = 10;
+      const PAD_T  = 10;
+      const PAD_B  = 8;
+      const LABEL_W = 56;
+      const rowH   = (H - PAD_T - PAD_B) / rows;
+      const allVals = [...spec.v2025, ...spec.v2026];
+      const minV   = Math.min(...allVals) - 4;
+      const maxV   = Math.max(...allVals) + 4;
+      const barZone = W - PAD_L - PAD_R - LABEL_W;
+      const toX    = v => PAD_L + LABEL_W + ((v - minV) / (maxV - minV)) * barZone;
+
+      spec.labels.forEach((lbl, i) => {
+        const cy   = PAD_T + i * rowH + rowH / 2;
+        const x25  = toX(spec.v2025[i]);
+        const x26  = toX(spec.v2026[i]);
+        const down = spec.v2026[i] < spec.v2025[i];
+
+        // Connector line
+        ctx.strokeStyle = down ? 'rgba(220,60,60,0.35)' : 'rgba(245,197,24,0.35)';
+        ctx.lineWidth   = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x25, cy);
+        ctx.lineTo(x26, cy);
+        ctx.stroke();
+
+        // 2025 dot (muted)
+        ctx.beginPath();
+        ctx.arc(x25, cy, 3, 0, Math.PI * 2);
+        ctx.fillStyle = '#444';
+        ctx.fill();
+
+        // 2026 dot (colored by direction)
+        ctx.beginPath();
+        ctx.arc(x26, cy, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = down ? '#dc3c3c' : ACCENT;
+        ctx.fill();
+
+        // Label
+        ctx.font = '600 7.5px "Helvetica Neue", sans-serif';
+        ctx.fillStyle = '#555';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(lbl.length > 10 ? lbl.slice(0, 10) + '…' : lbl, PAD_L + LABEL_W - 4, cy);
+      });
+
+      // Tiny year labels
+      const firstCy = PAD_T + (H - PAD_T - PAD_B) / rows / 2;
+      ctx.font = '500 6.5px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = '#3a3a3a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const x25avg = toX((Math.min(...spec.v2025) + Math.max(...spec.v2025)) / 2);
+      ctx.fillText("'25", toX(spec.v2025[0]), 1);
+      ctx.fillText("'26", toX(spec.v2026[0]), 1);
+    }
+
+    // ── Slope ──────────────────────────────────────────────────────
+    if (spec.type === 'slope') {
+      const PAD_L  = 24;
+      const PAD_R  = 24;
+      const PAD_T  = 18;
+      const PAD_B  = 10;
+      const cL     = PAD_L;
+      const cR     = W - PAD_R;
+      const allV   = spec.lines.flatMap(l => [l.v1, l.v2]);
+      const minV   = Math.min(...allV) - 5;
+      const maxV   = Math.max(...allV) + 5;
+      const toY    = v => PAD_T + (H - PAD_T - PAD_B) * (1 - (v - minV) / (maxV - minV));
+
+      // Column guide lines
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth   = 1;
+      ctx.beginPath(); ctx.moveTo(cL, PAD_T - 6); ctx.lineTo(cL, H - PAD_B); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cR, PAD_T - 6); ctx.lineTo(cR, H - PAD_B); ctx.stroke();
+
+      // Year labels
+      ctx.font = '700 7px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = '#3a3a3a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText("2025", cL, 2);
+      ctx.fillText("2026", cR, 2);
+
+      spec.lines.forEach(line => {
+        const y1 = toY(line.v1);
+        const y2 = toY(line.v2);
+
+        ctx.beginPath();
+        ctx.moveTo(cL, y1);
+        ctx.lineTo(cR, y2);
+        ctx.strokeStyle = line.key ? ACCENT : '#2a2a2a';
+        ctx.lineWidth   = line.key ? 2 : 1;
+        ctx.stroke();
+
+        // Dots
+        ctx.beginPath();
+        ctx.arc(cL, y1, line.key ? 3.5 : 2, 0, Math.PI * 2);
+        ctx.fillStyle = line.key ? ACCENT : '#333';
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cR, y2, line.key ? 3.5 : 2, 0, Math.PI * 2);
+        ctx.fillStyle = line.key ? ACCENT : '#333';
+        ctx.fill();
+
+        // Value labels for key line only
+        if (line.key) {
+          ctx.font = '700 8px "Helvetica Neue", sans-serif';
+          ctx.fillStyle = ACCENT;
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(line.v1 + '%', cL - 5, y1);
+          ctx.textAlign = 'left';
+          ctx.fillText(line.v2 + '%', cR + 5, y2);
         }
       });
     }

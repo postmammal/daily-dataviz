@@ -80,11 +80,11 @@
     <button class="ctrl-btn" data-view="trajectory">Rise to Dominance</button>
   </div>
 
-  <!-- Competitors -->
+  <!-- Competitors: Treemap -->
   <div class="view-panel active" id="view-competitors">
     <div class="chart-panel">
-      <div class="chart-title">Design Tool Market Share — Collaborative Design Category (2026)</div>
-      <div class="chart-container"><canvas id="chart-competitors"></canvas></div>
+      <div class="chart-title">Design Tool Market Share — Treemap (2026)</div>
+      <div class="chart-container" style="height:300px"><canvas id="canvas-treemap"></canvas></div>
     </div>
     <div class="insight">
       <div class="insight-label">Key Finding</div>
@@ -146,26 +146,58 @@
   const DIM = '#2a2a2a';
   const MUTED = '#3a3a3a';
 
-  // Competitors chart
-  new Chart(document.getElementById('chart-competitors'), {
-    type: 'bar',
-    data: {
-      labels: ['Figma', 'Adobe XD', 'InVision', 'Sketch', 'Framer', 'Others'],
-      datasets: [{
-        data: [40.65, 13.5, 7.6, 5.2, 3.1, 29.95],
-        backgroundColor: [ACCENT, MUTED, MUTED, MUTED, MUTED, '#222'],
-        borderColor: 'transparent', borderRadius: 2,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}%` } } },
-      scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: '#666' } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 50 }
+  // ── Treemap (Canvas 2D) ──
+  (function() {
+    const canvas = document.getElementById('canvas-treemap');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth || 700;
+    const H = 300;
+    canvas.width  = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const items = [
+      { name: 'Figma',     pct: 40.65, bg: '#f5c518', fg: '#0a0a0a' },
+      { name: 'Others',    pct: 29.95, bg: '#1e1e1e',  fg: '#555'    },
+      { name: 'Adobe XD',  pct: 13.5,  bg: '#252525',  fg: '#666'    },
+      { name: 'InVision',  pct: 7.6,   bg: '#1c1c1c',  fg: '#555'    },
+      { name: 'Sketch',    pct: 5.2,   bg: '#1a1a1a',  fg: '#4a4a4a' },
+      { name: 'Framer',    pct: 3.1,   bg: '#181818',  fg: '#444'    },
+    ];
+    const total = items.reduce((s, d) => s + d.pct, 0);
+    const PAD = 2;
+
+    // Figma occupies left column proportional to its share
+    const figmaW = Math.round((items[0].pct / total) * (W - PAD * 2));
+    ctx.fillStyle = items[0].bg;
+    ctx.fillRect(PAD, PAD, figmaW, H - PAD * 2);
+    ctx.font = '900 18px "Helvetica Neue", sans-serif';
+    ctx.fillStyle = items[0].fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('Figma', PAD + figmaW / 2, H / 2 - 14);
+    ctx.font = '700 12px "Helvetica Neue", sans-serif';
+    ctx.fillText('40.65%', PAD + figmaW / 2, H / 2 + 6);
+    ctx.font = '500 9px "Helvetica Neue", sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillText('market share', PAD + figmaW / 2, H / 2 + 22);
+
+    // Remaining items fill the right column, stacked vertically
+    const restW = W - PAD * 2 - figmaW - PAD;
+    const restX = PAD + figmaW + PAD;
+    const restTotal = items.slice(1).reduce((s, d) => s + d.pct, 0);
+    let y = PAD;
+    items.slice(1).forEach(d => {
+      const cellH = Math.round((d.pct / restTotal) * (H - PAD * 2));
+      ctx.fillStyle = d.bg;
+      ctx.fillRect(restX, y, restW, cellH - PAD);
+      if (cellH > 22) {
+        ctx.font = '700 9px "Helvetica Neue", sans-serif';
+        ctx.fillStyle = d.fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(`${d.name}  ${d.pct}%`, restX + restW / 2, y + (cellH - PAD) / 2);
       }
-    }
-  });
+      y += cellH;
+    });
+  })();
 
   // User Growth
   new Chart(document.getElementById('chart-growth'), {

@@ -227,12 +227,12 @@
     <button class="ctrl-btn" data-view="human">Human Edge</button>
   </div>
 
-  <!-- ── View: Strategic Shift ── -->
+  <!-- ── View: Strategic Shift — Slope Graph ── -->
   <div class="view-panel active" id="view-strategic">
     <div class="chart-panel">
-      <div class="chart-title">Strategic Importance &amp; Demand — 2025 vs. 2026</div>
-      <div class="chart-container">
-        <canvas id="chart-strategic"></canvas>
+      <div class="chart-title">Strategic Importance &amp; Demand — Slope Graph 2025 → 2026</div>
+      <div class="chart-container" style="height:300px">
+        <canvas id="canvas-slope"></canvas>
       </div>
     </div>
     <div class="insight">
@@ -343,76 +343,85 @@
   const MUTED  = '#444';
   const TEXT   = '#f0ece2';
 
-  /* ── Chart 1: Strategic Shift ── */
-  const ctxS = document.getElementById('chart-strategic').getContext('2d');
-  const chartStrategic = new Chart(ctxS, {
-    type: 'bar',
-    data: {
-      labels: [
-        'Research essential\nto all strategy',
-        'Increased demand\nexperienced',
-        'Hybrid orgs\n(mixed methods)',
-        'Role becoming\nmore strategic'
-      ],
-      datasets: [
-        {
-          label: '2025',
-          data: [8, 55, 65, 28],
-          backgroundColor: MUTED,
-          borderColor: MUTED,
-          borderWidth: 0,
-        },
-        {
-          label: '2026',
-          data: [22, 66, 78, 35],
-          backgroundColor: ACCENT,
-          borderColor: ACCENT,
-          borderWidth: 0,
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: 'top',
-          align: 'end',
-          labels: {
-            font: { size: 10, weight: '700' },
-            color: '#888',
-            boxWidth: 12, boxHeight: 12,
-            padding: 16,
-          }
-        },
-        tooltip: {
-          backgroundColor: '#1a1a1a',
-          borderColor: '#333',
-          borderWidth: 1,
-          titleColor: TEXT,
-          bodyColor: '#aaa',
-          callbacks: {
-            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%`
-          }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: DIM },
-          ticks: { font: { size: 10 }, color: '#666', maxRotation: 0 },
-        },
-        y: {
-          grid: { color: DIM },
-          ticks: {
-            font: { size: 10 }, color: '#666',
-            callback: v => v + '%'
-          },
-          min: 0, max: 100,
-        }
-      }
-    }
-  });
+  /* ── Chart 1: Strategic Shift — Slope Graph (Canvas 2D) ── */
+  (function() {
+    const canvas = document.getElementById('canvas-slope');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth || 700;
+    const H = 300;
+    canvas.width  = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const metrics = [
+      { label: 'Essential to strategy', v25: 8,  v26: 22, key: true  },
+      { label: 'Increased demand',       v25: 55, v26: 66, key: false },
+      { label: 'Hybrid orgs',            v25: 65, v26: 78, key: false },
+      { label: 'Using AI',               v25: 45, v26: 69, key: false },
+      { label: 'Role more strategic',    v25: 28, v26: 35, key: false },
+    ];
+
+    const PAD_L = 28, PAD_R = 28, PAD_T = 36, PAD_B = 16;
+    const cL = PAD_L + 50, cR = W - PAD_R - 50;
+    function yPos(v) { return PAD_T + (1 - v / 100) * (H - PAD_T - PAD_B); }
+
+    // Column verticals
+    [[cL,'#333'],[cR,'#333']].forEach(([x,c]) => {
+      ctx.strokeStyle = c; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, PAD_T - 8); ctx.lineTo(x, H - PAD_B); ctx.stroke();
+    });
+
+    // Column headers
+    ctx.font = '700 10px "Helvetica Neue", sans-serif'; ctx.textBaseline = 'top';
+    ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.fillText('2025', cL, 8);
+    ctx.fillStyle = ACCENT; ctx.fillText('2026', cR, 8);
+
+    // Lines + dots
+    metrics.forEach(m => {
+      const y25 = yPos(m.v25), y26 = yPos(m.v26);
+      const isKey = m.key;
+
+      // Connecting line
+      ctx.strokeStyle = isKey ? 'rgba(245,197,24,0.9)' : 'rgba(80,80,80,0.45)';
+      ctx.lineWidth   = isKey ? 2.5 : 1.5;
+      ctx.beginPath(); ctx.moveTo(cL, y25); ctx.lineTo(cR, y26); ctx.stroke();
+
+      // 2025 dot
+      ctx.beginPath(); ctx.arc(cL, y25, isKey ? 5 : 3.5, 0, Math.PI*2);
+      ctx.fillStyle = isKey ? '#a88000' : '#3a3a3a'; ctx.fill();
+      // 2026 dot
+      ctx.beginPath(); ctx.arc(cR, y26, isKey ? 6 : 4, 0, Math.PI*2);
+      ctx.fillStyle = isKey ? ACCENT : '#555'; ctx.fill();
+
+      // 2025 value
+      ctx.font = `${isKey?'700':'600'} ${isKey?10:9}px "Helvetica Neue", sans-serif`;
+      ctx.fillStyle = isKey ? '#a88000' : '#4a4a4a';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(m.v25 + '%', cL - 10, y25);
+
+      // 2026 value
+      ctx.fillStyle = isKey ? ACCENT : '#666';
+      ctx.textAlign = 'left';
+      ctx.fillText(m.v26 + '%', cR + 10, y26);
+
+      // Right-side metric label
+      ctx.font = `${isKey?'700':'500'} ${isKey?9:8.5}px "Helvetica Neue", sans-serif`;
+      ctx.fillStyle = isKey ? ACCENT : '#4a4a4a';
+      ctx.textAlign = 'left';
+      ctx.fillText(m.label, cR + 38, y26);
+    });
+
+    // Key metric delta annotation
+    const km = metrics[0];
+    const midY = (yPos(km.v25) + yPos(km.v26)) / 2;
+    const midX = (cL + cR) / 2;
+    ctx.font = '800 11px "Helvetica Neue", sans-serif';
+    ctx.fillStyle = ACCENT;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('↑ 175%', midX, midY - 10);
+  })();
+  const chartStrategic = null; // replaced by canvas
 
   /* ── Chart 2: AI Takeover ── */
   const ctxA = document.getElementById('chart-ai').getContext('2d');
@@ -530,7 +539,7 @@
 
       // Trigger chart resize after display:block
       setTimeout(() => {
-        chartStrategic.resize();
+        if (chartStrategic && chartStrategic.resize) chartStrategic.resize();
         chartAI.resize();
         chartHuman.resize();
       }, 10);

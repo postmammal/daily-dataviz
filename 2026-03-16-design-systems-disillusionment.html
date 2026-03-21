@@ -109,11 +109,11 @@
     <button class="ctrl-btn" data-view="maturity">Maturity Dividend</button>
   </div>
 
-  <!-- Buy-in -->
+  <!-- Buy-in: Dumbbell -->
   <div class="view-panel active" id="view-buyin">
     <div class="chart-panel">
-      <div class="chart-title">Design System Buy-in Satisfaction — Year-over-Year (%)</div>
-      <div class="chart-container"><canvas id="chart-buyin"></canvas></div>
+      <div class="chart-title">Design System Health — 2025 vs 2026 (Dumbbell Chart)</div>
+      <div class="chart-container" style="height:240px"><canvas id="canvas-dumbbell"></canvas></div>
     </div>
     <div class="insight">
       <div class="insight-label">Key Finding</div>
@@ -176,34 +176,74 @@
   const MUTED = '#3a3a3a';
   const RED = '#7a3030';
 
-  // Buy-in chart
-  new Chart(document.getElementById('chart-buyin'), {
-    type: 'bar',
-    data: {
-      labels: [
-        'Buy-in\nSatisfaction',
-        'Resource\nAdequacy',
-        'Exec Support',
-        'Team\nCapacity',
-        'Stakeholder\nAlignment',
-      ],
-      datasets: [
-        { label: '2025', data: [42, 38, 35, 44, 40], backgroundColor: MUTED, borderColor: 'transparent', borderRadius: 2 },
-        { label: '2026', data: [32, 29, 27, 38, 33], backgroundColor: RED, borderColor: 'transparent', borderRadius: 2 },
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true, position: 'top', align: 'end', labels: { font: { size: 10 }, color: '#888', boxWidth: 12, boxHeight: 12, padding: 16 } },
-        tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y}% satisfied` } }
-      },
-      scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', maxRotation: 0 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 60 }
-      }
-    }
-  });
+  // ── Dumbbell chart (Canvas 2D) ──
+  (function() {
+    const canvas = document.getElementById('canvas-dumbbell');
+    const dpr = window.devicePixelRatio || 1;
+    const W = canvas.offsetWidth || 700;
+    const H = 240;
+    canvas.width  = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    const metrics = [
+      { label: 'Buy-in Satisfaction',   v25: 42, v26: 32 },
+      { label: 'Resource Adequacy',      v25: 38, v26: 29 },
+      { label: 'Executive Support',      v25: 35, v26: 27 },
+      { label: 'Team Capacity',          v25: 44, v26: 38 },
+      { label: 'Stakeholder Alignment',  v25: 40, v26: 33 },
+    ];
+
+    const PAD_L = 154, PAD_R = 28, PAD_T = 28, PAD_B = 12;
+    const rowH   = (H - PAD_T - PAD_B) / metrics.length;
+    const trackW = W - PAD_L - PAD_R;
+    const MAX    = 55;
+
+    // Column headers
+    ctx.font = '700 9px "Helvetica Neue", sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#555';  ctx.textAlign = 'left';
+    ctx.fillText('← 2025', PAD_L + (35 / MAX) * trackW - 4, 6);
+    ctx.fillStyle = '#c0392b'; ctx.textAlign = 'right';
+    ctx.fillText('2026 →', PAD_L + (33 / MAX) * trackW + 4, 6);
+
+    metrics.forEach((m, i) => {
+      const cy   = PAD_T + i * rowH + rowH / 2;
+      const x25  = PAD_L + (m.v25 / MAX) * trackW;
+      const x26  = PAD_L + (m.v26 / MAX) * trackW;
+      const drop = m.v26 < m.v25;
+
+      // Track line
+      ctx.strokeStyle = '#1e1e1e'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(PAD_L, cy); ctx.lineTo(PAD_L + trackW, cy); ctx.stroke();
+
+      // Connector
+      ctx.strokeStyle = drop ? 'rgba(192,57,43,0.55)' : 'rgba(80,160,80,0.55)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(x25, cy); ctx.lineTo(x26, cy); ctx.stroke();
+
+      // 2025 dot (muted)
+      ctx.beginPath(); ctx.arc(x25, cy, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#4a4a4a'; ctx.fill();
+
+      // 2026 dot (accent/red)
+      ctx.beginPath(); ctx.arc(x26, cy, 6.5, 0, Math.PI * 2);
+      ctx.fillStyle = drop ? '#c0392b' : ACCENT; ctx.fill();
+
+      // Row label
+      ctx.font = '500 10px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = '#666'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(m.label, PAD_L - 10, cy);
+
+      // Value labels above dots
+      ctx.font = '700 8.5px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(m.v25 + '%', x25, cy - 8);
+      ctx.fillStyle = drop ? '#c0392b' : ACCENT;
+      ctx.fillText(m.v26 + '%', x26, cy - 8);
+    });
+  })();
 
   // Documentation chart
   new Chart(document.getElementById('chart-documentation'), {

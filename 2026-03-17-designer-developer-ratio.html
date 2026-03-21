@@ -48,13 +48,18 @@
     .view-panel { display: none; }
     .view-panel.active { display: block; }
 
-    /* Ratio visual */
-    .ratio-visual { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-bottom: 28px; }
-    .ratio-bar { background: var(--rule); border-radius: 1px; flex: 1; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; transition: height .4s ease; }
-    .ratio-bar.researcher { background: var(--accent); }
-    .ratio-bar.designer { background: #7a6800; }
-    .ratio-bar.developer { background: var(--rule); }
-    .ratio-label { font-size: .55rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #888; writing-mode: vertical-rl; transform: rotate(180deg); }
+    /* Waffle chart */
+    .waffle-wrap { display: grid; grid-template-columns: repeat(10,1fr); gap: 3px; margin: 4px 0 14px; }
+    .waffle-cell { aspect-ratio: 1; border-radius: 1px; }
+    .waffle-cell.developer { background: #1c1c1c; border: 1px solid #262626; }
+    .waffle-cell.designer  { background: #7a6800; }
+    .waffle-cell.researcher{ background: var(--accent); }
+    .waffle-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
+    .wl-item { display: flex; align-items: center; gap: 6px; font-size: .65rem; color: var(--muted); }
+    .wl-dot  { width: 9px; height: 9px; border-radius: 1px; flex-shrink: 0; }
+    .waffle-sub-ctrl { display: flex; gap: 6px; margin-bottom: 14px; }
+    .waffle-sub-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 4px 11px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
+    .waffle-sub-btn.active { border-color: var(--accent); color: var(--accent); }
   </style>
 </head>
 <body>
@@ -83,25 +88,34 @@
   </div>
 
   <div class="controls">
-    <button class="ctrl-btn active" data-view="gap">Actual vs. Recommended</button>
+    <button class="ctrl-btn active" data-view="gap">Team Breakdown</button>
     <button class="ctrl-btn" data-view="bystage">By Company Stage</button>
     <button class="ctrl-btn" data-view="impact">Why It Matters</button>
   </div>
 
-  <!-- Gap -->
+  <!-- Gap: Waffle -->
   <div class="view-panel active" id="view-gap">
     <div class="chart-panel">
-      <div class="chart-title">Designers &amp; Researchers per 100 Developers — Actual vs. Recommended</div>
-      <div class="chart-container"><canvas id="chart-gap"></canvas></div>
+      <div class="chart-title">Every Square Is One Person — Out of 100 Developers</div>
+      <div class="waffle-sub-ctrl">
+        <button class="waffle-sub-btn active" data-waffle="actual">Actual</button>
+        <button class="waffle-sub-btn" data-waffle="ideal">Ideal</button>
+      </div>
+      <div id="waffle-wrap" class="waffle-wrap"></div>
+      <div class="waffle-legend">
+        <div class="wl-item"><div class="wl-dot" style="background:#f5c518"></div>Researcher</div>
+        <div class="wl-item"><div class="wl-dot" style="background:#7a6800"></div>Designer</div>
+        <div class="wl-item"><div class="wl-dot" style="background:#1c1c1c;border:1px solid #262626"></div>Developer</div>
+      </div>
     </div>
     <div class="insight">
       <div class="insight-label">Key Finding</div>
-      <div class="insight-text">The design gap is stark, but the research gap is jaw-dropping. At 1 researcher per 100 developers, most teams have essentially zero dedicated research capacity. The recommended ratio is 1 per 50 — but even "well-resourced" teams rarely hit 1 per 30. Research is being done by nobody, or everybody, equally badly.</div>
+      <div class="insight-text">Seeing it as a grid makes the shortage visceral. In a typical team of 100 developers there is <em>one</em> researcher — a single yellow square. Toggle to "Ideal" to see what a well-staffed org looks like: 2 researchers and 12 designers, still a small fraction but with meaningful coverage.</div>
     </div>
     <div class="annotation-row">
-      <div class="annotation"><div class="ann-pct">5 designers</div><div class="ann-label">per 100 devs — the typical actual ratio across industries surveyed by NN/Group</div></div>
-      <div class="annotation"><div class="ann-pct">12.5 designers</div><div class="ann-label">per 100 devs — the recommended ratio (1:8) for healthy product output</div></div>
-      <div class="annotation"><div class="ann-pct">2.5× gap</div><div class="ann-label">between actual designer headcount and recommended — the research gap is 2× worse</div></div>
+      <div class="annotation"><div class="ann-pct">1 square</div><div class="ann-label">— the lone researcher in a 100-developer org. Ideal: 2.</div></div>
+      <div class="annotation"><div class="ann-pct">5 squares</div><div class="ann-label">— designers in a typical org. Ideal: 12–13 for healthy 1:8 coverage.</div></div>
+      <div class="annotation"><div class="ann-pct">94 squares</div><div class="ann-label">— developers producing code without proportionate design or research input.</div></div>
     </div>
   </div>
 
@@ -155,28 +169,24 @@
   const MUTED = '#3a3a3a';
   const GOLD = '#7a6800';
 
-  // Gap chart
-  new Chart(document.getElementById('chart-gap'), {
-    type: 'bar',
-    data: {
-      labels: ['Researchers\n(Actual)', 'Researchers\n(Recommended)', 'Designers\n(Actual)', 'Designers\n(Recommended)'],
-      datasets: [{
-        data: [1, 2, 5, 12.5],
-        backgroundColor: [MUTED, ACCENT, GOLD, ACCENT],
-        borderColor: 'transparent', borderRadius: 2,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1, titleColor: '#f0ece2', bodyColor: '#aaa', callbacks: { label: ctx => ` ${ctx.parsed.y} per 100 developers` } }
-      },
-      scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', maxRotation: 0 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + ' per 100 devs' }, max: 15 }
-      }
+  // ── Waffle chart ──
+  function buildWaffle(researchers, designers) {
+    const wrap = document.getElementById('waffle-wrap');
+    wrap.innerHTML = '';
+    for (let i = 0; i < 100; i++) {
+      const c = document.createElement('div');
+      c.className = 'waffle-cell ' +
+        (i < researchers ? 'researcher' : i < researchers + designers ? 'designer' : 'developer');
+      wrap.appendChild(c);
     }
+  }
+  buildWaffle(1, 5);
+  document.querySelectorAll('.waffle-sub-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('.waffle-sub-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      b.dataset.waffle === 'actual' ? buildWaffle(1, 5) : buildWaffle(2, 12);
+    });
   });
 
   // By Stage

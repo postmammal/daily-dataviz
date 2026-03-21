@@ -78,6 +78,7 @@
     <button class="ctrl-btn active" data-view="input">Input Prices</button>
     <button class="ctrl-btn" data-view="output">Output Prices</button>
     <button class="ctrl-btn" data-view="history">Price History</button>
+    <button class="ctrl-btn" data-view="market">Market Map</button>
   </div>
 
   <!-- Input Prices -->
@@ -128,6 +129,23 @@
       <div class="annotation"><div class="ann-pct">$60</div><div class="ann-label">2023: GPT-4 input price per million tokens at launch</div></div>
       <div class="annotation"><div class="ann-pct">$2.50</div><div class="ann-label">2025: GPT-4o class models after competition from Claude/Gemini</div></div>
       <div class="annotation"><div class="ann-pct">$0.75</div><div class="ann-label">2026: GPT-4 quality today, a 98.75% reduction in three years</div></div>
+    </div>
+  </div>
+
+  <!-- Market Map (bubble) -->
+  <div class="view-panel" id="view-market">
+    <div class="chart-panel">
+      <div class="chart-title">Market Map — Cost vs. Capability (bubble = relative developer adoption)</div>
+      <div class="chart-container" style="height:340px"><canvas id="chart-market"></canvas></div>
+    </div>
+    <div class="insight">
+      <div class="insight-label">Key Finding</div>
+      <div class="insight-text">The market is bifurcating into two clusters: a dense budget tier (under $0.50/M) where most developers operate day-to-day, and a sparse frontier tier ($3–21/M) reserved for the highest-stakes tasks. The "missing middle" — mid-capability models at mid-prices — is rapidly being hollowed out as providers race to the extremes.</div>
+    </div>
+    <div class="annotation-row">
+      <div class="annotation"><div class="ann-pct">Budget</div><div class="ann-label">Under $0.50/M — GPT-5 nano, Flash-Lite, Haiku: the high-volume production tier</div></div>
+      <div class="annotation"><div class="ann-pct">Midrange</div><div class="ann-label">$0.25–$3/M — Flash, GPT-5.2 mini: versatile models under pricing pressure</div></div>
+      <div class="annotation"><div class="ann-pct">Frontier</div><div class="ann-label">$3–21/M — Opus, Sonnet, GPT-5.2 Pro: premium reasoning for complex tasks</div></div>
     </div>
   </div>
 
@@ -220,6 +238,89 @@
       scales: {
         x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
         y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+      }
+    }
+  });
+
+  // Chart 4: Market Map bubble chart
+  // x = input price (log scale), y = capability tier (1–5), r = adoption radius
+  const bubbleData = [
+    { name: 'GPT-5.2 Pro',      input: 21.00, tier: 5.0, adoption: 8,  provider: 'openai'     },
+    { name: 'Claude Opus 4.6',  input:  5.00, tier: 4.5, adoption: 10, provider: 'anthropic'  },
+    { name: 'Claude Sonnet 4.6',input:  3.00, tier: 4.2, adoption: 22, provider: 'anthropic'  },
+    { name: 'GPT-5.2',          input:  1.75, tier: 4.0, adoption: 15, provider: 'openai'     },
+    { name: 'Gemini 2.5 Pro',   input:  1.25, tier: 3.9, adoption: 12, provider: 'google'     },
+    { name: 'Gemini Flash',     input:  0.30, tier: 3.2, adoption: 18, provider: 'google'     },
+    { name: 'GPT-5.2 mini',     input:  0.25, tier: 3.1, adoption: 24, provider: 'openai'     },
+    { name: 'Claude Haiku 4.5', input:  0.25, tier: 2.9, adoption: 16, provider: 'anthropic'  },
+    { name: 'Gemini Flash-Lite',input:  0.10, tier: 2.4, adoption: 9,  provider: 'google'     },
+    { name: 'GPT-5 nano',       input:  0.05, tier: 2.2, adoption: 14, provider: 'openai'     },
+  ];
+
+  // Group by provider for separate datasets (so tooltip shows name)
+  const providerGroups = ['openai', 'anthropic', 'google'];
+  const providerLabels = { openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google' };
+  const providerColors = { openai: ACCENT, anthropic: '#c9a114', google: '#7a6800' };
+
+  const bubbleDatasets = providerGroups.map(prov => ({
+    label: providerLabels[prov],
+    data: bubbleData.filter(d => d.provider === prov).map(d => ({
+      x: d.input,
+      y: d.tier,
+      r: Math.sqrt(d.adoption) * 2.8,
+      name: d.name,
+    })),
+    backgroundColor: providerColors[prov] + 'cc',
+    borderColor: providerColors[prov],
+    borderWidth: 1.5,
+  }));
+
+  new Chart(document.getElementById('chart-market'), {
+    type: 'bubble',
+    data: { datasets: bubbleDatasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: '#888', font: { size: 10 }, boxWidth: 10, padding: 16 }
+        },
+        tooltip: {
+          backgroundColor: '#1a1a1a', borderColor: '#333', borderWidth: 1,
+          titleColor: '#f0ece2', bodyColor: '#aaa',
+          callbacks: {
+            title: items => items[0].raw.name,
+            label: item => [
+              ` Input: $${item.raw.x.toFixed(2)}/M tokens`,
+              ` Capability: ${item.raw.y.toFixed(1)}/5`,
+            ]
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'logarithmic',
+          min: 0.03, max: 30,
+          grid: { color: DIM },
+          ticks: {
+            font: { size: 10 }, color: '#666',
+            callback: v => {
+              const nice = [0.05, 0.1, 0.25, 1, 5, 21];
+              return nice.includes(v) ? '$' + v : '';
+            }
+          },
+          title: { display: true, text: 'Input price ($/M tokens, log scale)', color: '#555', font: { size: 10 } }
+        },
+        y: {
+          min: 1.5, max: 5.5,
+          grid: { color: DIM },
+          ticks: {
+            font: { size: 10 }, color: '#666', stepSize: 1,
+            callback: v => ({ 2: 'Budget', 3: 'Capable', 4: 'Advanced', 5: 'Frontier' }[v] || '')
+          },
+          title: { display: true, text: 'Capability tier', color: '#555', font: { size: 10 } }
+        }
       }
     }
   });
