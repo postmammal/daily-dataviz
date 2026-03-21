@@ -568,7 +568,7 @@ const pricingChart = new Chart(pricingCtx, {
     labels: modelsShort,
     datasets: [{
       data: inputPrices,
-      backgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--rule') || '#CCCAC2')),
+      backgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--muted') || '#888880')),
       hoverBackgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--border') || '#CCCAC2')),
       borderWidth: 0
     }]
@@ -624,7 +624,7 @@ function refreshChartColors() {
   costChart.data.datasets[0].pointBorderColor = ACCENT;
   costChart.update('none');
   // Pricing chart
-  pricingChart.data.datasets[0].backgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--rule') || '#CCCAC2'));
+  pricingChart.data.datasets[0].backgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--muted') || '#888880'));
   pricingChart.data.datasets[0].hoverBackgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--border') || '#CCCAC2'));
   pricingChart.update('none');
 }

@@ -377,7 +377,7 @@
 
   const ACCENT = '#2B5FD9';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED  = _cssVar('--rule') || '#CCCAC2';
+  const MUTED  = _cssVar('--muted') || '#888880';
   const ACCENT_MID = 'rgba(43,95,217,0.5)';
   const TEXT   = _cssVar('--text') || '#1C1C1A';
 
@@ -427,7 +427,7 @@
 
       // 2025 dot
       ctx.beginPath(); ctx.arc(cL, y25, isKey ? 5 : 3.5, 0, Math.PI*2);
-      ctx.fillStyle = isKey ? ACCENT_MID : (_cssVar('--rule') || '#CCCAC2'); ctx.fill();
+      ctx.fillStyle = isKey ? ACCENT_MID : (_cssVar('--muted') || '#888880'); ctx.fill();
       // 2026 dot
       ctx.beginPath(); ctx.arc(cR, y26, isKey ? 6 : 4, 0, Math.PI*2);
       ctx.fillStyle = isKey ? ACCENT : '#555'; ctx.fill();

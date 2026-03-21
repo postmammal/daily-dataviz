@@ -216,7 +216,7 @@
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
   const ACCENT = '#7B3FD9';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED = _cssVar('--rule') || '#CCCAC2';
+  const MUTED = _cssVar('--muted') || '#888880';
   const ACCENT_MID = 'rgba(123,63,217,0.5)';
 
 
@@ -269,7 +269,7 @@
 
       // 2025 dot (muted)
       ctx.beginPath(); ctx.arc(x25, cy, 5.5, 0, Math.PI * 2);
-      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2'; ctx.fill();
+      ctx.fillStyle = _cssVar('--muted') || '#888880'; ctx.fill();
 
       // 2026 dot (accent/red)
       ctx.beginPath(); ctx.arc(x26, cy, 6.5, 0, Math.PI * 2);

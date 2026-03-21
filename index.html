@@ -511,7 +511,7 @@
 
       // Arrow between them
       ctx.font         = '600 9px "Helvetica Neue", sans-serif';
-      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
+      ctx.fillStyle = _cssVar('--muted') || '#888880';
       ctx.textAlign    = 'center';
       ctx.fillText('→', W / 2, 5);
     }
@@ -575,7 +575,7 @@
         let fill;
         if (i < researchers)                         fill = ACCENT;
         else if (i < researchers + designers)        fill = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.5);
-        else                                         fill = _cssVar('--rule') || '#CCCAC2';
+        else                                         fill = _cssVar('--muted') || '#888880';
 
         ctx.fillStyle = fill;
         ctx.fillRect(x, y, w, h);
@@ -658,7 +658,7 @@
       // Tiny year labels
       const firstCy = PAD_T + (H - PAD_T - PAD_B) / rows / 2;
       ctx.font = '500 6.5px "Helvetica Neue", sans-serif';
-      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
+      ctx.fillStyle = _cssVar('--muted') || '#888880';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       const x25avg = toX((Math.min(...spec.v2025) + Math.max(...spec.v2025)) / 2);
@@ -687,7 +687,7 @@
 
       // Year labels
       ctx.font = '700 7px "Helvetica Neue", sans-serif';
-      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
+      ctx.fillStyle = _cssVar('--muted') || '#888880';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText("2025", cL, 2);

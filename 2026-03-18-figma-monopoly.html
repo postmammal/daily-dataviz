@@ -187,7 +187,7 @@
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
   const ACCENT = '#E8C940';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED = _cssVar('--rule') || '#CCCAC2';
+  const MUTED = _cssVar('--muted') || '#888880';
   const ACCENT_MID = 'rgba(232,201,64,0.5)';
 
   // ── Treemap (Canvas 2D) ──
@@ -203,11 +203,11 @@
 
     const items = [
       { name: 'Figma',     pct: 40.65, bg: ACCENT,    fg: '#0a0a0a' },
-      { name: 'Others',    pct: 29.95, bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
-      { name: 'Adobe XD',  pct: 13.5,  bg: _cssVar('--border') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
-      { name: 'InVision',  pct: 7.6,   bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
-      { name: 'Sketch',    pct: 5.2,   bg: _cssVar('--border') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
-      { name: 'Framer',    pct: 3.1,   bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
+      { name: 'Others',    pct: 29.95, bg: _cssVar('--muted') || '#888880', fg: _cssVar('--bg') || '#F4F3EE' },
+      { name: 'Adobe XD',  pct: 13.5,  bg: _cssVar('--muted') || '#888880', fg: _cssVar('--bg') || '#F4F3EE' },
+      { name: 'InVision',  pct: 7.6,   bg: _cssVar('--muted') || '#888880', fg: _cssVar('--bg') || '#F4F3EE' },
+      { name: 'Sketch',    pct: 5.2,   bg: _cssVar('--muted') || '#888880', fg: _cssVar('--bg') || '#F4F3EE' },
+      { name: 'Framer',    pct: 3.1,   bg: _cssVar('--muted') || '#888880', fg: _cssVar('--bg') || '#F4F3EE' },
     ];
     const total = items.reduce((s, d) => s + d.pct, 0);
     const PAD = 2;
