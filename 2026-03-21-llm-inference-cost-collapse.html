@@ -428,6 +428,7 @@ themBtn.addEventListener('click', () => {
 // ── Color helpers ────────────────────────────────────────────
 const ACCENT     = '#1E9E7A';
 const ACCENT_DIM = 'rgba(30,158,122,0.10)';
+const ACCENT_MID = 'rgba(30,158,122,0.5)';
 
 function getCS(prop) {
   return getComputedStyle(document.documentElement).getPropertyValue(prop).trim();
@@ -567,8 +568,8 @@ const pricingChart = new Chart(pricingCtx, {
     labels: modelsShort,
     datasets: [{
       data: inputPrices,
-      backgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : '#2E2E2E'),
-      hoverBackgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : '#404040'),
+      backgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--rule') || '#CCCAC2')),
+      hoverBackgroundColor: inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--border') || '#CCCAC2')),
       borderWidth: 0
     }]
   },
@@ -623,8 +624,8 @@ function refreshChartColors() {
   costChart.data.datasets[0].pointBorderColor = ACCENT;
   costChart.update('none');
   // Pricing chart
-  pricingChart.data.datasets[0].backgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : '#2E2E2E');
-  pricingChart.data.datasets[0].hoverBackgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : '#404040');
+  pricingChart.data.datasets[0].backgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--rule') || '#CCCAC2'));
+  pricingChart.data.datasets[0].hoverBackgroundColor = inputPrices.map((_, i) => i === KEY_IDX ? ACCENT : (_cssVar('--border') || '#CCCAC2'));
   pricingChart.update('none');
 }
 </script>

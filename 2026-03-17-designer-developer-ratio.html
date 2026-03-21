@@ -69,7 +69,7 @@
     .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
     .ctrl-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
     .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
-    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .ctrl-btn:hover:not(.active) { border-color: var(--border); color: var(--muted); }
     .chart-panel { background: var(--surface); border: 1px solid var(--rule); padding: 28px 24px 20px; margin-bottom: 24px; }
     .chart-title { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
     .chart-container { position: relative; width: 100%; height: 300px; }
@@ -91,7 +91,7 @@
     .waffle-wrap { display: grid; grid-template-columns: repeat(10,1fr); gap: 3px; margin: 4px 0 14px; }
     .waffle-cell { aspect-ratio: 1; border-radius: 1px; }
     .waffle-cell.developer { background: #1c1c1c; border: 1px solid #262626; }
-    .waffle-cell.designer  { background: #7a6800; }
+    .waffle-cell.designer  { background: rgba(76,154,82,0.5); }
     .waffle-cell.researcher{ background: var(--accent); }
     .waffle-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 10px; }
     .wl-item { display: flex; align-items: center; gap: 6px; font-size: .65rem; color: var(--muted); }
@@ -144,7 +144,7 @@
       <div id="waffle-wrap" class="waffle-wrap"></div>
       <div class="waffle-legend">
         <div class="wl-item"><div class="wl-dot" style="background:#f5c518"></div>Researcher</div>
-        <div class="wl-item"><div class="wl-dot" style="background:#7a6800"></div>Designer</div>
+        <div class="wl-item"><div class="wl-dot" style="background:rgba(76,154,82,0.5)"></div>Designer</div>
         <div class="wl-item"><div class="wl-dot" style="background:#1c1c1c;border:1px solid #262626"></div>Developer</div>
       </div>
     </div>
@@ -209,8 +209,9 @@
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
   const ACCENT = '#4C9A52';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED = '#3a3a3a';
-  const GOLD = '#7a6800';
+  const MUTED = _cssVar('--rule') || '#CCCAC2';
+  const ACCENT_MID = 'rgba(76,154,82,0.5)';
+  const GOLD = ACCENT_MID;
 
   // ── Waffle chart ──
   function buildWaffle(researchers, designers) {
@@ -259,8 +260,8 @@
         tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y} designers per 100 devs` } }
       },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 25 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + ' /100' }, max: 20 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 25 } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + ' /100' }, max: 20 }
       }
     }
   });
@@ -282,8 +283,8 @@
         tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}%` } }
       },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 0 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 55 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 0 } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 55 }
       }
     }
   });

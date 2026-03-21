@@ -69,7 +69,7 @@
     .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
     .ctrl-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
     .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
-    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .ctrl-btn:hover:not(.active) { border-color: var(--border); color: var(--muted); }
     .chart-panel { background: var(--surface); border: 1px solid var(--rule); padding: 28px 24px 20px; margin-bottom: 24px; }
     .chart-title { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
     .chart-container { position: relative; width: 100%; height: 300px; }
@@ -187,7 +187,8 @@
   Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
   const ACCENT = '#E8C940';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED = '#3a3a3a';
+  const MUTED = _cssVar('--rule') || '#CCCAC2';
+  const ACCENT_MID = 'rgba(232,201,64,0.5)';
 
   // ── Treemap (Canvas 2D) ──
   (function() {
@@ -201,12 +202,12 @@
     ctx.scale(dpr, dpr);
 
     const items = [
-      { name: 'Figma',     pct: 40.65, bg: '#f5c518', fg: '#0a0a0a' },
-      { name: 'Others',    pct: 29.95, bg: '#1e1e1e',  fg: '#555'    },
-      { name: 'Adobe XD',  pct: 13.5,  bg: '#252525',  fg: '#666'    },
-      { name: 'InVision',  pct: 7.6,   bg: '#1c1c1c',  fg: '#555'    },
-      { name: 'Sketch',    pct: 5.2,   bg: '#1a1a1a',  fg: '#4a4a4a' },
-      { name: 'Framer',    pct: 3.1,   bg: '#181818',  fg: '#444'    },
+      { name: 'Figma',     pct: 40.65, bg: ACCENT,    fg: '#0a0a0a' },
+      { name: 'Others',    pct: 29.95, bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
+      { name: 'Adobe XD',  pct: 13.5,  bg: _cssVar('--border') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
+      { name: 'InVision',  pct: 7.6,   bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
+      { name: 'Sketch',    pct: 5.2,   bg: _cssVar('--border') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
+      { name: 'Framer',    pct: 3.1,   bg: _cssVar('--rule') || '#CCCAC2', fg: _cssVar('--muted') || '#888880' },
     ];
     const total = items.reduce((s, d) => s + d.pct, 0);
     const PAD = 2;
@@ -249,7 +250,7 @@
       labels: ['2022', '2023', '2024 (est.)', '2025'],
       datasets: [{
         data: [4, 8, 11, 13],
-        backgroundColor: [MUTED, MUTED, '#7a6800', ACCENT],
+        backgroundColor: [MUTED, MUTED, ACCENT_MID, ACCENT],
         borderColor: 'transparent', borderRadius: 2,
       }]
     },
@@ -257,8 +258,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}M MAU` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: '#666' } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + 'M' }, max: 16 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, _cssVar('--muted') || '#888880' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + 'M' }, max: 16 }
       }
     }
   });
@@ -271,7 +272,7 @@
       datasets: [{
         label: 'Figma UI design market share',
         data: [7, 14, 26, 45, 70, 82, 90, 90, 90],
-        borderColor: ACCENT, backgroundColor: 'rgba(245,197,24,0.08)',
+        borderColor: ACCENT, backgroundColor: _cssVar('--accent-dim') || 'rgba(100,100,100,0.10)',
         fill: true, tension: 0.35, pointBackgroundColor: ACCENT, pointRadius: 4,
       }]
     },
@@ -279,8 +280,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}% market share` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' }, max: 100, min: 0 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 100, min: 0 }
       }
     }
   });

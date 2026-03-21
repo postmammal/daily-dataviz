@@ -144,7 +144,7 @@
       cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
     }
     .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
-    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .ctrl-btn:hover:not(.active) { border-color: var(--border); color: var(--muted); }
 
     /* ── Chart area ── */
     .chart-panel {
@@ -377,8 +377,9 @@
 
   const ACCENT = '#2B5FD9';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED  = '#444';
-  const TEXT   = '#f0ece2';
+  const MUTED  = _cssVar('--rule') || '#CCCAC2';
+  const ACCENT_MID = 'rgba(43,95,217,0.5)';
+  const TEXT   = _cssVar('--text') || '#1C1C1A';
 
   /* ── Chart 1: Strategic Shift — Slope Graph (Canvas 2D) ── */
   (function() {
@@ -404,14 +405,14 @@
     function yPos(v) { return PAD_T + (1 - v / 100) * (H - PAD_T - PAD_B); }
 
     // Column verticals
-    [[cL,'#333'],[cR,'#333']].forEach(([x,c]) => {
+    [[cL, _cssVar('--rule') || '#CCCAC2'],[cR, _cssVar('--rule') || '#CCCAC2']].forEach(([x,c]) => {
       ctx.strokeStyle = c; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(x, PAD_T - 8); ctx.lineTo(x, H - PAD_B); ctx.stroke();
     });
 
     // Column headers
     ctx.font = '700 10px "Helvetica Neue", sans-serif'; ctx.textBaseline = 'top';
-    ctx.fillStyle = '#555'; ctx.textAlign = 'center'; ctx.fillText('2025', cL, 8);
+    ctx.fillStyle = _cssVar('--muted') || '#888880'; ctx.textAlign = 'center'; ctx.fillText('2025', cL, 8);
     ctx.fillStyle = ACCENT; ctx.fillText('2026', cR, 8);
 
     // Lines + dots
@@ -420,31 +421,31 @@
       const isKey = m.key;
 
       // Connecting line
-      ctx.strokeStyle = isKey ? 'rgba(245,197,24,0.9)' : 'rgba(80,80,80,0.45)';
+      ctx.strokeStyle = isKey ? ACCENT : (_cssVar('--rule') || '#CCCAC2');
       ctx.lineWidth   = isKey ? 2.5 : 1.5;
       ctx.beginPath(); ctx.moveTo(cL, y25); ctx.lineTo(cR, y26); ctx.stroke();
 
       // 2025 dot
       ctx.beginPath(); ctx.arc(cL, y25, isKey ? 5 : 3.5, 0, Math.PI*2);
-      ctx.fillStyle = isKey ? '#a88000' : '#3a3a3a'; ctx.fill();
+      ctx.fillStyle = isKey ? ACCENT_MID : (_cssVar('--rule') || '#CCCAC2'); ctx.fill();
       // 2026 dot
       ctx.beginPath(); ctx.arc(cR, y26, isKey ? 6 : 4, 0, Math.PI*2);
       ctx.fillStyle = isKey ? ACCENT : '#555'; ctx.fill();
 
       // 2025 value
       ctx.font = `${isKey?'700':'600'} ${isKey?10:9}px "Helvetica Neue", sans-serif`;
-      ctx.fillStyle = isKey ? '#a88000' : '#4a4a4a';
+      ctx.fillStyle = isKey ? ACCENT_MID : (_cssVar('--muted') || '#888880');
       ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
       ctx.fillText(m.v25 + '%', cL - 10, y25);
 
       // 2026 value
-      ctx.fillStyle = isKey ? ACCENT : '#666';
+      ctx.fillStyle = isKey ? ACCENT : (_cssVar('--muted') || '#888880');
       ctx.textAlign = 'left';
       ctx.fillText(m.v26 + '%', cR + 10, y26);
 
       // Right-side metric label
       ctx.font = `${isKey?'700':'500'} ${isKey?9:8.5}px "Helvetica Neue", sans-serif`;
-      ctx.fillStyle = isKey ? ACCENT : '#4a4a4a';
+      ctx.fillStyle = isKey ? ACCENT : (_cssVar('--muted') || '#888880');
       ctx.textAlign = 'left';
       ctx.fillText(m.label, cR + 38, y26);
     });
@@ -475,7 +476,7 @@
       datasets: [{
         label: '% of researchers',
         data: [88, 69, 73, 48, 36],
-        backgroundColor: [ACCENT, '#c9a114', '#c9a114', MUTED, MUTED],
+        backgroundColor: [ACCENT, ACCENT_MID, ACCENT_MID, MUTED, MUTED],
         borderColor: 'transparent',
         borderWidth: 0,
         borderRadius: 2,
@@ -501,7 +502,7 @@
       scales: {
         x: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' },
+          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' },
           min: 0, max: 100,
         },
         y: {
@@ -551,11 +552,11 @@
       scales: {
         x: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, color: '#666', maxRotation: 0 },
+          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', maxRotation: 0 },
         },
         y: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, color: '#666', callback: v => v + '%' },
+          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' },
           min: 0, max: 100,
         }
       }

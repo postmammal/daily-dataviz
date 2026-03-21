@@ -69,7 +69,7 @@
     .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
     .ctrl-btn { background: transparent; border: 1px solid var(--rule); color: var(--muted); font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 6px 14px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s; }
     .ctrl-btn.active { border-color: var(--accent); color: var(--accent); }
-    .ctrl-btn:hover:not(.active) { border-color: #444; color: #aaa; }
+    .ctrl-btn:hover:not(.active) { border-color: var(--border); color: var(--muted); }
     .chart-panel { background: var(--surface); border: 1px solid var(--rule); padding: 28px 24px 20px; margin-bottom: 24px; }
     .chart-title { font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
     .chart-container { position: relative; width: 100%; height: 300px; }
@@ -206,11 +206,13 @@
 
   const ACCENT = '#D63C2F';
   const DIM = _cssVar('--rule') || '#CCCAC2';
-  const MUTED = '#3a3a3a';
+  const MUTED = _cssVar('--rule') || '#CCCAC2';
+  const ACCENT_MID = 'rgba(214,60,47,0.6)';
+  const ACCENT_DIM = 'rgba(214,60,47,0.3)';
   const COLORS = {
     openai: ACCENT,
-    anthropic: '#c9a114',
-    google: '#7a6800',
+    anthropic: ACCENT_MID,
+    google: ACCENT_DIM,
     other: MUTED,
   };
 
@@ -240,8 +242,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 35 } },
-        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 35 } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => '$' + v } }
       }
     }
   });
@@ -257,8 +259,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: '#666', maxRotation: 35 } },
-        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 35 } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => '$' + v } }
       }
     }
   });
@@ -271,7 +273,7 @@
       datasets: [{
         label: 'GPT-4-class input price ($/M tokens)',
         data: [60, 30, 10, 4, 2.5, 1.5, 0.75],
-        borderColor: ACCENT, backgroundColor: 'rgba(245,197,24,0.08)',
+        borderColor: ACCENT, backgroundColor: _cssVar('--accent-dim') || 'rgba(100,100,100,0.10)',
         fill: true, tension: 0.3, pointBackgroundColor: ACCENT, pointRadius: 4, pointHoverRadius: 6,
       }]
     },
@@ -279,8 +281,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` $${ctx.parsed.y.toFixed(2)}/M tokens` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666' } },
-        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, color: '#666', callback: v => '$' + v } }
+        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880' } },
+        y: { type: 'logarithmic', grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => '$' + v } }
       }
     }
   });
@@ -303,7 +305,7 @@
   // Group by provider for separate datasets (so tooltip shows name)
   const providerGroups = ['openai', 'anthropic', 'google'];
   const providerLabels = { openai: 'OpenAI', anthropic: 'Anthropic', google: 'Google' };
-  const providerColors = { openai: ACCENT, anthropic: '#c9a114', google: '#7a6800' };
+  const providerColors = { openai: ACCENT, anthropic: ACCENT_MID, google: ACCENT_DIM };
 
   const bubbleDatasets = providerGroups.map(prov => ({
     label: providerLabels[prov],
@@ -347,22 +349,22 @@
           min: 0.03, max: 30,
           grid: { color: DIM },
           ticks: {
-            font: { size: 10 }, color: '#666',
+            font: { size: 10 }, _cssVar('--muted') || '#888880',
             callback: v => {
               const nice = [0.05, 0.1, 0.25, 1, 5, 21];
               return nice.includes(v) ? '$' + v : '';
             }
           },
-          title: { display: true, text: 'Input price ($/M tokens, log scale)', color: '#555', font: { size: 10 } }
+          title: { display: true, text: 'Input price ($/M tokens, log scale)', _cssVar('--muted') || '#888880', font: { size: 10 } }
         },
         y: {
           min: 1.5, max: 5.5,
           grid: { color: DIM },
           ticks: {
-            font: { size: 10 }, color: '#666', stepSize: 1,
+            font: { size: 10 }, color: _cssVar('--muted') || '#888880', stepSize: 1,
             callback: v => ({ 2: 'Budget', 3: 'Capable', 4: 'Advanced', 5: 'Frontier' }[v] || '')
           },
-          title: { display: true, text: 'Capability tier', color: '#555', font: { size: 10 } }
+          title: { display: true, text: 'Capability tier', _cssVar('--muted') || '#888880', font: { size: 10 } }
         }
       }
     }
