@@ -362,6 +362,16 @@
     return String(v);
   }
 
+
+  // Convert hex color + alpha → rgba() string (used for dynamic gradients)
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#','');
+    const r = parseInt(h.substring(0,2),16);
+    const g = parseInt(h.substring(2,4),16);
+    const b = parseInt(h.substring(4,6),16);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
   function renderMiniViz(canvas, spec, accentColor) {
     const { ctx, W, H } = setupCanvas(canvas);
     const ACCENT  = accentColor || '#E8C940';
@@ -371,6 +381,8 @@
     const TEXTHI  = _cssVar('--text') || '#1C1C1A';
 
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = _cssVar('--preview-bg') || '#E8E6DF';
+    ctx.fillRect(0, 0, W, H);
 
     // ── Horizontal bars ─────────────────────────────────────────────
     if (spec.type === 'hbars') {
@@ -440,8 +452,8 @@
 
       // Gradient area fill
       const grad = ctx.createLinearGradient(0, PAD_T, 0, PAD_T + aH);
-      grad.addColorStop(0, 'rgba(245,197,24,0.18)');
-      grad.addColorStop(1, 'rgba(245,197,24,0)');
+      grad.addColorStop(0, hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.18));
+      grad.addColorStop(1, hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0));
       ctx.beginPath();
       pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
       ctx.lineTo(pts[pts.length - 1].x, PAD_T + aH);
@@ -451,7 +463,7 @@
       ctx.fill();
 
       // Baseline
-      ctx.strokeStyle = '#222';
+      ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(PAD_L, PAD_T + aH);
@@ -494,7 +506,7 @@
 
       // Arrow between them
       ctx.font         = '600 9px "Helvetica Neue", sans-serif';
-      ctx.fillStyle    = '#3a3a3a';
+      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.textAlign    = 'center';
       ctx.fillText('→', W / 2, 5);
     }
@@ -506,7 +518,7 @@
       const aH  = H - PAD * 2;
       const yRange = spec.yMax - spec.yMin;
 
-      ctx.strokeStyle = '#222';
+      ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.lineWidth   = 1;
       ctx.beginPath();
       ctx.moveTo(PAD, PAD);
@@ -522,7 +534,7 @@
         ctx.fillStyle = pt.key ? ACCENT : BARFILL;
         ctx.fill();
         if (pt.key) {
-          ctx.strokeStyle = 'rgba(245,197,24,0.3)';
+          ctx.strokeStyle = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.3);
           ctx.lineWidth   = 4;
           ctx.beginPath();
           ctx.arc(px, py, 8, 0, Math.PI * 2);
@@ -557,7 +569,7 @@
 
         let fill;
         if (i < researchers)                         fill = ACCENT;
-        else if (i < researchers + designers)        fill = '#7a6800';
+        else if (i < researchers + designers)        fill = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.5);
         else                                         fill = _cssVar('--rule') || '#CCCAC2';
 
         ctx.fillStyle = fill;
@@ -567,7 +579,7 @@
       // Legend dots bottom-right
       const items = [
         { color: ACCENT,   label: `${researchers} researcher` + (researchers !== 1 ? 's' : '') },
-        { color: '#7a6800', label: `${designers} designers` },
+        { color: hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.5), label: `${designers} designers` },
       ];
       let lx = W - PAD_R;
       let ly = H - 4;
@@ -611,7 +623,7 @@
         const down = spec.v2026[i] < spec.v2025[i];
 
         // Connector line
-        ctx.strokeStyle = down ? 'rgba(220,60,60,0.35)' : 'rgba(245,197,24,0.35)';
+        ctx.strokeStyle = down ? 'rgba(220,60,60,0.35)' : hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.35);
         ctx.lineWidth   = 1.5;
         ctx.beginPath();
         ctx.moveTo(x25, cy);
@@ -641,7 +653,7 @@
       // Tiny year labels
       const firstCy = PAD_T + (H - PAD_T - PAD_B) / rows / 2;
       ctx.font = '500 6.5px "Helvetica Neue", sans-serif';
-      ctx.fillStyle = '#3a3a3a';
+      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       const x25avg = toX((Math.min(...spec.v2025) + Math.max(...spec.v2025)) / 2);
@@ -663,14 +675,14 @@
       const toY    = v => PAD_T + (H - PAD_T - PAD_B) * (1 - (v - minV) / (maxV - minV));
 
       // Column guide lines
-      ctx.strokeStyle = '#222';
+      ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.lineWidth   = 1;
       ctx.beginPath(); ctx.moveTo(cL, PAD_T - 6); ctx.lineTo(cL, H - PAD_B); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(cR, PAD_T - 6); ctx.lineTo(cR, H - PAD_B); ctx.stroke();
 
       // Year labels
       ctx.font = '700 7px "Helvetica Neue", sans-serif';
-      ctx.fillStyle = '#3a3a3a';
+      ctx.fillStyle = _cssVar('--rule') || '#CCCAC2';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText("2025", cL, 2);
@@ -690,12 +702,12 @@
         // Dots
         ctx.beginPath();
         ctx.arc(cL, y1, line.key ? 3.5 : 2, 0, Math.PI * 2);
-        ctx.fillStyle = line.key ? ACCENT : '#333';
+        ctx.fillStyle = line.key ? ACCENT : (_cssVar('--muted') || '#888880');
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(cR, y2, line.key ? 3.5 : 2, 0, Math.PI * 2);
-        ctx.fillStyle = line.key ? ACCENT : '#333';
+        ctx.fillStyle = line.key ? ACCENT : (_cssVar('--muted') || '#888880');
         ctx.fill();
 
         // Value labels for key line only
