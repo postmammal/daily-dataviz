@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Inference Costs — 1,000× Cheaper in 3 Years</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:         #0E0E0E;
+    --surface:    #1A1A1A;
+    --rule:       #2A2A2A;
+    --rule-light: #222222;
+    --text:       #F0EFE8;
+    --muted:      #555550;
+    --accent:     #E8C940;
+    --accent-dim: rgba(232, 201, 64, 0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    min-height: 100vh;
+    padding: clamp(20px, 5vw, 56px) clamp(20px, 5vw, 56px);
+  }
+
+  .page {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    border-left: 4px solid var(--accent);
+    padding-left: 20px;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .header-left { flex: 1; }
+
+  .category-tag {
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.03em;
+    line-height: 1.0;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  h1 .num { color: var(--accent); }
+
+  .subtext {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.5;
+    max-width: 560px;
+  }
+
+  .date-tag {
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-top: 2px;
+  }
+
+  /* ─── YELLOW RULE ─── */
+  .section-rule {
+    width: 48px;
+    height: 2px;
+    background: var(--accent);
+    margin: 32px 0;
+  }
+
+  /* ─── CHART SECTION ─── */
+  .chart-section {
+    margin-bottom: 2px;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .chart-title {
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .range-buttons {
+    display: flex;
+    gap: 4px;
+  }
+
+  .range-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+    font-family: inherit;
+  }
+
+  .range-btn:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  .range-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .chart-container {
+    position: relative;
+    height: 340px;
+    background: var(--surface);
+    padding: 24px 20px 20px;
+  }
+
+  .y-axis-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* ─── VIEW DATA TOGGLE ─── */
+  .data-toggle-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px 0 6px;
+  }
+
+  .data-toggle-btn {
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .data-toggle-btn:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  .data-table-wrap {
+    display: none;
+    overflow: hidden;
+  }
+
+  .data-table-wrap.open {
+    display: block;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+  }
+
+  .data-table th {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .data-table td {
+    padding: 9px 12px;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px solid var(--rule-light);
+    color: var(--text);
+  }
+
+  .data-table tr:nth-child(odd) td { background: var(--bg); }
+  .data-table tr:nth-child(even) td { background: #141414; }
+  .data-table tr.key-row td { color: var(--accent); }
+
+  /* ─── BAR CHART SECTION ─── */
+  .bar-section {
+    margin-top: 40px;
+  }
+
+  .bar-chart-container {
+    position: relative;
+    height: 340px;
+    background: var(--surface);
+    padding: 24px 20px 20px;
+  }
+
+  /* ─── STAT CARDS ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule);
+    margin: 40px 0 0;
+  }
+
+  .stat-card {
+    background: var(--bg);
+    padding: 20px 16px;
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .stat-card:hover {
+    background: var(--surface);
+  }
+
+  .stat-num {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+
+  .stat-num.accent { color: var(--accent); }
+
+  .stat-label {
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .stat-delta {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-top: 8px;
+  }
+
+  /* ─── SOURCES ─── */
+  .sources {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 2;
+  }
+
+  .sources a {
+    color: var(--muted);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .sources a:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+
+  /* ─── MOBILE ─── */
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .chart-container { height: 260px; }
+    .bar-chart-container { height: 260px; }
+    h1 { font-size: clamp(1.4rem, 6vw, 2.4rem); }
+    .stat-num { font-size: clamp(1.5rem, 5vw, 2.2rem); }
+    .header { flex-direction: column; gap: 8px; }
+    .date-tag { display: none; }
+    .range-buttons { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="category-tag">AI / Infrastructure</div>
+      <h1>LLM INFERENCE COSTS<br>FELL <span class="num">1,000×</span> IN 3 YEARS</h1>
+      <p class="subtext">GPT-4 class reasoning dropped from $20 per million tokens in late 2022 to under $0.07 today — the fastest sustained price deflation in the history of computing infrastructure.</p>
+    </div>
+    <div class="date-tag">21 Mar 2026</div>
+  </header>
+
+  <div class="section-rule"></div>
+
+  <!-- MAIN LINE CHART -->
+  <div class="chart-section">
+    <div class="chart-header">
+      <div class="chart-title">GPT-4 class performance — $ per 1M output tokens</div>
+      <div class="range-buttons">
+        <button class="range-btn" onclick="setRange('6M')">6M</button>
+        <button class="range-btn" onclick="setRange('1Y')">1Y</button>
+        <button class="range-btn" onclick="setRange('2Y')">2Y</button>
+        <button class="range-btn active" onclick="setRange('ALL')">ALL</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="lineChart"></canvas>
+    </div>
+    <div class="data-toggle-row">
+      <button class="data-toggle-btn" onclick="toggleTable()">[ View Data ]</button>
+    </div>
+    <div class="data-table-wrap" id="dataTableWrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>$ / 1M Output Tokens</th>
+            <th>YoY Change</th>
+          </tr>
+        </thead>
+        <tbody id="dataTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CURRENT MODEL BAR CHART -->
+  <div class="bar-section">
+    <div class="chart-header">
+      <div class="chart-title">Current pricing — input tokens per 1M (March 2026)</div>
+    </div>
+    <div class="bar-chart-container">
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat0">—</div>
+      <div class="stat-label">Cost reduction<br>since late 2022</div>
+      <div class="stat-delta">↓ $20 → $0.02</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat1">—</div>
+      <div class="stat-label">Annual deflation<br>rate (avg)</div>
+      <div class="stat-delta">Faster than Moore's Law</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat2">—</div>
+      <div class="stat-label">Cheapest model<br>per 1M tokens</div>
+      <div class="stat-delta">Llama 3.2 3B · Mar 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat3">—</div>
+      <div class="stat-label">Models compared<br>by pricepertoken.com</div>
+      <div class="stat-delta">↑ From ~12 in 2023</div>
+    </div>
+  </div>
+
+  <!-- SOURCES -->
+  <div class="sources">
+    Sources &nbsp;·&nbsp;
+    <a href="https://a16z.com/llmflation-llm-inference-cost/" target="_blank">a16z LLMflation</a> &nbsp;·&nbsp;
+    <a href="https://epoch.ai/data-insights/llm-inference-price-trends" target="_blank">Epoch AI Inference Pricing</a> &nbsp;·&nbsp;
+    <a href="https://pricepertoken.com/" target="_blank">PricePerToken.com</a> &nbsp;·&nbsp;
+    <a href="https://www.silicondata.com/blog/llm-cost-per-token" target="_blank">SiliconData 2026</a> &nbsp;·&nbsp;
+    <a href="https://introl.com/blog/inference-unit-economics-true-cost-per-million-tokens-guide" target="_blank">Introl Unit Economics</a>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const allData = {
+  labels: ['Q4 2022', 'Q1 2023', 'Q2 2023', 'Q3 2023', 'Q4 2023', 'Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024', 'Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025', 'Q1 2026'],
+  values: [20.00, 12.00,  7.50,   4.00,   2.50,   1.50,   0.90,   0.55,   0.40,   0.28,   0.18,   0.10,   0.06,   0.02],
+  yoy:    [null,  null,   null,   null,  '-87%', '-62%', '-64%', '-86%', '-84%', '-30%', '-55%', '-64%', '-85%', '-95%']
+};
+
+const ranges = {
+  '6M': { start: 8 },
+  '1Y': { start: 6 },
+  '2Y': { start: 2 },
+  'ALL': { start: 0 }
+};
+
+let currentRange = 'ALL';
+
+// ─── LINE CHART ─────────────────────────────────────────────────────────────
+
+const ctxLine = document.getElementById('lineChart').getContext('2d');
+
+const lineChart = new Chart(ctxLine, {
+  type: 'line',
+  data: {
+    labels: allData.labels,
+    datasets: [{
+      data: allData.values,
+      borderColor: '#E8C940',
+      backgroundColor: 'rgba(232, 201, 64, 0.07)',
+      borderWidth: 2.5,
+      pointBackgroundColor: '#0E0E0E',
+      pointBorderColor: '#E8C940',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      fill: true,
+      tension: 0.3
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 900, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1A1A1A',
+        borderColor: '#2A2A2A',
+        borderWidth: 1,
+        titleColor: '#F0EFE8',
+        bodyColor: '#555550',
+        padding: 14,
+        cornerRadius: 0,
+        callbacks: {
+          label: ctx => ` $${ctx.parsed.y.toFixed(2)} per 1M tokens`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: '#1E1E1E', drawTicks: false },
+        border: { display: false },
+        ticks: { color: '#555550', font: { size: 10, weight: '600' }, padding: 10, maxRotation: 45 }
+      },
+      y: {
+        type: 'logarithmic',
+        grid: { color: '#1E1E1E' },
+        border: { display: false },
+        ticks: {
+          color: '#555550',
+          font: { size: 10, weight: '600' },
+          padding: 12,
+          callback: v => v >= 1 ? `$${v}` : `$${v.toFixed(2)}`
+        }
+      }
+    }
+  }
+});
+
+function setRange(key) {
+  currentRange = key;
+  const start = ranges[key].start;
+  lineChart.data.labels = allData.labels.slice(start);
+  lineChart.data.datasets[0].data = allData.values.slice(start);
+  lineChart.update('active');
+
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.toggle('active', b.textContent === key));
+  populateTable(start);
+}
+
+// ─── BAR CHART ──────────────────────────────────────────────────────────────
+
+const models = [
+  { name: 'Llama 3.2 3B',        price: 0.06  },
+  { name: 'Gemini Flash-Lite',   price: 0.075 },
+  { name: 'Gemini Flash',        price: 0.15  },
+  { name: 'DeepSeek R1',         price: 0.55  },
+  { name: 'GPT-4o mini',         price: 0.60  },
+  { name: 'GPT-4o',              price: 2.50  },
+  { name: 'Claude Sonnet 4.6',   price: 3.00  },
+  { name: 'Claude Opus 4.6',     price: 15.00 },
+];
+
+const keyBarIndex = 2; // Gemini Flash-Lite as highlight (cheapest frontier)
+
+const barColors = models.map((_, i) => i === 0 ? '#E8C940' : '#2E2E2E');
+const barHoverColors = models.map((_, i) => i === 0 ? '#E8C940' : '#404040');
+
+const ctxBar = document.getElementById('barChart').getContext('2d');
+
+const barChart = new Chart(ctxBar, {
+  type: 'bar',
+  data: {
+    labels: models.map(m => m.name),
+    datasets: [{
+      data: models.map(m => m.price),
+      backgroundColor: barColors.slice(),
+      hoverBackgroundColor: barHoverColors,
+      borderWidth: 0,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 900, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1A1A1A',
+        borderColor: '#2A2A2A',
+        borderWidth: 1,
+        titleColor: '#F0EFE8',
+        bodyColor: '#555550',
+        padding: 14,
+        cornerRadius: 0,
+        callbacks: {
+          label: ctx => ` $${ctx.parsed.x < 0.1 ? ctx.parsed.x.toFixed(3) : ctx.parsed.x.toFixed(2)} per 1M input tokens`
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'logarithmic',
+        grid: { color: '#1E1E1E' },
+        border: { display: false },
+        ticks: {
+          color: '#555550',
+          font: { size: 10, weight: '600' },
+          padding: 10,
+          callback: v => v >= 1 ? `$${v}` : `$${v.toFixed(2)}`
+        }
+      },
+      y: {
+        grid: { color: '#1E1E1E', drawTicks: false },
+        border: { display: false },
+        ticks: {
+          color: '#555550',
+          font: { size: 10, weight: '600' },
+          padding: 10
+        }
+      }
+    },
+    onHover: (event, elements, chart) => {
+      const ds = chart.data.datasets[0];
+      if (elements.length) {
+        const idx = elements[0].index;
+        ds.backgroundColor = barColors.map((c, i) =>
+          i === idx ? '#E8C940' : '#252525'
+        );
+      } else {
+        ds.backgroundColor = barColors.slice();
+      }
+      chart.update('none');
+    }
+  }
+});
+
+// ─── DATA TABLE ─────────────────────────────────────────────────────────────
+
+function populateTable(start) {
+  const tbody = document.getElementById('dataTableBody');
+  tbody.innerHTML = '';
+  const labels = allData.labels.slice(start);
+  const values = allData.values.slice(start);
+  const yoy = allData.yoy.slice(start);
+  labels.forEach((lbl, i) => {
+    const tr = document.createElement('tr');
+    const isKey = values[i] === Math.min(...values);
+    if (isKey) tr.classList.add('key-row');
+    tr.innerHTML = `<td>${lbl}</td><td>$${values[i].toFixed(2)}</td><td>${yoy[i] || '—'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function toggleTable() {
+  const wrap = document.getElementById('dataTableWrap');
+  const btn = document.querySelector('.data-toggle-btn');
+  const open = wrap.classList.toggle('open');
+  btn.textContent = open ? '[ Hide Data ]' : '[ View Data ]';
+  if (open) populateTable(ranges[currentRange].start);
+}
+
+// ─── STAT COUNT-UP ──────────────────────────────────────────────────────────
+
+function countUp(el, target, isFloat, prefix, suffix, decimals) {
+  const duration = 1000;
+  const steps = 40;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const val = isFloat ? current.toFixed(decimals || 2) : Math.round(current).toLocaleString();
+    el.textContent = prefix + val + suffix;
+  }, duration / steps);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Populate table initially
+  populateTable(0);
+
+  // Count-ups
+  countUp(document.getElementById('stat0'), 1000, false, '', '×');
+  countUp(document.getElementById('stat1'), 10,   false, '', '×/yr');
+  countUp(document.getElementById('stat2'), 0.06, true,  '$', '', 3);
+  countUp(document.getElementById('stat3'), 300,  false, '', '+');
+});
+</script>
+</body>
+</html>
