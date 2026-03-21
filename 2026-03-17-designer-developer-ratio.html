@@ -260,8 +260,8 @@
         tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y} designers per 100 devs` } }
       },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 25 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + ' /100' }, max: 20 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: _cssVar('--muted') || '#888880', maxRotation: 25 } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + ' /100' }, max: 20 }
       }
     }
   });
@@ -283,8 +283,8 @@
         tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}%` } }
       },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, _cssVar('--muted') || '#888880', maxRotation: 0 } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 55 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 9 }, color: _cssVar('--muted') || '#888880', maxRotation: 0 } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 55 }
       }
     }
   });

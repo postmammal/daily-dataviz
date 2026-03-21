@@ -258,8 +258,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}M MAU` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, _cssVar('--muted') || '#888880' } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + 'M' }, max: 16 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 11 }, color: _cssVar('--muted') || '#888880' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + 'M' }, max: 16 }
       }
     }
   });
@@ -280,8 +280,8 @@
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: _cssVar('--surface') || '#ECEAE3', borderColor: _cssVar('--rule') || '#CCCAC2', borderWidth: 1, titleColor: _cssVar('--text') || '#1C1C1A', bodyColor: _cssVar('--muted') || '#888880', callbacks: { label: ctx => ` ${ctx.parsed.y}% market share` } } },
       scales: {
-        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880' } },
-        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 100, min: 0 }
+        x: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880' } },
+        y: { grid: { color: DIM }, ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + '%' }, max: 100, min: 0 }
       }
     }
   });

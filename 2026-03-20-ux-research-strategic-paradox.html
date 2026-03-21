@@ -502,7 +502,7 @@
       scales: {
         x: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' },
+          ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + '%' },
           min: 0, max: 100,
         },
         y: {
@@ -552,11 +552,11 @@
       scales: {
         x: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', maxRotation: 0 },
+          ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', maxRotation: 0 },
         },
         y: {
           grid: { color: DIM },
-          ticks: { font: { size: 10 }, _cssVar('--muted') || '#888880', callback: v => v + '%' },
+          ticks: { font: { size: 10 }, color: _cssVar('--muted') || '#888880', callback: v => v + '%' },
           min: 0, max: 100,
         }
       }
