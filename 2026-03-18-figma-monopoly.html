@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -300,9 +300,9 @@
     var root = document.documentElement;
     var btn  = document.getElementById('theme-toggle');
     if (!btn) return;
-    var dark = false;
+    var dark = true;
     root.setAttribute('data-theme', 'light');
-    btn.textContent = '☾';
+    btn.textContent = '☀';
     btn.addEventListener('click', function() {
       dark = !dark;
       root.setAttribute('data-theme', dark ? 'dark' : 'light');

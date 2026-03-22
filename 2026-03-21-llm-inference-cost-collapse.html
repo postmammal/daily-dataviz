@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -429,7 +429,7 @@
 const root = document.documentElement;
 const themBtn = document.getElementById('theme-toggle');
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-let dark = false /* default: light */;
+let dark = true;
 themBtn.textContent = dark ? '☀' : '☾';
 themBtn.addEventListener('click', () => {
   dark = !dark;
