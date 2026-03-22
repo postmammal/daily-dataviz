@@ -65,6 +65,11 @@
     }
     .subtitle { color: var(--muted); font-size: 0.88rem; line-height: 1.65; max-width: 600px; }
 
+    /* ── Key Finding ── */
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+
     /* ── Chart panels ── */
     .chart-panel { margin-bottom: 40px; }
     .chart-title {
@@ -191,12 +196,22 @@
     </table>
   </div>
 
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">No model scores highest across all five dimensions. Claude 3.7 leads coding (93) and instruction-following (90), while Gemini 2.5 tops knowledge (90) and math (87). GPT-4o splits the difference. As top-line benchmark scores saturate above 85, the strategic differentiation between labs is increasingly defined by which dimensions they prioritize.</div>
+  </div>
+
   <!-- Secondary chart: Horizontal bar — coding scores -->
   <div class="chart-panel">
     <div class="chart-title">Coding Performance — HumanEval / SWE-Bench Normalized Score</div>
     <div class="chart-container" style="height: 180px;">
       <canvas id="chart-coding"></canvas>
     </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Coding is the dimension where models diverge most sharply — an 8-point gap between Claude 3.7 (93) and Llama 3.3 (85). For developer tooling, this gap is commercially decisive: coding assistants, code review, and agentic software engineering are all directly dependent on coding-dimension performance rather than aggregate benchmark averages.</div>
   </div>
 
   <!-- Stat cards -->

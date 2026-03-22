@@ -137,6 +137,10 @@
     margin-bottom: 20px;
   }
 
+  .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+  .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+  .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+
   .chart-title {
     font-size: 0.63rem;
     font-weight: 700;
@@ -402,6 +406,11 @@
     </div>
   </div>
 
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">GPT-4 class output tokens have deflated 1,000× in three years — the fastest sustained price collapse ever recorded in a software category. This is not commoditization but an efficiency revolution: each generation of models delivers more capability per dollar while simultaneously becoming cheaper to serve at scale.</div>
+  </div>
+
   <!-- CURRENT MODEL BAR CHART -->
   <div class="bar-section">
     <div class="chart-header">
@@ -410,6 +419,11 @@
     <div class="bar-chart-container">
       <canvas id="barChart"></canvas>
     </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Output tokens cost 3–8× more than input tokens across every major provider — because text generation is computationally heavier than context reading. For agentic workflows that produce thousands of output tokens per run, this asymmetry makes output pricing the dominant variable in total AI infrastructure cost.</div>
   </div>
 
   <!-- STAT CARDS -->

@@ -65,6 +65,11 @@
     }
     .subtitle { color: var(--muted); font-size: 0.88rem; line-height: 1.65; max-width: 600px; }
 
+    /* ── Key Finding ── */
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+
     /* ── Chart panels ── */
     .chart-panel { margin-bottom: 40px; }
     .chart-title {
@@ -165,12 +170,22 @@
     </div>
   </div>
 
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Cursor's 18% share in 18 months is one of the fastest enterprise SaaS adoption curves in developer tooling history. At $20/month versus Copilot's $10, it commands a 2× price premium by offering project-wide context and AI-native workflow integration — signaling that developers will pay more for depth of assistance over breadth of availability.</div>
+  </div>
+
   <!-- Secondary: Horizontal bar — daily use by task -->
   <div class="chart-panel">
     <div class="chart-title">Developer Adoption — % Using AI Tools for Each Workflow (Stack Overflow 2025)</div>
     <div class="chart-container" style="height: 220px;">
       <canvas id="chart-tasks"></canvas>
     </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">84% of developers now use or plan to use AI tools daily — up from under 40% in 2023. Debugging (73%) and code completion (68%) are the most-adopted workflows, but documentation (51%) and code review (47%) are growing fastest as AI tools move from novelty to standard operating practice.</div>
   </div>
 
   <!-- Stat cards -->

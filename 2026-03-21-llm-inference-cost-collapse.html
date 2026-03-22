@@ -148,6 +148,9 @@
       background: var(--rule);
       margin-bottom: 40px;
     }
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 24px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
     .stat-card {
       background: var(--bg);
       padding: 20px 16px;
@@ -362,6 +365,11 @@
     </tbody>
   </table>
 
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">The 50× cost collapse in four years is the fastest sustained pricing decline in computing history — outpacing DRAM and disk storage deflation curves. At the current trajectory of ~10× per year, frontier-grade AI inference approaches near-zero marginal cost by 2028, fundamentally changing product economics for AI-native applications.</div>
+  </div>
+
   <!-- Secondary chart: current pricing -->
   <div class="section-label">Current Model Pricing — Input Cost per 1M Tokens (Mar 2026)</div>
   <div class="scale-note">Log scale — bars span from $0.05 to $15.00</div>
@@ -392,6 +400,11 @@
       <tr><td>Claude Opus 4.6</td><td>$15.00</td><td>$75.00</td><td>Anthropic</td></tr>
     </tbody>
   </table>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">The market has bifurcated sharply: a dense budget tier below $0.50/M where most teams run day-to-day workloads, and a sparse frontier tier above $3/M for the highest-stakes tasks. The "missing middle" is being hollowed out as providers race to both extremes simultaneously.</div>
+  </div>
 
   <!-- Sources -->
   <div class="sources">
