@@ -265,7 +265,7 @@
   <div class="view-panel active" id="view-strategic">
     <div class="chart-panel">
       <div class="chart-title">Strategic Importance &amp; Demand — Slope Graph 2025 → 2026</div>
-      <div class="chart-container" style="height:300px">
+      <div class="chart-container" style="height:380px">
         <canvas id="canvas-slope"></canvas>
       </div>
     </div>
@@ -386,7 +386,7 @@
     const canvas = document.getElementById('canvas-slope');
     const dpr = window.devicePixelRatio || 1;
     const W = canvas.offsetWidth || 700;
-    const H = 300;
+    const H = canvas.offsetHeight || 380;
     canvas.width  = W * dpr; canvas.height = H * dpr;
     canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
     const ctx = canvas.getContext('2d');
@@ -400,9 +400,14 @@
       { label: 'Role more strategic',    v25: 28, v26: 35, key: false },
     ];
 
-    const PAD_L = 28, PAD_R = 28, PAD_T = 36, PAD_B = 16;
-    const cL = PAD_L + 50, cR = W - PAD_R - 50;
-    function yPos(v) { return PAD_T + (1 - v / 100) * (H - PAD_T - PAD_B); }
+    const PAD_L = 16, PAD_T = 36, PAD_B = 24;
+    // cL leaves room for left value labels; cR leaves 180px for right value + metric label
+    const cL = PAD_L + 42, cR = W - 180;
+    // Auto-scale y to data range with padding — avoids dead whitespace at top/bottom
+    const allVals = metrics.flatMap(m => [m.v25, m.v26]);
+    const vMin = Math.max(0,   Math.min(...allVals) - 8);
+    const vMax = Math.min(100, Math.max(...allVals) + 8);
+    function yPos(v) { return PAD_T + (1 - (v - vMin) / (vMax - vMin)) * (H - PAD_T - PAD_B); }
 
     // Column verticals
     [[cL, _cssVar('--rule') || '#CCCAC2'],[cR, _cssVar('--rule') || '#CCCAC2']].forEach(([x,c]) => {
@@ -439,15 +444,16 @@
       ctx.fillText(m.v25 + '%', cL - 10, y25);
 
       // 2026 value
+      ctx.font = `${isKey?'700':'600'} ${isKey?10:9}px "Helvetica Neue", sans-serif`;
       ctx.fillStyle = isKey ? ACCENT : (_cssVar('--muted') || '#888880');
-      ctx.textAlign = 'left';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
       ctx.fillText(m.v26 + '%', cR + 10, y26);
 
-      // Right-side metric label
-      ctx.font = `${isKey?'700':'500'} ${isKey?9:8.5}px "Helvetica Neue", sans-serif`;
+      // Right-side metric label — offset further right to avoid overlap with value
+      ctx.font = `${isKey?'700':'400'} ${isKey?9:8.5}px "Helvetica Neue", sans-serif`;
       ctx.fillStyle = isKey ? ACCENT : (_cssVar('--muted') || '#888880');
       ctx.textAlign = 'left';
-      ctx.fillText(m.label, cR + 38, y26);
+      ctx.fillText(m.label, cR + 46, y26);
     });
 
     // Key metric delta annotation
