@@ -233,6 +233,25 @@
   // ── Data ──────────────────────────────────────────────────────────────
   const vizzes = [
       {
+        date: "2026-03-22",
+        slug: "2026-03-22-open-source-ai-shift",
+        accent: "#D9641E",
+        accentDim: "rgba(217,100,30,0.10)",
+        title: "Open Source AI Goes Global: Indie Devs Now Rival Big Tech",
+        category: "AI/ML · Open Source",
+        insight: "Hugging Face's Spring 2026 report shows independent developers have overtaken Big Tech in open-source AI downloads (39% vs 37%), while China surpassed the US at 41% of all downloads — the ecosystem's power map has flipped.",
+        tags: ["AI"],
+        miniViz: {
+          type: "slope",
+          lines: [
+            { label: "Independent Devs",  v1: 17, v2: 39, key: true  },
+            { label: "Big Tech",          v1: 70, v2: 37, key: false },
+            { label: "Academia",          v1: 13, v2: 24, key: false },
+          ],
+          label: "Download share by developer type (%)"
+        }
+      },
+      {
         date: "2026-03-23",
         slug: "2026-03-23-ai-coding-market-share",
         accent: "#7B3FD9",

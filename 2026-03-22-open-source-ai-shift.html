@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Open Source AI Goes Global — The Signal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --border:     #3A3A3A;
+      --accent:     #D9641E;
+      --accent-dim: rgba(217,100,30,0.12);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #D9641E;
+      --accent-dim: rgba(217,100,30,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+      min-height: 100vh;
+    }
+    .page { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
+
+    /* ── NAV ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .tag { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 10px; cursor: pointer; line-height: 1; flex-shrink: 0;
+    }
+    #theme-toggle:hover { border-color: var(--text); color: var(--text); }
+
+    /* ── HERO ── */
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── STAT CARDS ── */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--rule); margin-bottom: 40px;
+    }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900; letter-spacing: -0.04em;
+      color: var(--text); line-height: 1; margin-bottom: 8px;
+    }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); line-height: 1.4; }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: var(--accent); margin-top: 8px; }
+
+    /* ── CHART PANELS ── */
+    .chart-panel { margin-bottom: 12px; }
+    .chart-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+    .chart-title { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+
+    .chart-wrap {
+      height: 340px; background: var(--surface); border: 1px solid var(--rule);
+      padding: 20px; position: relative;
+    }
+    .chart-wrap canvas { width: 100%; height: 100%; }
+
+    /* Two-column layout for secondary charts */
+    .chart-two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--rule); margin-bottom: 12px;
+    }
+    .chart-two-col .chart-wrap { border: none; }
+
+    /* ── KEY FINDING ── */
+    .insight {
+      background: var(--accent-dim); border-left: 3px solid var(--accent);
+      padding: 14px 16px; margin-bottom: 32px;
+    }
+    .insight-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; }
+
+    /* ── LEGEND ── */
+    .legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-label { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── SOURCES ── */
+    .sources { border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 8px; }
+    .sources-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .sources-list { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+    .sources-list a { font-size: 0.72rem; color: var(--muted); text-decoration: none; }
+    .sources-list a:hover { color: var(--text); text-decoration: underline; }
+
+    /* ── MOBILE ── */
+    @media (max-width: 600px) {
+      .chart-wrap { height: 260px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-two-col { grid-template-columns: 1fr; }
+      .hero-headline { font-size: clamp(1.4rem, 6vw, 2.4rem); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- NAV -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">AI/ML</span>
+      <span class="tag">22 MAR 2026</span>
+      <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-headline">Open Source AI Goes Global: Independent Devs Now Rival Big Tech</div>
+    <div class="hero-sub">Hugging Face's Spring 2026 report reveals a tectonic shift: independent developers now drive 39% of model downloads — up from 17% in 2022 — while China surpassed the US as the #1 source of downloads at 41%. Big Tech's grip on open-source AI is loosening fast.</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-china">—</div>
+      <div class="stat-label">China's share of<br>HF downloads</div>
+      <div class="stat-delta">↑ Surpassed US (36.5%)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-users">—</div>
+      <div class="stat-label">Active Hugging Face<br>users</div>
+      <div class="stat-delta">↑ from 11M in 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-robotics">—</div>
+      <div class="stat-label">Robotics dataset<br>growth, 2024→2025</div>
+      <div class="stat-delta">↑ 1,145 → 26,991</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-indie">—</div>
+      <div class="stat-label">Independent dev<br>download share</div>
+      <div class="stat-delta">↑ from 17% in 2022</div>
+    </div>
+  </div>
+
+  <!-- PRIMARY CHART: Developer Type Shift (Slope) -->
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div class="chart-title">Who Builds Open Source AI — Developer Type Share of Downloads</div>
+    </div>
+    <div class="chart-wrap" id="slope-container" style="height:360px;">
+      <canvas id="slopeCanvas"></canvas>
+    </div>
+    <div class="legend" style="padding: 0 0 8px 0;">
+      <div class="legend-item"><div class="legend-dot" id="leg-indie"></div><span class="legend-label">Independent Developers</span></div>
+      <div class="legend-item"><div class="legend-dot" id="leg-industry"></div><span class="legend-label">Big Tech / Industry</span></div>
+      <div class="legend-item"><div class="legend-dot" id="leg-academia"></div><span class="legend-label">Academia / Research</span></div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Industry's share of open-source AI development collapsed from ~70% pre-2022 to 37% in 2025 — while independent developers more than doubled their share to 39%, making them the single largest contributor type for the first time.</div>
+  </div>
+
+  <!-- SECONDARY CHARTS -->
+  <div class="chart-two-col">
+    <!-- Download geography -->
+    <div>
+      <div class="chart-header" style="padding: 20px 20px 0;">
+        <div class="chart-title">Download Geography — Hugging Face 12-month Share</div>
+      </div>
+      <div class="chart-wrap" style="height:280px; border:none; padding: 12px 20px 20px;">
+        <canvas id="donutChart"></canvas>
+      </div>
+    </div>
+    <!-- Platform growth bars -->
+    <div>
+      <div class="chart-header" style="padding: 20px 20px 0;">
+        <div class="chart-title">Platform Scale — Hugging Face 2023–2026</div>
+      </div>
+      <div class="chart-wrap" style="height:280px; border:none; padding: 12px 20px 20px;">
+        <canvas id="growthChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">China overtook the US in model downloads (41% vs 36.5%) driven by the DeepSeek R1 viral moment in January 2025 — Baidu went from zero to 100+ model releases in a single year, while ByteDance and Tencent multiplied releases 8–9×.</div>
+  </div>
+
+  <!-- SOURCES -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      <a href="https://huggingface.co/blog/huggingface/state-of-os-hf-spring-2026" target="_blank">Hugging Face — State of Open Source Spring 2026 (18 Mar 2026)</a>
+      <a href="https://programming.dev/post/47531647" target="_blank">programming.dev summary (18 Mar 2026)</a>
+      <a href="https://www.yuyjo.com/archives/61587" target="_blank">China winning open source AI race (Mar 2026)</a>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── ACCENT ──────────────────────────────────────────────────────
+const ACCENT     = '#D9641E';
+const ACCENT_MID = 'rgba(217,100,30,0.5)';
+const ACCENT_DIM = 'rgba(217,100,30,0.07)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+    rule:      _cssVar('--rule'),
+  };
+}
+
+// ── COUNT-UP ─────────────────────────────────────────────────────
+function countUp(el, target, decimals, prefix, suffix) {
+  if (!el) return;
+  const duration = 1000, steps = 40;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const d = decimals !== undefined ? decimals : 0;
+    el.textContent = (prefix || '') + (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) + (suffix || '');
+  }, duration / steps);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  countUp(document.getElementById('stat-china'),   41,   0, '', '%');
+  countUp(document.getElementById('stat-users'),   13,   0, '', 'M');
+  countUp(document.getElementById('stat-robotics'),23,   0, '', '×');
+  countUp(document.getElementById('stat-indie'),   39,   0, '', '%');
+});
+
+// ── SLOPE CHART (Canvas 2D) ──────────────────────────────────────
+const slopeData = [
+  { label: 'Big Tech / Industry',      values: [70, 37], key: false },
+  { label: 'Independent Devs',         values: [17, 39], key: true  },
+  { label: 'Academia / Research',      values: [13, 24], key: false },
+];
+const slopeYears = ['Pre-2022', '2025'];
+let hoveredSlope = -1;
+
+function drawSlope() {
+  const canvas = document.getElementById('slopeCanvas');
+  const container = document.getElementById('slope-container');
+  const dpr = window.devicePixelRatio || 1;
+  const W = container.offsetWidth  || 700;
+  const H = container.offsetHeight || 360;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = '100%';
+  canvas.style.height = '100%';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const MUTED  = _cssVar('--muted')  || '#555550';
+  const RULE   = _cssVar('--rule')   || '#2A2A2A';
+  const TEXT   = _cssVar('--text')   || '#F0EFE8';
+  const BG     = _cssVar('--bg')     || '#0E0E0E';
+
+  const padL = 90, padR = 90, padT = 40, padB = 40;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+
+  // Y grid lines at 0, 25, 50, 75, 100
+  ctx.strokeStyle = RULE;
+  ctx.lineWidth   = 1;
+  [0, 25, 50, 75, 100].forEach(pct => {
+    const y = padT + chartH - (pct / 100) * chartH;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + chartW, y); ctx.stroke();
+    ctx.fillStyle = MUTED;
+    ctx.font = '600 10px -apple-system, Helvetica, Arial, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(pct + '%', padL - 10, y + 4);
+  });
+
+  // Year labels
+  ctx.fillStyle = MUTED;
+  ctx.font = '700 11px -apple-system, Helvetica, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  slopeYears.forEach((year, i) => {
+    const x = padL + (i / (slopeYears.length - 1)) * chartW;
+    ctx.fillText(year, x, padT - 14);
+  });
+
+  // Lines
+  slopeData.forEach((series, si) => {
+    const isKey     = series.key;
+    const isHovered = hoveredSlope === si;
+    const color  = isKey ? ACCENT : (isHovered ? TEXT : MUTED);
+    const alpha  = (hoveredSlope === -1 || isHovered || isKey) ? 1 : 0.3;
+    const lw     = isKey ? 2.5 : (isHovered ? 2 : 1.5);
+
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = lw;
+    ctx.beginPath();
+
+    const pts = series.values.map((v, i) => ({
+      x: padL + (i / (slopeYears.length - 1)) * chartW,
+      y: padT + chartH - (v / 100) * chartH,
+    }));
+
+    pts.forEach((pt, i) => i === 0 ? ctx.moveTo(pt.x, pt.y) : ctx.lineTo(pt.x, pt.y));
+    ctx.stroke();
+
+    // Dots
+    pts.forEach(pt => {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, isKey ? 5 : 4, 0, Math.PI * 2);
+      ctx.fillStyle   = color;
+      ctx.strokeStyle = BG;
+      ctx.lineWidth   = 2;
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    // Labels
+    ctx.fillStyle = color;
+    ctx.font = `${isKey ? '800' : '600'} ${isKey ? '11' : '10'}px -apple-system, Helvetica, Arial, sans-serif`;
+    ctx.globalAlpha = alpha;
+
+    // Left label
+    ctx.textAlign = 'right';
+    ctx.fillText(series.values[0] + '%', pts[0].x - 12, pts[0].y + 4);
+    // Right label
+    ctx.textAlign = 'left';
+    ctx.fillText(series.values[1] + '%', pts[1].x + 12, pts[1].y + 4);
+
+    // Right series name
+    ctx.textAlign = 'left';
+    ctx.font = `${isKey ? '800' : '600'} 9px -apple-system, Helvetica, Arial, sans-serif`;
+    ctx.fillText(series.label, pts[1].x + 30, pts[1].y + 4);
+
+    ctx.globalAlpha = 1;
+  });
+
+  // Legend dot colors
+  const colors = [ACCENT, MUTED, MUTED];
+  const ids    = ['leg-indie', 'leg-industry', 'leg-academia'];
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el) el.style.background = colors[i];
+  });
+}
+
+// ── DONUT CHART: Download Geography ─────────────────────────────
+const geoLabels = ['China', 'United States', 'EU', 'Rest of World'];
+const geoValues = [41, 36.5, 16, 6.5];
+let donutChart;
+let hoveredGeo = -1;
+
+function initDonut() {
+  const ctx = document.getElementById('donutChart').getContext('2d');
+  const c   = getChartColors();
+  donutChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: geoLabels,
+      datasets: [{
+        data:            geoValues,
+        backgroundColor: [ACCENT, _cssVar('--muted'), ACCENT_MID, _cssVar('--rule-light') || '#2A2A2A'],
+        borderColor:     _cssVar('--bg'),
+        borderWidth:     3,
+        hoverOffset:     8,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      cutout: '62%',
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: {
+            color: c.muted, font: { size: 10, weight: '700' },
+            padding: 14, boxWidth: 10, boxHeight: 10,
+          }
+        },
+        tooltip: {
+          backgroundColor: c.surface, borderColor: c.rule, borderWidth: 1,
+          titleColor: c.text, bodyColor: c.muted, padding: 12, cornerRadius: 0,
+          callbacks: { label: ctx => ` ${ctx.raw}% of downloads` }
+        }
+      }
+    }
+  });
+}
+
+// ── GROWTH CHART: Platform Scale ─────────────────────────────────
+let growthChart;
+function initGrowthChart() {
+  const ctx    = document.getElementById('growthChart').getContext('2d');
+  const c      = getChartColors();
+  const labels = ['2023', '2024', '2025', '2026'];
+  const users  = [5, 8, 11, 13];
+  const models = [0.5, 0.8, 1.5, 2];
+
+  growthChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Users (M)',
+          data: users,
+          backgroundColor: ACCENT,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Models (M)',
+          data: models,
+          backgroundColor: ACCENT_MID,
+          yAxisID: 'y2',
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          display: true, position: 'bottom',
+          labels: { color: c.muted, font: { size: 10, weight: '700' }, padding: 12, boxWidth: 10 }
+        },
+        tooltip: {
+          backgroundColor: c.surface, borderColor: c.rule, borderWidth: 1,
+          titleColor: c.text, bodyColor: c.muted, padding: 12, cornerRadius: 0,
+          callbacks: {
+            label: ctx => ctx.datasetIndex === 0
+              ? ` ${ctx.raw}M users`
+              : ` ${ctx.raw}M public models`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8 }
+        },
+        y: {
+          position: 'left',
+          grid:   { color: c.ruleLight },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8,
+            callback: v => v + 'M' }
+        },
+        y2: {
+          position: 'right',
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8,
+            callback: v => v + 'M' }
+        }
+      }
+    }
+  });
+}
+
+// ── REFRESH CHART COLORS ─────────────────────────────────────────
+function refreshChartColors() {
+  const c = getChartColors();
+  if (donutChart) {
+    donutChart.data.datasets[0].backgroundColor = [ACCENT, c.muted, ACCENT_MID, c.ruleLight || '#2A2A2A'];
+    donutChart.data.datasets[0].borderColor      = c.bg;
+    donutChart.options.plugins.legend.labels.color = c.muted;
+    donutChart.options.plugins.tooltip.backgroundColor = c.surface;
+    donutChart.options.plugins.tooltip.titleColor = c.text;
+    donutChart.options.plugins.tooltip.bodyColor  = c.muted;
+    donutChart.update();
+  }
+  if (growthChart) {
+    growthChart.options.scales.x.ticks.color  = c.muted;
+    growthChart.options.scales.x.grid.color   = c.ruleLight;
+    growthChart.options.scales.y.ticks.color  = c.muted;
+    growthChart.options.scales.y.grid.color   = c.ruleLight;
+    growthChart.options.scales.y2.ticks.color = c.muted;
+    growthChart.options.plugins.legend.labels.color   = c.muted;
+    growthChart.options.plugins.tooltip.backgroundColor = c.surface;
+    growthChart.options.plugins.tooltip.titleColor = c.text;
+    growthChart.options.plugins.tooltip.bodyColor  = c.muted;
+    growthChart.update();
+  }
+  drawSlope();
+}
+
+// ── SLOPE HOVER ──────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('slopeCanvas');
+  canvas.addEventListener('mousemove', e => {
+    const rect  = canvas.getBoundingClientRect();
+    const mx    = e.clientX - rect.left;
+    const my    = e.clientY - rect.top;
+    const W     = canvas.parentElement.offsetWidth  || 700;
+    const H     = canvas.parentElement.offsetHeight || 360;
+    const padL  = 90, padR = 90, padT = 40, padB = 40;
+    const chartW = W - padL - padR;
+    const chartH = H - padT - padB;
+    let found = -1;
+
+    slopeData.forEach((series, si) => {
+      series.values.forEach((v, i) => {
+        const x = padL + (i / (slopeYears.length - 1)) * chartW;
+        const y = padT + chartH - (v / 100) * chartH;
+        if (Math.hypot(mx - x, my - y) < 20) found = si;
+      });
+    });
+    if (found !== hoveredSlope) { hoveredSlope = found; drawSlope(); }
+  });
+  canvas.addEventListener('mouseleave', () => { hoveredSlope = -1; drawSlope(); });
+});
+
+// ── THEME TOGGLE ─────────────────────────────────────────────────
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  refreshChartColors();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────
+function init() {
+  drawSlope();
+  initDonut();
+  initGrowthChart();
+  window.addEventListener('resize', drawSlope);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
