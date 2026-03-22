@@ -385,10 +385,12 @@
   (function() {
     const canvas = document.getElementById('canvas-slope');
     const dpr = window.devicePixelRatio || 1;
-    const W = canvas.offsetWidth || 700;
-    const H = canvas.offsetHeight || 380;
+    // Read from parent container — canvas.offsetWidth returns browser default 300px
+    // before CSS is applied, causing the chart to render small and get locked there
+    const W = canvas.parentElement.offsetWidth || 700;
+    const H = canvas.parentElement.offsetHeight || 380;
     canvas.width  = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    canvas.style.width = '100%'; canvas.style.height = '100%';
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
