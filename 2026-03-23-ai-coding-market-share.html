@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Coding Assistants: Copilot Holds 42% as Cursor Surges · The Signal</title>
+  <style>
+    :root, [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+    }
+    [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --border:     #3A3A3A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      min-height: 100vh;
+    }
+    .wrapper { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
+
+    /* ── Header ── */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); text-decoration: none;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .eyebrow-tag {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 10px; cursor: pointer;
+      font-family: inherit; line-height: 1;
+    }
+    #theme-toggle:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── Hero ── */
+    .hero { border-left: 4px solid #7B3FD9; padding-left: 20px; margin-bottom: 40px; }
+    .headline {
+      font-size: clamp(1.5rem, 4vw, 2.4rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .subtitle { color: var(--muted); font-size: 0.88rem; line-height: 1.65; max-width: 600px; }
+
+    /* ── Section rule ── */
+    .section-rule { width: 40px; height: 3px; background: #7B3FD9; margin: 32px 0; }
+
+    /* ── Chart panels ── */
+    .chart-panel { margin-bottom: 40px; }
+    .chart-title {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+
+    /* ── Donut layout ── */
+    .donut-layout {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center;
+    }
+    .donut-container { position: relative; height: 300px; }
+    .donut-container canvas { display: block; }
+
+    /* ── Donut legend ── */
+    .donut-legend { display: flex; flex-direction: column; gap: 12px; }
+    .legend-item {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; padding: 6px 0;
+    }
+    .legend-dot { width: 10px; height: 10px; flex-shrink: 0; }
+    .legend-name {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; flex: 1;
+    }
+    .legend-pct {
+      font-size: 0.88rem; font-weight: 900; letter-spacing: -0.02em;
+    }
+
+    /* ── Secondary bar chart ── */
+    .chart-container { position: relative; }
+    .chart-container canvas { display: block; }
+
+    /* ── Stat cards ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--rule); margin-bottom: 40px;
+    }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900;
+      letter-spacing: -0.04em; color: var(--text); line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-num.accent { color: #7B3FD9; }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); line-height: 1.4;
+    }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: #7B3FD9; margin-top: 6px; }
+
+    /* ── Sources ── */
+    .sources { border-top: 1px solid var(--rule); padding-top: 24px; margin-top: 40px; }
+    .sources-label {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources-list { font-size: 0.78rem; color: var(--muted); line-height: 1.6; }
+
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .donut-layout { grid-template-columns: 1fr; }
+      .donut-container { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Nav -->
+  <div class="nav">
+    <a href="./index.html" class="back-link">← The Signal</a>
+    <div class="nav-right">
+      <span class="eyebrow-tag">Technology</span>
+      <span class="eyebrow-tag">23 MAR 2026</span>
+      <button id="theme-toggle">☾</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="headline">Copilot Holds 42% of AI Coding Market<br>as Cursor Grabs 18% in 18 Months</div>
+    <p class="subtitle">
+      The $7.37B AI coding assistant market is consolidating fast. GitHub Copilot dominates enterprise with
+      20M+ users, but Cursor's project-wide context approach has carved out a premium niche. 84% of
+      developers now use or plan to use AI tools — daily.
+    </p>
+  </div>
+
+  <div class="section-rule"></div>
+
+  <!-- Primary: Donut -->
+  <div class="chart-panel">
+    <div class="chart-title">AI Coding Assistant Market Share — 2026 (Hover segment to explore)</div>
+    <div class="donut-layout">
+      <div class="donut-container">
+        <canvas id="chart-donut"></canvas>
+      </div>
+      <div class="donut-legend" id="donut-legend"></div>
+    </div>
+  </div>
+
+  <!-- Secondary: Horizontal bar — daily use by task -->
+  <div class="chart-panel">
+    <div class="chart-title">Developer Adoption — % Using AI Tools for Each Workflow (Stack Overflow 2025)</div>
+    <div class="chart-container" style="height: 220px;">
+      <canvas id="chart-tasks"></canvas>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-0">—</div>
+      <div class="stat-label">AI coding<br>market size 2025</div>
+      <div class="stat-delta">↑ from $4.91B in 2024</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-1">—</div>
+      <div class="stat-label">Copilot<br>market share</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-2">—</div>
+      <div class="stat-label">Developers using<br>AI tools daily</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-3">—</div>
+      <div class="stat-label">Copilot in<br>Fortune 100 cos.</div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      Stack Overflow Developer Survey 2025 · GitHub Copilot Statistics 2026 (Quantumrun) ·
+      AI Coding Assistant Statistics 2026 (Panto) · Index.dev AI Pair Programming Statistics ·
+      Faros AI Best Coding Agents 2026 · DigitalOcean GitHub Copilot vs Cursor Review
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  // ── Accent palette ──────────────────────────────────────────────────────
+  const ACCENT     = '#7B3FD9';
+  const ACCENT_MID = 'rgba(123,63,217,0.5)';
+  const ACCENT_DIM = 'rgba(123,63,217,0.07)';
+
+  function _cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function getChartColors() {
+    return {
+      muted:     _cssVar('--muted'),
+      ruleLight: _cssVar('--rule-light') || _cssVar('--rule'),
+      bg:        _cssVar('--bg'),
+      surface:   _cssVar('--surface'),
+      text:      _cssVar('--text'),
+      rule:      _cssVar('--rule'),
+    };
+  }
+
+  // ── Market share data ────────────────────────────────────────────────────
+  const segments = [
+    { name: 'GitHub Copilot', pct: 42, key: true  },
+    { name: 'Cursor',         pct: 18, key: false },
+    { name: 'Direct AI',      pct: 15, key: false },
+    { name: 'Codeium',        pct: 12, key: false },
+    { name: 'Others',         pct: 13, key: false },
+  ];
+
+  // Colors: accent for key, progressively more muted for others
+  function segmentColors() {
+    const MUTED = _cssVar('--muted') || '#888880';
+    return [
+      ACCENT,
+      ACCENT_MID,
+      MUTED,
+      MUTED,
+      _cssVar('--rule') || '#CCCAC2',
+    ];
+  }
+  function segmentHoverColors() {
+    const MUTED = _cssVar('--muted') || '#888880';
+    return [
+      '#9B5FF9',      // lighter violet on hover for key segment
+      'rgba(123,63,217,0.7)',
+      MUTED,
+      MUTED,
+      _cssVar('--border') || '#BEBCB4',
+    ];
+  }
+
+  // ── Center label state ───────────────────────────────────────────────────
+  let centerPct   = '$7.4B';
+  let centerLabel = 'MARKET SIZE';
+
+  // ── Custom center label plugin ───────────────────────────────────────────
+  const centerPlugin = {
+    id: 'centerLabel',
+    afterDraw(chart) {
+      const { ctx } = chart;
+      const { left, right, top, bottom } = chart.chartArea;
+      const cx = (left + right) / 2;
+      const cy = (top + bottom) / 2;
+      ctx.save();
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `900 ${Math.min((right - left) * 0.14, 28)}px 'Helvetica Neue', sans-serif`;
+      ctx.fillStyle = _cssVar('--text') || '#1C1C1A';
+      ctx.fillText(centerPct, cx, cy - 9);
+      ctx.font = `700 ${Math.min((right - left) * 0.055, 9)}px 'Helvetica Neue', sans-serif`;
+      ctx.fillStyle = _cssVar('--muted') || '#888880';
+      ctx.letterSpacing = '0.1em';
+      ctx.fillText(centerLabel, cx, cy + 13);
+      ctx.restore();
+    },
+  };
+  Chart.register(centerPlugin);
+
+  // ── Donut chart ──────────────────────────────────────────────────────────
+  const c = getChartColors();
+  const donutCtx = document.getElementById('chart-donut').getContext('2d');
+
+  const donutChart = new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels:   segments.map(s => s.name),
+      datasets: [{
+        data:                 segments.map(s => s.pct),
+        backgroundColor:      segmentColors(),
+        hoverBackgroundColor: segmentHoverColors(),
+        borderColor:          _cssVar('--bg') || '#F4F3EE',
+        borderWidth:          3,
+        hoverBorderWidth:     3,
+        hoverOffset:          8,
+      }],
+    },
+    options: {
+      responsive:          true,
+      maintainAspectRatio: false,
+      cutout:              '62%',
+      animation:           { duration: 1000, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     c.rule,
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         12,
+          cornerRadius:    0,
+          callbacks: {
+            label: ctx => ` ${ctx.label}: ${ctx.parsed}%`,
+          },
+        },
+      },
+      onHover: (event, elements) => {
+        if (elements.length) {
+          const i = elements[0].index;
+          centerPct   = segments[i].pct + '%';
+          centerLabel = segments[i].name.toUpperCase();
+        } else {
+          centerPct   = '$7.4B';
+          centerLabel = 'MARKET SIZE';
+        }
+        donutChart.update('none');
+      },
+    },
+  });
+
+  // ── Legend ───────────────────────────────────────────────────────────────
+  const legendEl = document.getElementById('donut-legend');
+  const colors   = segmentColors();
+  segments.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-name" style="color:${s.key ? ACCENT : (_cssVar('--text')||'#1C1C1A')}">${s.name}</span>
+      <span class="legend-pct" style="color:${s.key ? ACCENT : (_cssVar('--text')||'#1C1C1A')}">${s.pct}%</span>
+    `;
+    item.addEventListener('mouseenter', () => {
+      centerPct   = s.pct + '%';
+      centerLabel = s.name.toUpperCase();
+      donutChart.update('none');
+    });
+    item.addEventListener('mouseleave', () => {
+      centerPct   = '$7.4B';
+      centerLabel = 'MARKET SIZE';
+      donutChart.update('none');
+    });
+    legendEl.appendChild(item);
+  });
+
+  // ── Secondary bar chart: task adoption ──────────────────────────────────
+  const taskCtx = document.getElementById('chart-tasks').getContext('2d');
+  const tasks = [
+    { label: 'Using or planning to use AI', pct: 84, key: true  },
+    { label: 'Debugging with AI',            pct: 73, key: false },
+    { label: 'Code completion daily',         pct: 68, key: false },
+    { label: 'Documentation',                pct: 51, key: false },
+    { label: 'Code review',                  pct: 47, key: false },
+  ];
+
+  const taskColors = () => tasks.map((t, i) => i === 0 ? ACCENT : (_cssVar('--muted')||'#888880'));
+
+  const tasksChart = new Chart(taskCtx, {
+    type: 'bar',
+    data: {
+      labels:   tasks.map(t => t.label),
+      datasets: [{
+        data:            tasks.map(t => t.pct),
+        backgroundColor: taskColors(),
+        borderColor:     'transparent',
+        borderWidth:     0,
+      }],
+    },
+    options: {
+      indexAxis:           'y',
+      responsive:          true,
+      maintainAspectRatio: false,
+      animation:           { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     c.rule,
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         12,
+          cornerRadius:    0,
+          callbacks: { label: ctx => ` ${ctx.parsed.x}% of developers` },
+        },
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  {
+            color: c.muted,
+            font:  { size: 10, weight: '600' },
+            padding: 8,
+            callback: v => v + '%',
+          },
+        },
+        y: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8 },
+        },
+      },
+    },
+  });
+
+  // ── Stat card count-up ───────────────────────────────────────────────────
+  function countUp(el, target, decimals, prefix, suffix) {
+    const steps = 40, dur = 1000;
+    let cur = 0;
+    const inc = target / steps;
+    const t = setInterval(() => {
+      cur = Math.min(cur + inc, target);
+      el.textContent = prefix + (decimals ? cur.toFixed(decimals) : Math.round(cur)) + suffix;
+      if (cur >= target) clearInterval(t);
+    }, dur / steps);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    countUp(document.getElementById('stat-0'), 7.37, 2, '$', 'B');
+    countUp(document.getElementById('stat-1'), 42,   0, '',  '%');
+    countUp(document.getElementById('stat-2'), 51,   0, '',  '%');
+    countUp(document.getElementById('stat-3'), 90,   0, '',  '%');
+  });
+
+  // ── refreshChartColors ───────────────────────────────────────────────────
+  function refreshChartColors() {
+    const c = getChartColors();
+
+    // Donut
+    donutChart.data.datasets[0].backgroundColor      = segmentColors();
+    donutChart.data.datasets[0].hoverBackgroundColor = segmentHoverColors();
+    donutChart.data.datasets[0].borderColor           = c.bg;
+    donutChart.options.plugins.tooltip.backgroundColor = c.surface;
+    donutChart.options.plugins.tooltip.titleColor      = c.text;
+    donutChart.options.plugins.tooltip.bodyColor       = c.muted;
+    donutChart.update();
+
+    // Task bar
+    tasksChart.data.datasets[0].backgroundColor = taskColors();
+    tasksChart.options.scales.x.ticks.color     = c.muted;
+    tasksChart.options.scales.x.grid.color      = c.ruleLight;
+    tasksChart.options.scales.y.ticks.color     = c.muted;
+    tasksChart.options.plugins.tooltip.backgroundColor = c.surface;
+    tasksChart.options.plugins.tooltip.titleColor      = c.text;
+    tasksChart.options.plugins.tooltip.bodyColor       = c.muted;
+    tasksChart.update();
+
+    // Rebuild legend colors
+    const newColors = segmentColors();
+    legendEl.querySelectorAll('.legend-dot').forEach((dot, i) => {
+      dot.style.background = newColors[i];
+    });
+    legendEl.querySelectorAll('.legend-name, .legend-pct').forEach((el, i) => {
+      const si = Math.floor(i / 2);
+      el.style.color = segments[si].key ? ACCENT : c.text;
+    });
+  }
+
+  // ── Theme toggle ─────────────────────────────────────────────────────────
+  const root = document.documentElement;
+  const btn  = document.getElementById('theme-toggle');
+  let dark = false;
+  btn.textContent = '☾';
+  btn.addEventListener('click', () => {
+    dark = !dark;
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.textContent = dark ? '☀' : '☾';
+    refreshChartColors();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LLM Benchmarks: No Model Dominates All Dimensions · The Signal</title>
+  <style>
+    :root, [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+    }
+    [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --border:     #3A3A3A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      min-height: 100vh;
+    }
+    .wrapper { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
+
+    /* ── Header ── */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); text-decoration: none;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .eyebrow-tag {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 10px; cursor: pointer;
+      font-family: inherit; line-height: 1;
+    }
+    #theme-toggle:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── Hero ── */
+    .hero { border-left: 4px solid #D9641E; padding-left: 20px; margin-bottom: 40px; }
+    .headline {
+      font-size: clamp(1.5rem, 4vw, 2.4rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1;
+      margin-bottom: 12px;
+    }
+    .subtitle { color: var(--muted); font-size: 0.88rem; line-height: 1.65; max-width: 600px; }
+
+    /* ── Section rule ── */
+    .section-rule {
+      width: 40px; height: 3px; background: #D9641E; margin: 32px 0;
+    }
+
+    /* ── Chart panels ── */
+    .chart-panel { margin-bottom: 40px; }
+    .chart-title {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+    }
+    .chart-container { position: relative; }
+    .chart-container canvas { display: block; }
+
+    /* ── Model toggle buttons ── */
+    .model-toggles {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .model-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 4px 12px; cursor: pointer;
+      font-family: inherit; transition: border-color 0.15s, color 0.15s;
+    }
+    .model-btn.active { border-color: var(--text); color: var(--text); }
+
+    /* ── View data toggle ── */
+    .view-data-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 14px; cursor: pointer;
+      font-family: inherit; margin-top: 12px;
+    }
+    .view-data-btn:hover { border-color: var(--text); color: var(--text); }
+    .data-table {
+      display: none; width: 100%; border-collapse: collapse;
+      font-size: 0.8rem; margin-top: 16px;
+    }
+    .data-table.visible { display: table; }
+    .data-table th, .data-table td {
+      border: 1px solid var(--rule); padding: 8px 12px; text-align: right;
+    }
+    .data-table th {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); text-align: left;
+      background: var(--surface);
+    }
+    .data-table td:first-child { text-align: left; font-weight: 600; }
+    .data-table tr.key-row td { color: #D9641E; font-weight: 700; }
+    .data-table tr:nth-child(odd) td { background: var(--surface); }
+
+    /* ── Stat cards ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--rule); margin-bottom: 40px;
+    }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900;
+      letter-spacing: -0.04em; color: var(--text); line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-num.accent { color: #D9641E; }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); line-height: 1.4;
+    }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: #D9641E; margin-top: 6px; }
+
+    /* ── Sources ── */
+    .sources {
+      border-top: 1px solid var(--rule); padding-top: 24px; margin-top: 40px;
+    }
+    .sources-label {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources-list { font-size: 0.78rem; color: var(--muted); }
+    .sources-list a { color: var(--muted); text-decoration: underline; }
+    .sources-list a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- Nav -->
+  <div class="nav">
+    <a href="./index.html" class="back-link">← The Signal</a>
+    <div class="nav-right">
+      <span class="eyebrow-tag">AI/ML</span>
+      <span class="eyebrow-tag">22 MAR 2026</span>
+      <button id="theme-toggle">☾</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="headline">No LLM Dominates All 5 Dimensions —<br>Specialization Is The New Moat</div>
+    <p class="subtitle">
+      Claude 3.7 leads coding and instruction-following. Gemini 2.5 Pro tops knowledge and math. GPT-4o splits
+      the difference. As benchmarks saturate, the gap between models is shrinking — but where they differ reveals strategic bets each lab is making.
+    </p>
+  </div>
+
+  <div class="section-rule"></div>
+
+  <!-- Primary chart: Radar -->
+  <div class="chart-panel">
+    <div class="chart-title">Benchmark Comparison — 5 Capability Dimensions (Normalized 0–100)</div>
+    <div class="model-toggles" id="model-toggles"></div>
+    <div class="chart-container" style="height: 360px;">
+      <canvas id="chart-radar"></canvas>
+    </div>
+    <button class="view-data-btn" id="toggle-data-btn">[ VIEW DATA ]</button>
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr>
+          <th>Model</th>
+          <th>Coding</th>
+          <th>Math</th>
+          <th>Reasoning</th>
+          <th>Knowledge</th>
+          <th>Instruction</th>
+        </tr>
+      </thead>
+      <tbody id="data-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Secondary chart: Horizontal bar — coding scores -->
+  <div class="chart-panel">
+    <div class="chart-title">Coding Performance — HumanEval / SWE-Bench Normalized Score</div>
+    <div class="chart-container" style="height: 180px;">
+      <canvas id="chart-coding"></canvas>
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-0">—</div>
+      <div class="stat-label">Claude 3.7<br>coding score</div>
+      <div class="stat-delta">↑ Best-in-class</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-1">—</div>
+      <div class="stat-label">Gemini 2.5<br>knowledge score</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-2">—</div>
+      <div class="stat-label">Benchmarks now<br>considered saturated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-3">—</div>
+      <div class="stat-label">Top models within<br>on MMLU</div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      Vellum AI LLM Leaderboard · LLM Stats (llm-stats.com) · Klu AI Leaderboard ·
+      Anthropic Claude 3.7 Technical Report · OpenAI GPT-4o System Card ·
+      Google Gemini 2.5 Technical Report · Meta Llama 3.3 Release Notes
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+  // ── Accent palette ──────────────────────────────────────────────────────
+  const ACCENT     = '#D9641E';
+  const ACCENT_MID = 'rgba(217,100,30,0.5)';
+  const ACCENT_DIM = 'rgba(217,100,30,0.07)';
+
+  function _cssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  function getChartColors() {
+    return {
+      muted:     _cssVar('--muted'),
+      ruleLight: _cssVar('--rule-light') || _cssVar('--rule'),
+      bg:        _cssVar('--bg'),
+      surface:   _cssVar('--surface'),
+      text:      _cssVar('--text'),
+      rule:      _cssVar('--rule'),
+    };
+  }
+
+  // ── Data ─────────────────────────────────────────────────────────────────
+  const dimensions = ['Coding', 'Math', 'Reasoning', 'Knowledge', 'Instruction'];
+  const models = [
+    { name: 'Claude 3.7',   scores: [93, 85, 88, 88, 90], primary: true  },
+    { name: 'GPT-4o',       scores: [90, 80, 83, 87, 88], primary: false },
+    { name: 'Gemini 2.5',   scores: [86, 87, 85, 90, 83], primary: false },
+    { name: 'Llama 3.3',    scores: [85, 78, 75, 86, 80], primary: false },
+  ];
+
+  // Colors per model (first gets accent, rest get progressively more muted)
+  const modelColors = [
+    ACCENT,
+    ACCENT_MID,
+    _cssVar('--muted') || '#888880',
+    _cssVar('--rule')  || '#CCCAC2',
+  ];
+  const modelVisible = [true, true, true, true];
+
+  // ── Radar Chart ──────────────────────────────────────────────────────────
+  const c = getChartColors();
+  const radarCtx = document.getElementById('chart-radar').getContext('2d');
+
+  function buildDatasets() {
+    return models.map((m, i) => ({
+      label:            m.name,
+      data:             m.scores,
+      borderColor:      i === 0 ? ACCENT : (i === 1 ? ACCENT_MID : (i === 2 ? (_cssVar('--muted')||'#888880') : (_cssVar('--rule')||'#CCCAC2'))),
+      backgroundColor:  i === 0 ? ACCENT_DIM : 'transparent',
+      borderWidth:      i === 0 ? 2.5 : 1.5,
+      pointBackgroundColor: i === 0 ? ACCENT : (i === 1 ? ACCENT_MID : (_cssVar('--muted')||'#888880')),
+      pointBorderColor:     'transparent',
+      pointRadius:      i === 0 ? 5 : 3,
+      hidden:           !modelVisible[i],
+      isAccent:         i === 0,
+    }));
+  }
+
+  const radarChart = new Chart(radarCtx, {
+    type: 'radar',
+    data: { labels: dimensions, datasets: buildDatasets() },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     c.rule,
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         12,
+          cornerRadius:    0,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}`,
+          }
+        },
+      },
+      scales: {
+        r: {
+          min: 65, max: 100,
+          grid:        { color: c.ruleLight },
+          angleLines:  { color: c.ruleLight },
+          ticks:       { display: false, backdropColor: 'transparent' },
+          pointLabels: {
+            color: c.muted,
+            font:  { size: 10, weight: '700' },
+          },
+        },
+      },
+    },
+  });
+
+  // ── Model toggle buttons ─────────────────────────────────────────────────
+  const togglesEl = document.getElementById('model-toggles');
+  models.forEach((m, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'model-btn active';
+    btn.textContent = m.name;
+    btn.style.borderColor = i === 0 ? ACCENT : '';
+    btn.style.color       = i === 0 ? ACCENT : '';
+    btn.addEventListener('click', () => {
+      modelVisible[i] = !modelVisible[i];
+      btn.classList.toggle('active', modelVisible[i]);
+      btn.style.borderColor = modelVisible[i] && i === 0 ? ACCENT : '';
+      btn.style.color       = modelVisible[i] && i === 0 ? ACCENT : '';
+      radarChart.data.datasets[i].hidden = !modelVisible[i];
+      radarChart.update();
+    });
+    togglesEl.appendChild(btn);
+  });
+
+  // ── Data table ──────────────────────────────────────────────────────────
+  const tbody = document.getElementById('data-tbody');
+  models.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    if (m.primary) tr.className = 'key-row';
+    tr.innerHTML = `<td>${m.name}</td>${m.scores.map(s => `<td>${s}</td>`).join('')}`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('toggle-data-btn').addEventListener('click', function() {
+    const tbl = document.getElementById('data-table');
+    tbl.classList.toggle('visible');
+    this.textContent = tbl.classList.contains('visible') ? '[ HIDE DATA ]' : '[ VIEW DATA ]';
+  });
+
+  // ── Secondary bar chart: coding scores ──────────────────────────────────
+  const codingCtx = document.getElementById('chart-coding').getContext('2d');
+  const codingScores = models.map(m => m.scores[0]); // Coding dimension
+  const codingColors = () => models.map((m, i) => i === 0 ? ACCENT : (_cssVar('--muted')||'#888880'));
+
+  const codingChart = new Chart(codingCtx, {
+    type: 'bar',
+    data: {
+      labels:   models.map(m => m.name),
+      datasets: [{
+        data:            codingScores,
+        backgroundColor: codingColors(),
+        borderColor:     'transparent',
+        borderWidth:     0,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     c.rule,
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         12,
+          cornerRadius:    0,
+          callbacks: { label: ctx => ` ${ctx.parsed.x} / 100` },
+        },
+      },
+      scales: {
+        x: {
+          min: 70, max: 100,
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8 },
+        },
+        y: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 8 },
+        },
+      },
+    },
+  });
+
+  // ── Stat card count-up ──────────────────────────────────────────────────
+  function countUp(el, target, decimals, prefix, suffix) {
+    const steps = 40, dur = 1000;
+    let cur = 0;
+    const inc = target / steps;
+    const t = setInterval(() => {
+      cur = Math.min(cur + inc, target);
+      el.textContent = prefix + (decimals ? cur.toFixed(decimals) : Math.round(cur)) + suffix;
+      if (cur >= target) clearInterval(t);
+    }, dur / steps);
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    countUp(document.getElementById('stat-0'), 93,  0, '', '/100');
+    countUp(document.getElementById('stat-1'), 90,  0, '', '/100');
+    countUp(document.getElementById('stat-2'), 3,   0, '', ' major');
+    countUp(document.getElementById('stat-3'), 5,   0, '±', '%');
+  });
+
+  // ── refreshChartColors ──────────────────────────────────────────────────
+  function refreshChartColors() {
+    const c = getChartColors();
+
+    // Radar scale
+    radarChart.options.scales.r.grid.color       = c.ruleLight;
+    radarChart.options.scales.r.angleLines.color = c.ruleLight;
+    radarChart.options.scales.r.pointLabels.color = c.muted;
+    radarChart.options.plugins.tooltip.backgroundColor = c.surface;
+    radarChart.options.plugins.tooltip.titleColor      = c.text;
+    radarChart.options.plugins.tooltip.bodyColor       = c.muted;
+    // Rebuild non-accent dataset colors (they read _cssVar at call time)
+    radarChart.data.datasets.forEach((ds, i) => {
+      if (i > 0) {
+        ds.borderColor = i === 1 ? ACCENT_MID : (i === 2 ? (_cssVar('--muted')||'#888880') : (_cssVar('--rule')||'#CCCAC2'));
+        ds.pointBackgroundColor = i === 1 ? ACCENT_MID : (_cssVar('--muted')||'#888880');
+      }
+    });
+    radarChart.update();
+
+    // Coding bar chart
+    codingChart.data.datasets[0].backgroundColor = codingColors();
+    codingChart.options.scales.x.ticks.color     = c.muted;
+    codingChart.options.scales.x.grid.color      = c.ruleLight;
+    codingChart.options.scales.y.ticks.color     = c.muted;
+    codingChart.options.plugins.tooltip.backgroundColor = c.surface;
+    codingChart.options.plugins.tooltip.titleColor      = c.text;
+    codingChart.options.plugins.tooltip.bodyColor       = c.muted;
+    codingChart.update();
+  }
+
+  // ── Theme toggle ────────────────────────────────────────────────────────
+  const root = document.documentElement;
+  const btn  = document.getElementById('theme-toggle');
+  let dark = false;
+  btn.textContent = '☾';
+  btn.addEventListener('click', () => {
+    dark = !dark;
+    root.setAttribute('data-theme', dark ? 'dark' : 'light');
+    btn.textContent = dark ? '☀' : '☾';
+    refreshChartColors();
+  });
+</script>
+</body>
+</html>
