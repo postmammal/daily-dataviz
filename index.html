@@ -11,7 +11,7 @@
       --surface:    #141414;
       --border:     #2A2A2A;
       --rule:       #2A2A2A;
-      --muted:      #555550;
+      --muted:      #6E6E68;
       --text:       #F0EFE8;
       --accent:     #E8C940;
       --accent-dim: rgba(232,201,64,0.10);
@@ -32,7 +32,7 @@
       --surface:    #141414;
       --border:     #2A2A2A;
       --rule:       #2A2A2A;
-      --muted:      #555550;
+      --muted:      #6E6E68;
       --text:       #F0EFE8;
     }
     .top-bar {
@@ -127,7 +127,7 @@
 
     /* mini-viz preview area */
     .card-preview {
-      height: 175px;
+      height: 210px;
       background: var(--preview-bg);
       border-bottom: 1px solid var(--rule);
       display: flex; flex-direction: column;
@@ -139,6 +139,8 @@
       min-height: 0;
       width: 100%;
       display: block;
+      padding: 8px;
+      box-sizing: border-box;
     }
 
     .card-body { padding: 16px 18px 18px; flex: 1; }
@@ -658,29 +660,6 @@
         ctx.fillRect(x, y, w, h);
       }
 
-      // Legend dots bottom-right
-      const items = [
-        { color: ACCENT,   label: `${researchers} researcher` + (researchers !== 1 ? 's' : '') },
-        { color: hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.5), label: `${designers} designers` },
-      ];
-      let lx = W - PAD_R;
-      let ly = H - 4;
-      ctx.font = '600 7px "Helvetica Neue", sans-serif';
-      ctx.textBaseline = 'bottom';
-      for (let i = items.length - 1; i >= 0; i--) {
-        const { color, label } = items[i];
-        const tw = ctx.measureText(label).width;
-        lx -= tw;
-        ctx.fillStyle = color;
-        ctx.textAlign  = 'left';
-        ctx.fillText(label, lx, ly);
-        lx -= 11;
-        ctx.beginPath();
-        ctx.arc(lx + 3, ly - 3, 3, 0, Math.PI * 2);
-        ctx.fillStyle = color;
-        ctx.fill();
-        lx -= 8;
-      }
     }
 
     // ── Dumbbell ─────────────────────────────────────────────────────
