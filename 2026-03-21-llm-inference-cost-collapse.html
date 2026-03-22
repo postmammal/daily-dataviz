@@ -287,26 +287,34 @@
       h1 { font-size: clamp(1.4rem, 6vw, 2.4rem); }
       .stat-num { font-size: clamp(1.5rem, 5vw, 2.2rem); }
     }
+  
+    /* ── Standardised nav + hero (injected) ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .back-link { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+    .hero-headline { font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+    .tag { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- Header nav -->
-  <div class="header-nav">
-    <a href="index.html" class="back-link">← All Visualizations</a>
-    <div class="header-meta">
-      <span class="meta-tag">AI/ML</span>
-      <span class="meta-tag">21 Mar 2026</span>
-      <button id="theme-toggle">☾</button>
-    </div>
+  <div class="top-nav">
+  <a href="./index.html" class="back-link">← All Visualizations</a>
+  <div class="nav-right">
+    <span class="tag">AI/ML</span>
+    <span class="tag">21 MAR 2026</span>
+    <button id="theme-toggle">☀</button>
   </div>
+</div>
 
-  <!-- Title block -->
-  <div class="header-block">
-    <h1>GPT-4 Class AI Costs 50× Less Than In 2022</h1>
-    <p class="subtext">LLM inference has deflated at roughly 10× per year since 2022 — collapsing the cost of frontier-grade intelligence from $20 to $0.40 per million tokens and compressing margins across the entire AI stack.</p>
-  </div>
+<div class="hero">
+  <div class="hero-headline">GPT-4 Class AI Costs 50× Less Than in 2022</div>
+  <div class="hero-sub">LLM inference has deflated at roughly 10× per year since 2022 — collapsing the cost of frontier-grade intelligence from $20 to $0.40 per million tokens and compressing margins across the entire AI stack.</div>
+</div>
 
   <!-- Stat cards -->
   <div class="stat-grid">

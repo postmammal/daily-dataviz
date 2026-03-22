@@ -102,15 +102,33 @@
     .hype-dot { width: 10px; height: 10px; border-radius: 50%; }
     .hype-dot.past { background: var(--muted); }
     .hype-dot.now { background: var(--accent); }
+  
+    /* ── Standardised nav + hero (injected) ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .back-link { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+    .hero-headline { font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+    .tag { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
   </style>
 </head>
 <body>
 <div class="wrapper">
+  <div class="top-nav">
   <a href="./index.html" class="back-link">← All Visualizations</a>
-  <button id="theme-toggle" aria-label="Toggle color theme" style="float:right;margin-top:-4px;margin-left:12px;">☾</button>
-  <div class="eyebrow">UX Design · Design Leadership · March 16, 2026</div>
-  <h1>Design Systems Are in Gartner's<br>Trough of Disillusionment</h1>
-  <p class="subtitle">Everyone agrees design systems are essential infrastructure. Almost nobody is satisfied with how theirs is going. Buy-in dropped from 42% to 32% in a single year — and 76% of teams still have no onboarding materials for their own system.</p>
+  <div class="nav-right">
+    <span class="tag">DESIGN</span>
+    <span class="tag">16 MAR 2026</span>
+    <button id="theme-toggle">☀</button>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-headline">Design Systems Are in Gartner's Trough of Disillusionment</div>
+  <div class="hero-sub">Everyone agrees design systems are essential infrastructure. Almost nobody is satisfied with how theirs is going. Buy-in dropped from 42% to 32% in a single year — and 76% of teams still have no onboarding materials for their own system.</div>
+</div>
 
   <!-- Hype Cycle strip -->
   <div class="hype-strip">

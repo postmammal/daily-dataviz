@@ -352,28 +352,36 @@
     .date-tag { display: none; }
     .range-buttons { flex-wrap: wrap; }
   }
-</style>
+
+    /* ── Standardised nav + hero (injected) ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .back-link { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+    .hero-headline { font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px; }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+    .tag { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+  </style>
 </head>
 <body>
 <div class="page">
 
-  <!-- NAV -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-    <a href="index.html" style="font-size:.63rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;">← All Visualizations</a>
-    <button id="theme-toggle" aria-label="Toggle color theme">☾</button>
+  <div class="top-nav">
+  <a href="./index.html" class="back-link">← All Visualizations</a>
+  <div class="nav-right">
+    <span class="tag">AI/ML</span>
+    <span class="tag">21 MAR 2026</span>
+    <button id="theme-toggle">☀</button>
   </div>
+</div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="header-left">
-      <div class="category-tag">AI / Infrastructure</div>
-      <h1>LLM INFERENCE COSTS<br>FELL <span class="num">1,000×</span> IN 3 YEARS</h1>
-      <p class="subtext">GPT-4 class reasoning dropped from $20 per million tokens in late 2022 to under $0.07 today — the fastest sustained price deflation in the history of computing infrastructure.</p>
-    </div>
-    <div class="date-tag">21 Mar 2026</div>
-  </header>
+<div class="hero">
+  <div class="hero-headline">LLM Inference Costs Fell 1,000× in 3 Years</div>
+  <div class="hero-sub">GPT-4 class reasoning dropped from $20 per million tokens in late 2022 to under $0.07 today — the fastest sustained price deflation in the history of computing infrastructure.</div>
+</div>
 
-  <div class="section-rule"></div>
+  
 
   <!-- MAIN LINE CHART -->
   <div class="chart-section">
