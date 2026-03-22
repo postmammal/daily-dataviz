@@ -46,20 +46,13 @@
     .page {
       max-width: 880px;
       margin: 0 auto;
-      padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 56px) 60px;
+      padding: clamp(20px, 5vw, 56px);
     }
 
-    /* ── Header ───────────────────────────────────────── */
-    .header {
-      border-left: 4px solid var(--accent);
-      padding-left: 16px;
-      margin-bottom: 40px;
-    }
-    .header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
+    /* ── Nav ──────────────────────────────────────────── */
+    .top-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
     }
     .back-link {
       font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
@@ -67,7 +60,7 @@
       display: flex; align-items: center; gap: 6px;
     }
     .back-link:hover { color: var(--text); }
-    .header-meta {
+    .nav-right {
       display: flex; align-items: center; gap: 16px;
     }
     .tag {
@@ -81,16 +74,22 @@
     }
     #theme-toggle:hover { border-color: var(--text); color: var(--text); }
 
-    h1 {
-      font-size: clamp(1.4rem, 4.5vw, 2.3rem);
+    /* ── Hero ─────────────────────────────────────────── */
+    .hero {
+      border-left: 4px solid var(--accent);
+      padding-left: 20px;
+      margin-bottom: 40px;
+    }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
       font-weight: 900; text-transform: uppercase;
       letter-spacing: -0.03em; line-height: 1.1;
       margin-bottom: 10px;
     }
-    .subtext {
-      font-size: 0.88rem; color: var(--muted); max-width: 640px; line-height: 1.6;
+    .hero-sub {
+      font-size: 0.9rem; color: var(--muted); line-height: 1.55;
     }
-    .subtext strong { color: var(--text); font-weight: 700; }
+    .hero-sub strong { color: var(--text); font-weight: 700; }
 
     /* ── Section label ────────────────────────────────── */
     .section-label {
@@ -256,22 +255,24 @@
 <body>
 <div class="page">
 
-  <!-- ── Header ── -->
-  <div class="header">
-    <div class="header-row">
-      <a href="index.html" class="back-link">← All Visualizations</a>
-      <div class="header-meta">
-        <span class="tag">AI/ML</span>
-        <span class="tag">22 MAR 2026</span>
-        <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
-      </div>
+  <!-- ── Nav ── -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">AI/ML</span>
+      <span class="tag">22 MAR 2026</span>
+      <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
     </div>
-    <h1>Agentforce Closed 29,000 Deals<br>in 15 Months. Enterprise AI Agents<br>Just Hit Escape Velocity.</h1>
-    <p class="subtext">
+  </div>
+
+  <!-- ── Hero ── -->
+  <div class="hero">
+    <div class="hero-headline">Agentforce Closed 29,000 Deals in 15 Months. Enterprise AI Agents Just Hit Escape Velocity.</div>
+    <div class="hero-sub">
       Salesforce's Q4 FY2026 earnings reveal <strong>the fastest enterprise software ramp on record</strong> —
       from zero to $800M ARR in under two years. The data from February 25, 2026 confirms:
       the agentic AI era has decisively begun.
-    </p>
+    </div>
   </div>
 
   <!-- ── Primary chart: deal count ── -->
