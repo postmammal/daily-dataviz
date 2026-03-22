@@ -35,12 +35,14 @@
       --muted:      #555550;
       --text:       #F0EFE8;
     }
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
     #theme-toggle-index {
-      position: fixed;
-      top: 20px;
-      right: 24px;
-      z-index: 100;
-      background: var(--bg);
+      background: transparent;
       border: 1px solid var(--rule);
       color: var(--muted);
       font-size: 0.63rem;
@@ -50,7 +52,9 @@
       padding: 5px 10px;
       cursor: pointer;
       font-family: inherit;
+      flex-shrink: 0;
     }
+    #theme-toggle-index:hover { color: var(--text); border-color: var(--text); }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -197,14 +201,15 @@
 <body>
 <div class="wrapper">
 
-  <div class="site-eyebrow">Daily Data Visualization</div>
+  <div class="top-bar">
+    <div class="site-eyebrow">Daily Data Visualization</div>
+    <button id="theme-toggle-index" aria-label="Toggle color theme">☾</button>
+  </div>
   <h1 class="site-title">The Signal</h1>
   <p class="site-desc">
     One data-driven story per day — across UX research, design leadership, AI tools, and developer trends.
     Built for designers and researchers who want the numbers behind the narratives.
   </p>
-
-  <button id="theme-toggle-index" aria-label="Toggle color theme">☾</button>
 
   <div class="filter-bar" id="filter-bar">
     <button class="filter-btn active" data-filter="all">All</button>
