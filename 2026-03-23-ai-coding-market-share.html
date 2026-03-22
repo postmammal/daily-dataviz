@@ -271,6 +271,7 @@
   const centerPlugin = {
     id: 'centerLabel',
     afterDraw(chart) {
+      if (chart.config.type !== 'doughnut') return;
       const { ctx } = chart;
       const { left, right, top, bottom } = chart.chartArea;
       const cx = (left + right) / 2;

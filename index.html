@@ -127,7 +127,7 @@
 
     /* mini-viz preview area */
     .card-preview {
-      height: 148px;
+      height: 175px;
       background: var(--preview-bg);
       border-bottom: 1px solid var(--rule);
       display: flex; flex-direction: column;
@@ -242,11 +242,13 @@
         insight: "The $7.37B AI coding market is consolidating fast. GitHub Copilot dominates enterprise with 20M+ users, while Cursor carved 18% share in 18 months. 84% of developers now use or plan to use AI tools daily.",
         tags: ["AI"],
         miniViz: {
-          type: "hbars",
+          type: "donut",
           data: [42, 18, 15, 12, 13],
           labels: ["Copilot", "Cursor", "Direct AI", "Codeium", "Others"],
           keyIdx: 0,
-          label: "Market share (%)"
+          center: "42%",
+          centerSub: "Copilot",
+          label: "AI coding market share"
         }
       },
       {
@@ -259,11 +261,17 @@
         insight: "Claude 3.7 leads coding (93/100) and instruction-following. Gemini 2.5 tops knowledge and math. GPT-4o splits the difference. No single model dominates all dimensions — specialization is the emerging moat.",
         tags: ["AI"],
         miniViz: {
-          type: "hbars",
-          data: [93, 90, 86, 85],
-          labels: ["Claude 3.7", "GPT-4o", "Gemini 2.5", "Llama 3.3"],
-          keyIdx: 0,
-          label: "Coding score (/100)"
+          type: "radar",
+          axes: ["Coding", "Math", "Reason", "Knowledge", "Instruct"],
+          series: [
+            { label: "Claude 3.7", values: [93, 85, 88, 88, 90], key: true },
+            { label: "GPT-4o",     values: [90, 80, 83, 87, 88], key: false },
+            { label: "Gemini 2.5", values: [86, 87, 85, 90, 83], key: false },
+            { label: "Llama 3.3",  values: [85, 78, 75, 86, 80], key: false }
+          ],
+          minVal: 70,
+          maxVal: 100,
+          label: "Multi-dim benchmark (/100)"
         }
       },
       {
@@ -278,22 +286,6 @@
         miniViz: {
           type: "sparkline",
           data: [20, 30, 6, 3, 1.2, 0.50, 0.42, 0.40],
-          logScale: true,
-          label: "GPT-4-class $/1M tokens (log scale)"
-        }
-      },
-      {
-        date: "2026-03-21",
-        slug: "2026-03-21-llm-cost-deflation",
-        accent: "#1E9E7A",
-        accentDim: "rgba(30,158,122,0.10)",
-        title: "LLM Inference Costs Fell 1,000× in 3 Years",
-        category: "AI · Inference Pricing",
-        insight: "GPT-4 class intelligence dropped from $20/M tokens in late 2022 to $0.02 today — the fastest sustained price deflation in computing history, driven by model efficiency gains and fierce competition.",
-        tags: ["AI"],
-        miniViz: {
-          type: "sparkline",
-          data: [20.00, 7.50, 2.50, 0.90, 0.40, 0.10, 0.02],
           logScale: true,
           label: "GPT-4-class $/1M tokens (log scale)"
         }
@@ -768,6 +760,151 @@
           ctx.textAlign = 'left';
           ctx.fillText(line.v2 + '%', cR + 5, y2);
         }
+      });
+    }
+
+    // ── Radar ──────────────────────────────────────────────────────
+    if (spec.type === 'radar') {
+      const axes    = spec.axes || [];
+      const N       = axes.length;
+      const minVal  = spec.minVal != null ? spec.minVal : 0;
+      const maxVal  = spec.maxVal != null ? spec.maxVal : 100;
+      const PAD     = 22;
+      const cx      = W / 2;
+      const cy      = H / 2 + 4;
+      const R       = Math.min(W, H) / 2 - PAD;
+      const rings   = 3;
+      const step    = (2 * Math.PI) / N;
+      const startA  = -Math.PI / 2;
+
+      // Helper: value → radius fraction
+      const toR = v => ((v - minVal) / (maxVal - minVal)) * R;
+
+      // Background rings
+      ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
+      ctx.lineWidth = 0.75;
+      for (let r = 1; r <= rings; r++) {
+        const frac = (r / rings) * R;
+        ctx.beginPath();
+        for (let i = 0; i < N; i++) {
+          const a = startA + i * step;
+          const x = cx + Math.cos(a) * frac;
+          const y = cy + Math.sin(a) * frac;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // Axis spokes
+      for (let i = 0; i < N; i++) {
+        const a = startA + i * step;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R);
+        ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
+        ctx.lineWidth = 0.75;
+        ctx.stroke();
+      }
+
+      // Axis labels
+      ctx.font = '600 7px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = _cssVar('--muted') || '#888880';
+      for (let i = 0; i < N; i++) {
+        const a = startA + i * step;
+        const lx = cx + Math.cos(a) * (R + 9);
+        const ly = cy + Math.sin(a) * (R + 9);
+        ctx.textAlign    = Math.cos(a) > 0.3 ? 'left' : Math.cos(a) < -0.3 ? 'right' : 'center';
+        ctx.textBaseline = Math.sin(a) > 0.3 ? 'top'  : Math.sin(a) < -0.3 ? 'bottom' : 'middle';
+        ctx.fillText(axes[i], lx, ly);
+      }
+
+      // Series polygons (non-key first, then key on top)
+      const sorted = [...(spec.series || [])].sort((a, b) => (a.key ? 1 : 0) - (b.key ? 1 : 0));
+      sorted.forEach(s => {
+        const pts = s.values.map((v, i) => {
+          const a = startA + i * step;
+          return { x: cx + Math.cos(a) * toR(v), y: cy + Math.sin(a) * toR(v) };
+        });
+        ctx.beginPath();
+        pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        if (s.key) {
+          ctx.fillStyle   = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.18);
+          ctx.strokeStyle = ACCENT;
+          ctx.lineWidth   = 1.5;
+        } else {
+          ctx.fillStyle   = 'transparent';
+          ctx.strokeStyle = _cssVar('--muted') || '#888880';
+          ctx.lineWidth   = 0.75;
+          ctx.globalAlpha = 0.5;
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      });
+    }
+
+    // ── Donut ──────────────────────────────────────────────────────
+    if (spec.type === 'donut') {
+      const data    = spec.data || [];
+      const total   = data.reduce((a, b) => a + b, 0);
+      const PAD     = 12;
+      const cx      = W * 0.4;          // offset left to leave room for legend
+      const cy      = H / 2;
+      const R       = Math.min(cx, H / 2) - PAD;
+      const innerR  = R * 0.52;
+      let   angle   = -Math.PI / 2;
+
+      // Segment colors
+      const segColors = data.map((_, i) => {
+        if (i === spec.keyIdx) return ACCENT;
+        if (i === 1)           return hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.55);
+        return _cssVar('--muted') || '#888880';
+      });
+
+      data.forEach((val, i) => {
+        const sweep = (val / total) * 2 * Math.PI;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+        ctx.arc(cx, cy, R, angle, angle + sweep);
+        ctx.arc(cx, cy, innerR, angle + sweep, angle, true);
+        ctx.closePath();
+        ctx.fillStyle = segColors[i];
+        ctx.globalAlpha = i === spec.keyIdx ? 1 : 0.7;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // small gap between segments
+        angle += sweep + 0.018;
+      });
+
+      // Center text
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font         = `700 ${Math.round(R * 0.46)}px "Helvetica Neue", sans-serif`;
+      ctx.fillStyle    = ACCENT;
+      ctx.fillText(spec.center || '', cx, cy - 4);
+      ctx.font         = `500 7.5px "Helvetica Neue", sans-serif`;
+      ctx.fillStyle    = _cssVar('--muted') || '#888880';
+      ctx.fillText(spec.centerSub || '', cx, cy + R * 0.3);
+
+      // Right-side mini legend
+      const legendX = cx + R + 10;
+      const legendLabels = spec.labels || [];
+      const itemH = Math.min((H - PAD * 2) / legendLabels.length, 18);
+      const startY = cy - (legendLabels.length * itemH) / 2;
+      ctx.font = '600 7.5px "Helvetica Neue", sans-serif';
+      legendLabels.forEach((lbl, i) => {
+        const ly = startY + i * itemH + itemH / 2;
+        ctx.beginPath();
+        ctx.arc(legendX + 4, ly, 3, 0, Math.PI * 2);
+        ctx.fillStyle = segColors[i];
+        ctx.fill();
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle    = i === spec.keyIdx ? _cssVar('--text') : (_cssVar('--muted') || '#888880');
+        ctx.font         = i === spec.keyIdx ? '700 7.5px "Helvetica Neue", sans-serif' : '500 7.5px "Helvetica Neue", sans-serif';
+        ctx.fillText(`${lbl} ${data[i]}%`, legendX + 10, ly);
       });
     }
   }
