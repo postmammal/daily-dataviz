@@ -36,7 +36,11 @@
       --text:       #F0EFE8;
     }
     #theme-toggle-index {
-      background: transparent;
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      z-index: 100;
+      background: var(--bg);
       border: 1px solid var(--rule);
       color: var(--muted);
       font-size: 0.63rem;
@@ -200,7 +204,7 @@
     Built for designers and researchers who want the numbers behind the narratives.
   </p>
 
-  <button id="theme-toggle-index" aria-label="Toggle color theme" style="float:right;margin-top:-44px;">☾</button>
+  <button id="theme-toggle-index" aria-label="Toggle color theme">☾</button>
 
   <div class="filter-bar" id="filter-bar">
     <button class="filter-btn active" data-filter="all">All</button>
