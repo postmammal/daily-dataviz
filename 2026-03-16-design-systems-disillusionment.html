@@ -224,10 +224,10 @@
   (function() {
     const canvas = document.getElementById('canvas-dumbbell');
     const dpr = window.devicePixelRatio || 1;
-    const W = canvas.offsetWidth || 700;
-    const H = 240;
+    const W = canvas.parentElement.offsetWidth || 700;
+    const H = canvas.parentElement.offsetHeight || 240;
     canvas.width  = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    canvas.style.width = '100%'; canvas.style.height = '100%';
     const ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
 
