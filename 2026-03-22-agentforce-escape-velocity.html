@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentforce: 29,000 Enterprise Deals in 15 Months · The Signal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── Theme tokens ─────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #555550;
+      --border:     #3A3A3A;
+      --accent:     #D9641E;
+      --accent-dim: rgba(217,100,30,0.09);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #D9641E;
+      --accent-dim: rgba(217,100,30,0.08);
+    }
+
+    /* ── Reset ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── Page wrapper ─────────────────────────────────── */
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 56px) 60px;
+    }
+
+    /* ── Header ───────────────────────────────────────── */
+    .header {
+      border-left: 4px solid var(--accent);
+      padding-left: 16px;
+      margin-bottom: 40px;
+    }
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .header-meta {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .tag {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 10px; cursor: pointer; line-height: 1; flex-shrink: 0; font-family: inherit;
+    }
+    #theme-toggle:hover { border-color: var(--text); color: var(--text); }
+
+    h1 {
+      font-size: clamp(1.4rem, 4.5vw, 2.3rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1;
+      margin-bottom: 10px;
+    }
+    .subtext {
+      font-size: 0.88rem; color: var(--muted); max-width: 640px; line-height: 1.6;
+    }
+    .subtext strong { color: var(--text); font-weight: 700; }
+
+    /* ── Section label ────────────────────────────────── */
+    .section-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* ── Chart panel ──────────────────────────────────── */
+    .chart-panel {
+      margin-bottom: 16px;
+    }
+    .chart-controls {
+      display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; cursor: pointer; font-family: inherit; transition: border-color .15s, color .15s;
+    }
+    .ctrl-btn:hover { border-color: var(--text); color: var(--text); }
+    .ctrl-btn.active { border-color: var(--text); color: var(--text); }
+
+    .chart-wrap {
+      height: 340px;
+      position: relative;
+    }
+    @media (max-width: 600px) {
+      .chart-wrap { height: 260px; }
+    }
+
+    /* ── Key Finding ──────────────────────────────────── */
+    .insight {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-bottom: 32px;
+    }
+    .insight-label {
+      font-size: .58rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .insight-text {
+      font-size: .82rem; color: var(--text); line-height: 1.6;
+    }
+
+    /* ── Stat cards ───────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      margin-bottom: 32px;
+    }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-card {
+      background: var(--bg);
+      padding: 20px 16px;
+    }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.04em;
+      color: var(--text); line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); line-height: 1.4;
+    }
+    .stat-delta {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--accent); margin-top: 8px;
+    }
+
+    /* ── Secondary chart: horizontal bars ─────────────── */
+    .hbar-list {
+      margin-bottom: 16px;
+    }
+    .hbar-item {
+      margin-bottom: 16px;
+    }
+    .hbar-meta {
+      display: flex; justify-content: space-between; align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .hbar-name {
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.06em; color: var(--text);
+      text-transform: uppercase;
+    }
+    .hbar-val {
+      font-size: 0.88rem; font-weight: 900;
+      color: var(--text);
+    }
+    .hbar-val.accent { color: var(--accent); }
+    .hbar-track {
+      height: 6px;
+      background: var(--rule);
+      position: relative;
+      overflow: hidden;
+    }
+    .hbar-fill {
+      height: 100%;
+      background: var(--muted);
+      transition: width 0.9s cubic-bezier(0.16,1,0.3,1);
+      width: 0%;
+    }
+    .hbar-fill.accent { background: var(--accent); }
+    .hbar-sublabel {
+      font-size: 0.6rem; color: var(--muted);
+      margin-top: 4px; letter-spacing: 0.04em;
+    }
+
+    /* ── Data table ───────────────────────────────────── */
+    .data-table-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; cursor: pointer; font-family: inherit;
+      margin-bottom: 12px;
+    }
+    .data-table-toggle:hover { border-color: var(--text); color: var(--text); }
+    .data-table-wrap { display: none; }
+    .data-table-wrap.open { display: block; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+      margin-bottom: 32px;
+    }
+    .data-table th {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 8px 12px; text-align: left;
+      border-bottom: 1px solid var(--rule);
+    }
+    .data-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--rule);
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+    .data-table tr:nth-child(even) td { background: var(--surface); }
+    .data-table td.accent-cell { color: var(--accent); font-weight: 900; }
+
+    /* ── Sources ──────────────────────────────────────── */
+    .sources {
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+    }
+    .sources-label {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources-list {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.8;
+    }
+    .sources-list a { color: var(--muted); text-decoration: underline; }
+    .sources-list a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ── Header ── -->
+  <div class="header">
+    <div class="header-row">
+      <a href="index.html" class="back-link">← All Visualizations</a>
+      <div class="header-meta">
+        <span class="tag">AI/ML</span>
+        <span class="tag">22 MAR 2026</span>
+        <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
+      </div>
+    </div>
+    <h1>Agentforce Closed 29,000 Deals<br>in 15 Months. Enterprise AI Agents<br>Just Hit Escape Velocity.</h1>
+    <p class="subtext">
+      Salesforce's Q4 FY2026 earnings reveal <strong>the fastest enterprise software ramp on record</strong> —
+      from zero to $800M ARR in under two years. The data from February 25, 2026 confirms:
+      the agentic AI era has decisively begun.
+    </p>
+  </div>
+
+  <!-- ── Primary chart: deal count ── -->
+  <div class="chart-panel">
+    <div class="section-label">Agentforce Cumulative Deals by Quarter — FY2026</div>
+    <div class="chart-controls">
+      <button class="ctrl-btn active" id="btn-deals" data-metric="deals">Deal Count</button>
+      <button class="ctrl-btn" id="btn-arr" data-metric="arr">ARR ($M)</button>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">
+      Salesforce closed more Agentforce deals in Q4 FY2026 alone than in all three previous
+      quarters combined — the 3× jump from 9,500 to 29,000 is the clearest signal yet that
+      enterprise AI agents have crossed from pilot programs into production infrastructure.
+    </div>
+  </div>
+
+  <!-- ── Stat cards ── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-arr">—</div>
+      <div class="stat-label">Agentforce ARR<br>Q4 FY2026</div>
+      <div class="stat-delta">+169% year-over-year</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-deals">—</div>
+      <div class="stat-label">Total deals<br>closed since launch</div>
+      <div class="stat-delta">+50% quarter-over-quarter</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-months">—</div>
+      <div class="stat-label">Months from launch<br>to $800M ARR</div>
+      <div class="stat-delta">Oct 2024 → Jan 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-roi">—</div>
+      <div class="stat-label">Average ROI on<br>agentic AI deployments</div>
+      <div class="stat-delta">↑ 3× traditional automation</div>
+    </div>
+  </div>
+
+  <!-- ── Secondary chart: enterprise context ── -->
+  <div class="chart-panel">
+    <div class="section-label">Enterprise AI Agent Adoption — March 2026</div>
+    <div class="hbar-list" id="hbar-list">
+      <!-- rendered by JS -->
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">
+      Agentforce's growth is not an outlier — 79% of enterprises now report using AI agents
+      in some capacity, and Gartner projects 40% of enterprise applications will embed
+      task-specific agents by year-end 2026, making agent-native architecture the new baseline.
+    </div>
+  </div>
+
+  <!-- ── Data table ── -->
+  <button class="data-table-toggle" id="toggle-data">[ VIEW DATA ]</button>
+  <div class="data-table-wrap" id="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Quarter</th>
+          <th>Period End</th>
+          <th>Deals / Customers</th>
+          <th>Agentforce ARR</th>
+          <th>YoY ARR Growth</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Q1 FY26</td>
+          <td>Apr 30, 2025</td>
+          <td>4,000</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Q2 FY26</td>
+          <td>Jul 31, 2025</td>
+          <td>6,000</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Q3 FY26</td>
+          <td>Oct 31, 2025</td>
+          <td>9,500 paid</td>
+          <td>$540M</td>
+          <td>+330%</td>
+        </tr>
+        <tr class="accent-row">
+          <td class="accent-cell">Q4 FY26</td>
+          <td class="accent-cell">Jan 31, 2026</td>
+          <td class="accent-cell">29,000 total</td>
+          <td class="accent-cell">$800M</td>
+          <td class="accent-cell">+169%</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size:0.63rem; color:var(--muted); margin-bottom:24px; line-height:1.6;">
+      Note: Q1–Q2 figures reflect "paying customers." Q3 reflects "paid deals" (9,500 of 18,500 total use cases).
+      Q4 reflects "deals closed since launch" (cumulative). Metrics are directionally comparable but sourced from different earnings disclosures.
+    </p>
+  </div>
+
+  <!-- ── Sources ── -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      Salesforce Q4 FY2026 Earnings (Feb 25, 2026) ·
+      <a href="https://www.salesforce.com/news/press-releases/2026/02/25/fy26-q4-earnings/" target="_blank">salesforce.com</a> ·
+      Salesforce Q3 FY2026 Earnings (Dec 3, 2025) ·
+      <a href="https://www.salesforce.com/news/press-releases/2025/12/03/fy26-q3-earnings/" target="_blank">salesforce.com</a> ·
+      <a href="https://nationalcioreview.com/articles-insights/cio-field-notes/agentforce-reaches-800-million-as-salesforce-posts-strong-q4/" target="_blank">National CIO Review, Mar 2026</a> ·
+      <a href="https://diginomica.com/agentforce-users-now-number-18500-salesforce-turns-109-billlon-quarter" target="_blank">Diginomica, Dec 2025</a> ·
+      Enterprise agentic AI ROI: CrewAI / G2 Enterprise AI Agents Report 2026 ·
+      Gartner agent forecast: Joget AI Analysis, Feb 2026
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── Constants ────────────────────────────────────────
+const ACCENT     = '#D9641E';
+const ACCENT_MID = 'rgba(217,100,30,0.5)';
+const ACCENT_DIM = 'rgba(217,100,30,0.09)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// ── Theme toggle ──────────────────────────────────────
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshChartColors === 'function') refreshChartColors();
+  renderHBars(); // re-render horizontal bars
+});
+
+// ── Data ──────────────────────────────────────────────
+const QUARTERS = ['Q1 FY26\nApr 2025', 'Q2 FY26\nJul 2025', 'Q3 FY26\nDec 2025', 'Q4 FY26\nFeb 2026'];
+const DEALS    = [4000, 6000, 9500, 29000];
+// ARR available only for Q3/Q4
+const ARR_LABELS = ['Q3 FY26\nDec 2025', 'Q4 FY26\nFeb 2026'];
+const ARR_DATA   = [540, 800];
+
+const ENTERPRISE_BARS = [
+  { label: 'Enterprises using AI agents in some capacity', val: 79,  max: 100, accent: false, suffix: '%', source: 'CrewAI Survey 2026' },
+  { label: 'Gartner: enterprise apps to embed agents by year-end', val: 40, max: 100, accent: false, suffix: '%', source: 'Gartner, 2026' },
+  { label: 'Average ROI on enterprise agentic AI', val: 171, max: 250, accent: true, suffix: '%', source: 'CrewAI / G2 2026' },
+  { label: 'C-suite execs planning to expand agentic AI in 2026', val: 100, max: 100, accent: false, suffix: '%', source: 'CrewAI Survey, 500 C-level execs' },
+];
+
+// ── Chart.js helpers ──────────────────────────────────
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+  };
+}
+
+// ── Main chart ────────────────────────────────────────
+let chart;
+let currentMetric = 'deals';
+
+function buildDealsDataset(c) {
+  return {
+    data: DEALS,
+    backgroundColor: DEALS.map((_, i) => i === 3 ? ACCENT : (c.muted || '#888880')),
+    borderColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 0,
+    hoverBackgroundColor: DEALS.map((_, i) => i === 3 ? ACCENT : (c.text || '#F0EFE8')),
+    isAccent: true,
+  };
+}
+
+function buildArrDataset(c) {
+  return {
+    data: ARR_DATA,
+    backgroundColor: ARR_DATA.map((_, i) => i === 1 ? ACCENT : (c.muted || '#888880')),
+    borderColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 0,
+    hoverBackgroundColor: ARR_DATA.map((_, i) => i === 1 ? ACCENT : (c.text || '#F0EFE8')),
+    isAccent: true,
+  };
+}
+
+function initChart() {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  const c = getChartColors();
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: QUARTERS,
+      datasets: [buildDealsDataset(c)],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 900,
+        easing: 'easeOutQuart',
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor: _cssVar('--rule'),
+          borderWidth: 1,
+          titleColor: c.text,
+          bodyColor: c.muted,
+          padding: 14,
+          cornerRadius: 0,
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.raw;
+              if (currentMetric === 'deals') {
+                return `  ${v.toLocaleString()} deals / customers`;
+              } else {
+                return `  $${v}M ARR`;
+              }
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: _cssVar('--rule-light'), drawTicks: false },
+          border: { display: false },
+          ticks: {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 10,
+            maxRotation: 0,
+          },
+        },
+        y: {
+          grid: { color: _cssVar('--rule-light') },
+          border: { display: false },
+          ticks: {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 12,
+            callback: (v) => {
+              if (currentMetric === 'deals') {
+                return v >= 1000 ? `${(v/1000).toFixed(0)}K` : v;
+              } else {
+                return `$${v}M`;
+              }
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+function switchMetric(metric) {
+  currentMetric = metric;
+  const c = getChartColors();
+  if (metric === 'deals') {
+    chart.data.labels   = QUARTERS;
+    chart.data.datasets = [buildDealsDataset(c)];
+  } else {
+    chart.data.labels   = ARR_LABELS;
+    chart.data.datasets = [buildArrDataset(c)];
+  }
+  chart.update('active');
+}
+
+function refreshChartColors() {
+  if (!chart) return;
+  const c = getChartColors();
+  chart.options.plugins.tooltip.backgroundColor = c.surface;
+  chart.options.plugins.tooltip.titleColor      = c.text;
+  chart.options.plugins.tooltip.bodyColor       = c.muted;
+  chart.options.scales.x.ticks.color            = c.muted;
+  chart.options.scales.x.grid.color             = _cssVar('--rule-light');
+  chart.options.scales.y.ticks.color            = c.muted;
+  chart.options.scales.y.grid.color             = _cssVar('--rule-light');
+  // Update non-accent bars
+  if (currentMetric === 'deals') {
+    chart.data.datasets[0].backgroundColor = DEALS.map((_, i) => i === 3 ? ACCENT : c.muted);
+    chart.data.datasets[0].hoverBackgroundColor = DEALS.map((_, i) => i === 3 ? ACCENT : c.text);
+  } else {
+    chart.data.datasets[0].backgroundColor = ARR_DATA.map((_, i) => i === 1 ? ACCENT : c.muted);
+    chart.data.datasets[0].hoverBackgroundColor = ARR_DATA.map((_, i) => i === 1 ? ACCENT : c.text);
+  }
+  chart.update();
+}
+
+// ── Metric toggle ─────────────────────────────────────
+document.querySelectorAll('.ctrl-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.ctrl-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    switchMetric(b.dataset.metric);
+  });
+});
+
+// ── Horizontal bars (secondary chart) ─────────────────
+function renderHBars() {
+  const container = document.getElementById('hbar-list');
+  container.innerHTML = '';
+  ENTERPRISE_BARS.forEach(item => {
+    const pct = (item.val / item.max) * 100;
+    const div = document.createElement('div');
+    div.className = 'hbar-item';
+    div.innerHTML = `
+      <div class="hbar-meta">
+        <span class="hbar-name">${item.label}</span>
+        <span class="hbar-val${item.accent ? ' accent' : ''}">${item.val}${item.suffix}</span>
+      </div>
+      <div class="hbar-track">
+        <div class="hbar-fill${item.accent ? ' accent' : ''}" data-pct="${pct}" style="width:0%"></div>
+      </div>
+      <div class="hbar-sublabel">${item.source}</div>
+    `;
+    container.appendChild(div);
+  });
+  // Animate fills after render
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.querySelectorAll('.hbar-fill').forEach(el => {
+        el.style.width = el.dataset.pct + '%';
+      });
+    });
+  });
+}
+
+// ── Stat card count-up ─────────────────────────────────
+function countUp(el, target, opts = {}) {
+  const { duration = 1000, steps = 40, prefix = '', suffix = '', decimals = 0 } = opts;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const disp = decimals > 0 ? current.toFixed(decimals) : Math.round(current).toLocaleString();
+    el.textContent = prefix + disp + suffix;
+  }, duration / steps);
+}
+
+// ── Init ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  initChart();
+  renderHBars();
+
+  // Count-up stats
+  countUp(document.getElementById('stat-arr'),    800,  { prefix: '$', suffix: 'M' });
+  countUp(document.getElementById('stat-deals'),  29000, {});
+  countUp(document.getElementById('stat-months'), 15,   { suffix: '' });
+  countUp(document.getElementById('stat-roi'),    171,  { suffix: '%' });
+
+  // Data table toggle
+  document.getElementById('toggle-data').addEventListener('click', function () {
+    const wrap = document.getElementById('data-table-wrap');
+    wrap.classList.toggle('open');
+    this.textContent = wrap.classList.contains('open') ? '[ HIDE DATA ]' : '[ VIEW DATA ]';
+  });
+});
+</script>
+</body>
+</html>
