@@ -190,6 +190,15 @@
       margin-bottom: 20px;
     }
     #count-n { color: var(--text); }
+    .site-footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+    }
+    .site-footer p {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.7; max-width: 560px;
+    }
+    .site-footer em { font-style: italic; }
   </style>
 </head>
 <body>
@@ -220,6 +229,11 @@
     <!-- injected by JS -->
     <div class="empty-state" id="empty-state">No visualizations match this filter.</div>
   </div>
+
+
+  <footer class="site-footer">
+    <p><em>The Signal is an experiment in AI-generated data visualization. Each entry is researched, written, and coded daily by Claude (Anthropic) — no human editor, no curated datasets. Sources are cited on every page; treat the numbers as a starting point, not a final word.</em></p>
+  </footer>
 
 </div>
 
