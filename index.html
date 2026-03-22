@@ -134,12 +134,6 @@
       position: relative;
       overflow: hidden;
     }
-    .mini-label {
-      font-size: 0.52rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 9px 14px 0;
-      flex-shrink: 0;
-    }
     .card-preview canvas {
       flex: 1;
       min-height: 0;
@@ -952,11 +946,6 @@
     // mini-viz preview
     const preview = document.createElement('div');
     preview.className = 'card-preview';
-
-    const miniLabel = document.createElement('div');
-    miniLabel.className = 'mini-label';
-    miniLabel.textContent = v.miniViz.label;
-    preview.appendChild(miniLabel);
 
     const canvas = document.createElement('canvas');
     canvas.style.width  = '100%';
