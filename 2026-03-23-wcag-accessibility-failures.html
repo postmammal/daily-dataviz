@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>94.8% of Websites Fail Accessibility — The Signal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── Tokens ── */
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #6E6E68;
+      --border:     #3A3A3A;
+      --accent:     #7B3FD9;
+      --accent-dim: rgba(123,63,217,0.10);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #7B3FD9;
+      --accent-dim: rgba(123,63,217,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(20px, 5vw, 56px);
+    }
+
+    /* ── Nav ── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .tag {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 10px;
+      cursor: pointer; line-height: 1; flex-shrink: 0;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      border-left: 4px solid var(--accent);
+      padding-left: 20px;
+      margin-bottom: 40px;
+    }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Section labels ── */
+    .section-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+    }
+
+    /* ── Chart containers ── */
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+      margin-bottom: 8px;
+    }
+    .chart-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .ctrl-btn {
+      background: transparent; border: 1px solid var(--rule);
+      color: var(--muted); font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; cursor: pointer;
+    }
+    .ctrl-btn.active { border-color: var(--text); color: var(--text); }
+    .ctrl-btn:hover { border-color: var(--muted); color: var(--text); }
+
+    /* ── Key Finding ── */
+    .insight {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px; margin-bottom: 32px;
+    }
+    .insight-label {
+      font-size: .58rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+
+    /* ── Stat Cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--bg);
+      padding: 20px 16px;
+      cursor: default;
+    }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.04em;
+      color: var(--text); line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); line-height: 1.5;
+    }
+    .stat-delta {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--accent); margin-top: 8px;
+    }
+
+    /* ── Data Table ── */
+    .data-toggle-btn {
+      background: transparent; border: 1px solid var(--rule);
+      color: var(--muted); font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 6px 14px; cursor: pointer; display: block;
+      margin: 0 0 8px;
+    }
+    .data-toggle-btn:hover { border-color: var(--muted); color: var(--text); }
+    .data-table-wrap { display: none; margin-bottom: 24px; }
+    .data-table-wrap.open { display: block; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.72rem;
+    }
+    .data-table th {
+      font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .data-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--rule);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+    .data-table tr.key-row td { color: var(--accent); font-weight: 700; }
+    .data-table tr:nth-child(even) td { background: var(--surface); }
+
+    /* ── ARIA note ── */
+    .aria-callout {
+      border: 1px solid var(--rule);
+      padding: 16px 20px;
+      margin-bottom: 32px;
+    }
+    .aria-callout-head {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .aria-callout-stat {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 900; letter-spacing: -0.03em;
+      color: var(--text); margin-bottom: 4px;
+    }
+    .aria-callout-stat span { color: var(--accent); }
+    .aria-callout-sub { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* ── Sources ── */
+    .sources {
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      margin-top: 8px;
+    }
+    .sources-label {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources-list {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.8;
+    }
+    .sources-list a { color: var(--muted); text-decoration: underline; }
+    .sources-list a:hover { color: var(--text); }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-wrap { height: 260px; }
+      .hero-headline { font-size: clamp(1.4rem, 6vw, 2.4rem); }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav row — no border -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">UX DESIGN · Accessibility</span>
+      <span class="tag">23 MAR 2026</span>
+      <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
+    </div>
+  </div>
+
+  <!-- Hero — carries the 4px left accent stripe -->
+  <div class="hero">
+    <div class="hero-headline">94.8% of Websites Fail Accessibility — The Same Six Errors, Six Years Running</div>
+    <div class="hero-sub">The WebAIM Million 2025 report analyzed 1 million homepages and found barely any progress. Low-contrast text alone affects 4 in 5 sites — unchanged since 2019.</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-pct">—</div>
+      <div class="stat-label">Pages<br>failing WCAG</div>
+      <div class="stat-delta">↓ from 97.8% in 2019</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-errors">—</div>
+      <div class="stat-label">Avg errors<br>per page</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-categories">—</div>
+      <div class="stat-label">Error types<br>= 96% of all issues</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-improve">—</div>
+      <div class="stat-label">Total improvement<br>in 6 years</div>
+    </div>
+  </div>
+
+  <!-- Primary Chart: Horizontal Bars -->
+  <div class="section-label">Most Common WCAG Failures — % of Home Pages Affected (2025)</div>
+  <div class="chart-wrap">
+    <canvas id="hbarsChart"></canvas>
+  </div>
+  <div style="text-align:right; margin-bottom:12px;">
+    <button class="data-toggle-btn" id="toggle-data-1">[ VIEW DATA ]</button>
+  </div>
+  <div class="data-table-wrap" id="data-table-wrap-1">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>WCAG Failure Type</th>
+          <th>% of Pages Affected (2025)</th>
+          <th>Avg Instances/Page</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="key-row">
+          <td>Low-contrast text</td>
+          <td>79.1%</td>
+          <td>29.6</td>
+        </tr>
+        <tr>
+          <td>Missing alt text</td>
+          <td>55.5%</td>
+          <td>11.0</td>
+        </tr>
+        <tr>
+          <td>Missing form labels</td>
+          <td>48.2%</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Empty links</td>
+          <td>45.4%</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Empty buttons</td>
+          <td>29.6%</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Missing page language</td>
+          <td>17.1%</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Low-contrast text is the single most prevalent failure — hitting 79.1% of pages at an average of 30 instances each — yet it's one of the easiest issues to fix with any modern color-contrast checker.</div>
+  </div>
+
+  <!-- Secondary Chart: Trend Line -->
+  <div class="section-label" style="margin-top:8px;">WCAG Failure Rate Trend — % of Home Pages Failing (2019–2025)</div>
+  <div class="chart-wrap">
+    <canvas id="trendChart"></canvas>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Six years of measurement show only 3.1 percentage points of improvement — from 97.8% failing in 2019 to 94.8% in 2025. At this pace, it would take until 2075 for even half of websites to become accessible.</div>
+  </div>
+
+  <!-- ARIA Counterintuitive Callout -->
+  <div class="aria-callout">
+    <div class="aria-callout-head">The ARIA Paradox</div>
+    <div class="aria-callout-stat">Pages using ARIA average <span>57 errors</span> — vs. 27 without it</div>
+    <div class="aria-callout-sub">ARIA (Accessible Rich Internet Applications) attributes are meant to improve accessibility, but pages deploying them show 2× more detected errors. This likely reflects more complex pages — but also developers reaching for ARIA before mastering the basics.</div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      WebAIM Million 2025 · webaim.org/projects/million/ (Feb 2025) ·
+      WebAIM Million historical reports 2019–2024 · webaim.org/projects/million/ ·
+      Level Access State of Digital Accessibility Report 2025–2026
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Accent & theme constants ────────────────────────────────
+const ACCENT     = '#7B3FD9';
+const ACCENT_MID = 'rgba(123,63,217,0.5)';
+const ACCENT_DIM = 'rgba(123,63,217,0.07)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+  };
+}
+
+// ── Theme toggle ────────────────────────────────────────────
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshChartColors === 'function') refreshChartColors();
+});
+
+// ── Count-up animation ──────────────────────────────────────
+function countUp(el, target, decimals, prefix, suffix) {
+  const duration = 1000, steps = 40;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const d = decimals !== undefined ? decimals : 0;
+    el.textContent = (prefix || '') + (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) + (suffix || '');
+  }, duration / steps);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  countUp(document.getElementById('stat-pct'),       94.8,  1, '', '%');
+  countUp(document.getElementById('stat-errors'),    51,    0, '', '');
+  countUp(document.getElementById('stat-categories'), 6,   0, '', '');
+  countUp(document.getElementById('stat-improve'),   3.1,   1, '', '%');
+});
+
+// ── Data ────────────────────────────────────────────────────
+const barLabels = [
+  'Low-contrast text',
+  'Missing alt text',
+  'Missing form labels',
+  'Empty links',
+  'Empty buttons',
+  'Missing page language'
+];
+const barData = [79.1, 55.5, 48.2, 45.4, 29.6, 17.1];
+const keyIdx  = 0; // low-contrast text is the highlight
+
+const trendLabels = ['2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+const trendData   = [97.8, 98.1, 97.4, 96.8, 96.3, 95.9, 94.8];
+
+// ── Primary Chart: Horizontal Bars ──────────────────────────
+let hbarsChart;
+(function buildHbars() {
+  const ctx = document.getElementById('hbarsChart').getContext('2d');
+  const c = getChartColors();
+
+  const bgColors = barData.map((_, i) => i === keyIdx ? ACCENT : c.muted);
+
+  hbarsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: barLabels,
+      datasets: [{
+        data: barData,
+        backgroundColor: bgColors,
+        borderWidth: 0,
+        borderRadius: 0,
+        isAccent: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     _cssVar('--rule'),
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         14,
+          cornerRadius:    0,
+          callbacks: {
+            label: (ctx) => `  ${ctx.parsed.x.toFixed(1)}% of home pages`,
+          }
+        }
+      },
+      onHover: (event, elements) => {
+        const idx = elements.length ? elements[0].index : -1;
+        hbarsChart.data.datasets[0].backgroundColor =
+          barData.map((_, i) => {
+            if (idx === -1) return i === keyIdx ? ACCENT : _cssVar('--muted');
+            return i === idx ? ACCENT : (_cssVar('--muted') + '88');
+          });
+        hbarsChart.update('none');
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks: {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 10,
+            callback: (v) => v + '%'
+          }
+        },
+        y: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks: {
+            color: c.muted,
+            font: { size: 11, weight: '600' },
+            padding: 12
+          }
+        }
+      }
+    }
+  });
+})();
+
+// ── Secondary Chart: Trend Line ──────────────────────────────
+let trendChart;
+(function buildTrend() {
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  const c = getChartColors();
+
+  trendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'WCAG failure rate',
+        data: trendData,
+        borderColor:          ACCENT,
+        backgroundColor:      ACCENT_DIM,
+        borderWidth:          2,
+        pointBackgroundColor: _cssVar('--bg'),
+        pointBorderColor:     ACCENT,
+        pointBorderWidth:     2,
+        pointRadius:          4,
+        pointHoverRadius:     6,
+        fill:                 true,
+        tension:              0.3,
+        isAccent:             true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor:     _cssVar('--rule'),
+          borderWidth:     1,
+          titleColor:      c.text,
+          bodyColor:       c.muted,
+          padding:         14,
+          cornerRadius:    0,
+          callbacks: {
+            label: (ctx) => `  ${ctx.parsed.y.toFixed(1)}% of pages failing WCAG`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 10 }
+        },
+        y: {
+          min: 93, max: 100,
+          grid:   { color: c.ruleLight },
+          border: { display: false },
+          ticks: {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 12,
+            callback: (v) => v + '%'
+          }
+        }
+      }
+    }
+  });
+})();
+
+// ── Refresh colors on theme toggle ──────────────────────────
+function refreshChartColors() {
+  const c = getChartColors();
+
+  // hbars
+  if (hbarsChart) {
+    hbarsChart.options.plugins.tooltip.backgroundColor = c.surface;
+    hbarsChart.options.plugins.tooltip.titleColor      = c.text;
+    hbarsChart.options.plugins.tooltip.bodyColor       = c.muted;
+    hbarsChart.options.scales.x.ticks.color            = c.muted;
+    hbarsChart.options.scales.x.grid.color             = c.ruleLight;
+    hbarsChart.options.scales.y.ticks.color            = c.muted;
+    hbarsChart.data.datasets[0].backgroundColor =
+      barData.map((_, i) => i === keyIdx ? ACCENT : c.muted);
+    hbarsChart.update();
+  }
+
+  // trend
+  if (trendChart) {
+    trendChart.options.plugins.tooltip.backgroundColor = c.surface;
+    trendChart.options.plugins.tooltip.titleColor      = c.text;
+    trendChart.options.plugins.tooltip.bodyColor       = c.muted;
+    trendChart.options.scales.x.ticks.color            = c.muted;
+    trendChart.options.scales.x.grid.color             = c.ruleLight;
+    trendChart.options.scales.y.ticks.color            = c.muted;
+    trendChart.options.scales.y.grid.color             = c.ruleLight;
+    trendChart.data.datasets[0].pointBackgroundColor   = c.bg;
+    trendChart.update();
+  }
+}
+
+// ── Data table toggle ────────────────────────────────────────
+document.getElementById('toggle-data-1').addEventListener('click', function () {
+  const wrap = document.getElementById('data-table-wrap-1');
+  wrap.classList.toggle('open');
+  this.textContent = wrap.classList.contains('open') ? '[ HIDE DATA ]' : '[ VIEW DATA ]';
+});
+</script>
+</body>
+</html>

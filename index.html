@@ -244,19 +244,19 @@
   const vizzes = [
       {
         date: "2026-03-23",
-        slug: "2026-03-23-tiobe-march-2026",
+        slug: "2026-03-23-wcag-accessibility-failures",
         accent: "#7B3FD9",
-        accentDim: "rgba(123,63,217,0.10)",
-        title: "Python Leads at 21% as C# Records the Biggest Climb in the Top Ten",
-        category: "TECHNOLOGY · Programming Languages",
-        insight: "TIOBE's March 2026 index shows Python holding 21.25% — nearly double any rival — while C# posted the largest year-on-year gain (+2.88 pp) of any top-10 language, earning the 2025 Language of the Year award as C++ and Java each shed over 2.5 points.",
-        tags: ["Technology"],
+        accentDim: "rgba(123,63,217,0.07)",
+        title: "94.8% of Websites Fail Accessibility — The Same Six Errors, Six Years Running",
+        category: "UX DESIGN · Accessibility",
+        insight: "The WebAIM Million 2025 report shows just 3.1 percentage points of improvement over 6 years. Low-contrast text hits 79.1% of pages, and pages using ARIA average 2× more errors than those without it.",
+        tags: ["Design"],
         miniViz: {
           type: "hbars",
-          data: [21.25, 11.55, 8.50, 8.05, 7.00, 2.90, 2.82, 2.22, 1.90, 1.87],
-          labels: ["Python", "C", "C++", "Java", "C#", "JavaScript", "Visual Basic", "R", "SQL", "Delphi"],
+          data: [79.1, 55.5, 48.2, 45.4, 29.6, 17.1],
+          labels: ["Low-contrast", "Missing alt text", "Form labels", "Empty links", "Empty buttons", "No language"],
           keyIdx: 0,
-          label: "TIOBE rating (%)"
+          label: "% of pages affected"
         }
       },
       {
