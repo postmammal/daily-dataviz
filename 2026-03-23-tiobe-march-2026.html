@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIOBE March 2026: Python Leads at 21%, C# Surges — The Signal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── Design Tokens ─────────────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #6E6E68;
+      --border:     #3A3A3A;
+      --accent:     #7B3FD9;
+      --accent-dim: rgba(123,63,217,0.12);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #7B3FD9;
+      --accent-dim: rgba(123,63,217,0.10);
+    }
+
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+      min-height: 100vh;
+    }
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(20px, 5vw, 56px);
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .tag {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 10px; cursor: pointer; line-height: 1;
+    }
+
+    /* ── Hero ──────────────────────────────────────────────────── */
+    .hero {
+      border-left: 4px solid var(--accent);
+      padding-left: 20px;
+      margin-bottom: 40px;
+    }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Chart container ───────────────────────────────────────── */
+    .chart-wrap {
+      height: 360px;
+      margin-bottom: 8px;
+      position: relative;
+    }
+    @media (max-width: 600px) {
+      .chart-wrap { height: 280px; }
+    }
+
+    /* ── Metric toggle buttons ─────────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .metric-btn {
+      background: transparent;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 12px; cursor: pointer;
+    }
+    .metric-btn.active { border-color: var(--text); color: var(--text); }
+
+    /* ── Key Finding ───────────────────────────────────────────── */
+    .insight {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px;
+      margin-bottom: 32px;
+    }
+    .insight-label {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .insight-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; }
+
+    /* ── Stat cards ────────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      margin-bottom: 40px;
+    }
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.04em;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); line-height: 1.4;
+    }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: var(--accent); margin-top: 6px; }
+
+    /* ── Data table ────────────────────────────────────────────── */
+    .data-table-wrap { display: none; margin-bottom: 24px; }
+    .data-table-wrap.open { display: block; }
+    .data-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.75rem; font-family: 'Helvetica Neue', monospace;
+    }
+    .data-table th {
+      text-align: left; padding: 6px 10px;
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--rule);
+    }
+    .data-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--rule-light);
+      font-variant-numeric: tabular-nums;
+    }
+    .data-table tr:nth-child(even) td { background: var(--surface); }
+    .data-table tr.key-row td { color: var(--accent); font-weight: 700; }
+    .data-table td.right { text-align: right; }
+
+    #toggle-data {
+      background: transparent; border: 1px solid var(--rule);
+      color: var(--muted); font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; cursor: pointer; margin-bottom: 16px;
+      display: block;
+    }
+    #toggle-data:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── Sources ───────────────────────────────────────────────── */
+    .sources {
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      margin-top: 8px;
+    }
+    .sources-label {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources-list {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.7;
+    }
+    .sources-list a { color: var(--muted); }
+    .sources-list a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav row — no border -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">Technology</span>
+      <span class="tag">23 Mar 2026</span>
+      <button id="theme-toggle">☀</button>
+    </div>
+  </div>
+
+  <!-- Hero — 4px left accent stripe -->
+  <div class="hero">
+    <div class="hero-headline">Python leads at 21% as C# records the biggest climb in the top ten</div>
+    <div class="hero-sub">The TIOBE March 2026 index shows Python still commanding nearly twice the share of any rival — but below the summit, C surged past C++ and Java, and C# posted the largest year-on-year gain of any top-10 language, earning the 2025 Language of the Year award.</div>
+  </div>
+
+  <!-- Metric toggle -->
+  <div class="controls">
+    <button class="metric-btn active" data-metric="current">Current Rating</button>
+    <button class="metric-btn" data-metric="change">Year-on-Year Change</button>
+  </div>
+
+  <!-- Primary chart -->
+  <div class="chart-wrap">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <!-- Data table toggle -->
+  <button id="toggle-data">[ View Data ]</button>
+  <div class="data-table-wrap" id="data-table-wrap">
+    <table class="data-table" id="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Language</th>
+          <th class="right">Mar 2026 (%)</th>
+          <th class="right">~Feb 2025 (%)</th>
+          <th class="right">YoY Change (pp)</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Key finding 1 -->
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text" id="insight-text">
+      Python's 21.25% rating is 9.7 percentage points ahead of second-place C — a margin wider than C#'s entire TIOBE score, and roughly equal to the combined shares of languages ranked #6 through #10.
+    </div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-python">—</div>
+      <div class="stat-label">Python's March<br>2026 TIOBE rating</div>
+      <div class="stat-delta">↑ #1 for 13th year running</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-gap">—</div>
+      <div class="stat-label">Point margin<br>over #2 (C)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-csharp">—</div>
+      <div class="stat-label">C# one-year gain<br>(pp) — 2025 Lang of Year</div>
+      <div class="stat-delta">↑ from ~4.1% to 7.0%</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-falling">—</div>
+      <div class="stat-label">Top-10 languages<br>with declining share</div>
+    </div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      TIOBE Programming Community Index, March 2026 · tiobe.com ·
+      TechRepublic: "TIOBE Index for March 2026: Top 10 Most Popular Programming Languages" (Mar 2026) ·
+      InfoWorld: "C# wins TIOBE Programming Language of the Year for 2025" (Jan 2026) ·
+      InfoWorld: "Python is slipping in popularity – TIOBE" (Feb 2026) ·
+      WebProNews: "TIOBE Index March 2026: Python Dominates, But the Real Story Is What's Climbing Behind It" (Mar 2026)
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── Constants ─────────────────────────────────────────────────── */
+const ACCENT     = '#7B3FD9';
+const ACCENT_MID = 'rgba(123,63,217,0.5)';
+const ACCENT_DIM = 'rgba(123,63,217,0.07)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+/* ── Data ──────────────────────────────────────────────────────── */
+const LABELS = ['Python', 'C', 'C++', 'Java', 'C#', 'JavaScript', 'Visual Basic', 'R', 'SQL', 'Delphi'];
+
+// March 2026 TIOBE ratings
+const CURRENT = [21.25, 11.55, 8.50, 8.05, 7.00, 2.90, 2.82, 2.22, 1.90, 1.87];
+
+// ~Feb 2025 TIOBE ratings (most recent prior-year data available)
+const PRIOR   = [23.88, 9.84, 11.37, 10.66, 4.12, 2.50, 2.20, 1.50, 2.10, 1.65];
+
+// Year-on-year change (pp) — estimated for #6–#10
+const CHANGES = CURRENT.map((v, i) => +(v - PRIOR[i]).toFixed(2));
+// = [-2.63, +1.71, -2.87, -2.61, +2.88, +0.40, +0.62, +0.72, -0.20, +0.22]
+
+// Key indices per metric
+const KEY_CURRENT = 0;  // Python
+const KEY_CHANGE  = 4;  // C# (biggest positive mover)
+
+/* ── Stat card count-up ────────────────────────────────────────── */
+function countUp(el, target, decimals, prefix, suffix) {
+  const duration = 900, steps = 36;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const d = decimals !== undefined ? decimals : 0;
+    el.textContent = (prefix || '') +
+      (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) +
+      (suffix || '');
+  }, duration / steps);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  countUp(document.getElementById('stat-python'), 21.25, 2, '', '%');
+  countUp(document.getElementById('stat-gap'),    9.7,   1, '+', ' pts');
+  countUp(document.getElementById('stat-csharp'), 2.88,  2, '+', ' pp');
+  countUp(document.getElementById('stat-falling'), 4,    0, '', '');
+});
+
+/* ── Chart colors ──────────────────────────────────────────────── */
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+  };
+}
+
+/* ── Build data table ──────────────────────────────────────────── */
+(function buildTable() {
+  const tbody = document.getElementById('table-body');
+  LABELS.forEach((lang, i) => {
+    const tr = document.createElement('tr');
+    if (i === KEY_CURRENT) tr.classList.add('key-row');
+    const delta = CHANGES[i];
+    const deltaStr = (delta > 0 ? '+' : '') + delta.toFixed(2);
+    const est = i >= 5 ? '*' : '';
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>${lang}</td>
+      <td class="right">${CURRENT[i].toFixed(2)}%</td>
+      <td class="right">${PRIOR[i].toFixed(2)}%${est}</td>
+      <td class="right">${deltaStr}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // footnote row
+  const tfoot = document.createElement('tr');
+  tfoot.innerHTML = `<td colspan="5" style="color:var(--muted);font-size:0.65rem;padding:8px 10px;">* Prior-year figures for #6–#10 are estimates based on Feb 2025 trend data.</td>`;
+  tbody.appendChild(tfoot);
+})();
+
+/* ── Chart.js setup ────────────────────────────────────────────── */
+let currentMetric = 'current';
+let hoveredIndex = -1;
+let chart;
+
+function makeBarColors(metric, hovered) {
+  const keyIdx = metric === 'current' ? KEY_CURRENT : KEY_CHANGE;
+  const data = metric === 'current' ? CURRENT : CHANGES;
+  return data.map((v, i) => {
+    if (hovered >= 0) {
+      return i === hovered ? ACCENT : (_cssVar('--muted') || '#6E6E68');
+    }
+    return i === keyIdx ? ACCENT : (_cssVar('--muted') || '#6E6E68');
+  });
+}
+
+function buildChart() {
+  const c = getChartColors();
+  const canvas = document.getElementById('mainChart');
+  const ctx = canvas.getContext('2d');
+
+  const data = CURRENT;
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: LABELS,
+      datasets: [{
+        data: data,
+        backgroundColor: makeBarColors('current', -1),
+        borderWidth: 0,
+        barThickness: 'flex',
+        categoryPercentage: 0.75,
+        barPercentage: 0.82,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 700, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor: _cssVar('--rule'),
+          borderWidth: 1,
+          titleColor: c.text,
+          bodyColor: c.muted,
+          padding: 12,
+          cornerRadius: 0,
+          callbacks: {
+            label: (ctx) => {
+              const v = ctx.parsed.x;
+              if (currentMetric === 'current') return ` ${v.toFixed(2)}%`;
+              return ` ${v > 0 ? '+' : ''}${v.toFixed(2)} pp`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 8,
+            callback: (v) => currentMetric === 'current' ? v + '%' : (v > 0 ? '+' : '') + v + ' pp',
+          }
+        },
+        y: {
+          grid:   { color: 'transparent' },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 10 }
+        }
+      },
+      onHover: (event, elements) => {
+        const idx = elements.length ? elements[0].index : -1;
+        if (idx === hoveredIndex) return;
+        hoveredIndex = idx;
+        chart.data.datasets[0].backgroundColor = makeBarColors(currentMetric, idx);
+        chart.update('none');
+      }
+    }
+  });
+}
+
+/* ── Metric toggle ─────────────────────────────────────────────── */
+const insightTexts = {
+  current: "Python's 21.25% rating is 9.7 percentage points ahead of second-place C — a margin wider than C#'s entire TIOBE score, and roughly equal to the combined shares of languages ranked #6 through #10.",
+  change:  "C# gained 2.88 percentage points year-on-year — the largest absolute gain in the top 10 — moving from ~4.1% (Feb 2025) to 7.0% (March 2026) and earning TIOBE's Language of the Year award for 2025. C++ and Java each lost more than 2.5 points."
+};
+
+document.querySelectorAll('.metric-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentMetric = btn.dataset.metric;
+    hoveredIndex = -1;
+
+    document.querySelectorAll('.metric-btn').forEach(b =>
+      b.classList.toggle('active', b === btn));
+
+    const data = currentMetric === 'current' ? CURRENT : CHANGES;
+    chart.data.datasets[0].data = data;
+    chart.data.datasets[0].backgroundColor = makeBarColors(currentMetric, -1);
+    chart.options.scales.x.ticks.callback = (v) =>
+      currentMetric === 'current' ? v + '%' : (v > 0 ? '+' : '') + v + ' pp';
+    chart.options.plugins.tooltip.callbacks.label = (ctx) => {
+      const v = ctx.parsed.x;
+      return currentMetric === 'current'
+        ? ` ${v.toFixed(2)}%`
+        : ` ${v > 0 ? '+' : ''}${v.toFixed(2)} pp`;
+    };
+    chart.update('active');
+
+    document.getElementById('insight-text').textContent = insightTexts[currentMetric];
+  });
+});
+
+/* ── Data table toggle ─────────────────────────────────────────── */
+document.getElementById('toggle-data').addEventListener('click', function () {
+  const wrap = document.getElementById('data-table-wrap');
+  wrap.classList.toggle('open');
+  this.textContent = wrap.classList.contains('open') ? '[ Hide Data ]' : '[ View Data ]';
+});
+
+/* ── Theme toggle ──────────────────────────────────────────────── */
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshChartColors === 'function') refreshChartColors();
+});
+
+function refreshChartColors() {
+  if (!chart) return;
+  const c = getChartColors();
+  chart.options.plugins.tooltip.backgroundColor = c.surface;
+  chart.options.plugins.tooltip.titleColor      = c.text;
+  chart.options.plugins.tooltip.bodyColor       = c.muted;
+  chart.options.scales.x.ticks.color            = c.muted;
+  chart.options.scales.x.grid.color             = c.ruleLight;
+  chart.options.scales.y.ticks.color            = c.muted;
+  chart.data.datasets[0].backgroundColor = makeBarColors(currentMetric, hoveredIndex);
+  chart.update('none');
+}
+
+/* ── Init ──────────────────────────────────────────────────────── */
+buildChart();
+</script>
+</body>
+</html>
