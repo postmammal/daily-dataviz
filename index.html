@@ -252,18 +252,11 @@
         insight: "Mobile devices drive 70% of global e-commerce traffic yet convert at just 2.2% versus desktop's 4.3%. The gap follows price: Food & Beverage converts 6.9× better than Luxury/Jewelry because $48 impulse buys close on mobile, $820 considered purchases don't.",
         tags: ["Design"],
         miniViz: {
-          type: "scatter",
-          points: [
-            { x: 6, y: 6.22, key: true },
-            { x: 8, y: 2.80 },
-            { x: 11, y: 2.20 },
-            { x: 18, y: 1.70 },
-            { x: 47, y: 2.16 },
-            { x: 100, y: 0.90 },
-          ],
-          yMin: 0.5,
-          yMax: 7.0,
-          label: "AOV (normalized) vs. conversion rate (%)"
+          type: "hbars",
+          data: [6.22, 2.80, 2.20, 2.16, 1.70, 0.90],
+          labels: ["Food & Bev", "Beauty", "Fashion", "Electronics", "Home", "Luxury"],
+          keyIdx: 0,
+          label: "Mobile conversion rate (%)"
         }
       },
       {
