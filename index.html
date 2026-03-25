@@ -252,11 +252,19 @@
         insight: "Mobile devices drive 70% of global e-commerce traffic yet convert at just 2.2% versus desktop's 4.3%. The gap follows price: Food & Beverage converts 6.9× better than Luxury/Jewelry because $48 impulse buys close on mobile, $820 considered purchases don't.",
         tags: ["Design"],
         miniViz: {
-          type: "hbars",
-          data: [6.22, 2.80, 2.20, 2.16, 1.70, 0.90],
-          labels: ["Food & Bev", "Beauty", "Fashion", "Electronics", "Home", "Luxury"],
-          keyIdx: 0,
-          label: "Mobile conversion rate (%)"
+          type: "scatter",
+          showTrend: true,
+          points: [
+            { x: 4,  y: 6.22, key: true },
+            { x: 11, y: 2.80 },
+            { x: 21, y: 2.20 },
+            { x: 39, y: 1.70 },
+            { x: 74, y: 2.16 },
+            { x: 97, y: 0.90 },
+          ],
+          yMin: 0.4,
+          yMax: 7.0,
+          label: "AOV (log-scaled) vs. mobile conversion rate (%)"
         }
       },
       {
@@ -631,34 +639,86 @@
 
     // ── Scatter ─────────────────────────────────────────────────────
     if (spec.type === 'scatter') {
-      const PAD = 14;
-      const aW  = W - PAD * 2;
-      const aH  = H - PAD * 2;
+      const PAD_L = 18, PAD_R = 14, PAD_T = 10, PAD_B = 18;
+      const aW  = W - PAD_L - PAD_R;
+      const aH  = H - PAD_T - PAD_B;
       const yRange = spec.yMax - spec.yMin;
 
-      ctx.strokeStyle = _cssVar('--rule') || '#CCCAC2';
+      // Draw light grid lines
+      ctx.strokeStyle = _cssVar('--rule') || '#2A2A2A';
+      ctx.lineWidth   = 0.75;
+      [0.25, 0.5, 0.75].forEach(t => {
+        ctx.beginPath();
+        ctx.moveTo(PAD_L, PAD_T + aH * (1 - t));
+        ctx.lineTo(PAD_L + aW, PAD_T + aH * (1 - t));
+        ctx.stroke();
+      });
+
+      // Draw axes
+      ctx.strokeStyle = _cssVar('--rule') || '#2A2A2A';
       ctx.lineWidth   = 1;
       ctx.beginPath();
-      ctx.moveTo(PAD, PAD);
-      ctx.lineTo(PAD, PAD + aH);
-      ctx.lineTo(PAD + aW, PAD + aH);
+      ctx.moveTo(PAD_L, PAD_T);
+      ctx.lineTo(PAD_L, PAD_T + aH);
+      ctx.lineTo(PAD_L + aW, PAD_T + aH);
       ctx.stroke();
 
-      spec.points.forEach(pt => {
-        const px = PAD + (pt.x / 100) * aW;
-        const py = PAD + aH - ((pt.y - spec.yMin) / yRange) * aH;
+      // Draw trend line (simple regression hint — top-left to bottom-right)
+      if (spec.showTrend) {
+        ctx.strokeStyle = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.18);
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.arc(px, py, pt.key ? 5 : 3, 0, Math.PI * 2);
-        ctx.fillStyle = pt.key ? ACCENT : BARFILL;
-        ctx.fill();
-        if (pt.key) {
-          ctx.strokeStyle = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.3);
-          ctx.lineWidth   = 4;
+        ctx.moveTo(PAD_L + aW * 0.04, PAD_T + aH * 0.06);
+        ctx.lineTo(PAD_L + aW * 0.96, PAD_T + aH * 0.88);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Draw non-key dots first, then key on top
+      const sorted = [...spec.points].sort((a, b) => (a.key ? 1 : 0) - (b.key ? 1 : 0));
+      sorted.forEach(pt => {
+        const px = PAD_L + (pt.x / 100) * aW;
+        const py = PAD_T + aH - ((pt.y - spec.yMin) / yRange) * aH;
+
+        if (!pt.key) {
+          // Outer glow ring
+          ctx.beginPath();
+          ctx.arc(px, py, 6, 0, Math.PI * 2);
+          ctx.fillStyle = hexToRgba(_cssVar('--muted') || '#6E6E68', 0.12);
+          ctx.fill();
+          // Dot
+          ctx.beginPath();
+          ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = TEXTMUT;
+          ctx.fill();
+        } else {
+          // Accent halo
+          ctx.beginPath();
+          ctx.arc(px, py, 11, 0, Math.PI * 2);
+          ctx.fillStyle = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.12);
+          ctx.fill();
+          // Accent ring
           ctx.beginPath();
           ctx.arc(px, py, 8, 0, Math.PI * 2);
+          ctx.strokeStyle = hexToRgba(ACCENT.startsWith('#') ? ACCENT : '#E8C940', 0.4);
+          ctx.lineWidth = 1.5;
           ctx.stroke();
+          // Accent dot
+          ctx.beginPath();
+          ctx.arc(px, py, 5, 0, Math.PI * 2);
+          ctx.fillStyle = ACCENT;
+          ctx.fill();
         }
       });
+
+      // Axis labels
+      ctx.font = '600 7px "Helvetica Neue", sans-serif';
+      ctx.fillStyle = TEXTMUT;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('Low AOV', PAD_L + aW * 0.08, PAD_T + aH + 3);
+      ctx.fillText('High AOV', PAD_L + aW * 0.92, PAD_T + aH + 3);
     }
 
     // ── Waffle ──────────────────────────────────────────────────────
