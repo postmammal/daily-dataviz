@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Captures 70% of Traffic — Converts at Half the Rate · The Signal</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ── Accent ─────────────────────────────────────────────── */
+/* Day 84 (March 25, 2026): 84 % 7 = 0 → Bauhaus Yellow */
+/* ── Theme ──────────────────────────────────────────────── */
+:root, [data-theme="dark"] {
+  --bg:         #0E0E0E;
+  --surface:    #1A1A1A;
+  --rule:       #2A2A2A;
+  --rule-light: #222222;
+  --text:       #F0EFE8;
+  --muted:      #6E6E68;
+  --border:     #3A3A3A;
+  --accent:     #E8C940;
+  --accent-dim: rgba(232,201,64,0.12);
+}
+[data-theme="light"] {
+  --bg:         #F4F3EE;
+  --surface:    #ECEAE3;
+  --rule:       #CCCAC2;
+  --rule-light: #D8D6CE;
+  --text:       #1C1C1A;
+  --muted:      #888880;
+  --border:     #BEBCB4;
+  --accent:     #E8C940;
+  --accent-dim: rgba(232,201,64,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  min-height: 100vh;
+}
+.page { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
+
+/* ── Nav ──────────────────────────────────────────────────── */
+.top-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 32px;
+}
+.back-link {
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); text-decoration: none;
+  display: flex; align-items: center; gap: 6px;
+}
+.back-link:hover { color: var(--text); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.tag {
+  font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  border: 1px solid var(--rule); padding: 3px 8px;
+}
+#theme-toggle {
+  background: transparent; border: 1px solid var(--rule); color: var(--muted);
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 5px 10px; cursor: pointer;
+  line-height: 1; flex-shrink: 0;
+}
+
+/* ── Hero ──────────────────────────────────────────────────── */
+.hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+.hero-headline {
+  font-size: clamp(1.4rem, 5vw, 2.4rem);
+  font-weight: 900; text-transform: uppercase;
+  letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+}
+.hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+/* ── Stat Cards ──────────────────────────────────────────── */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--rule); margin-bottom: 40px;
+}
+.stat-card { background: var(--bg); padding: 20px 16px; }
+.stat-num {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 900; letter-spacing: -0.04em;
+  color: var(--text); line-height: 1;
+}
+.stat-num.accent { color: var(--accent); }
+.stat-label {
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); margin-top: 8px; line-height: 1.4;
+}
+.stat-delta {
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--accent); margin-top: 8px;
+}
+
+/* ── Chart Sections ─────────────────────────────────────── */
+.chart-section { margin-bottom: 16px; }
+.chart-label {
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
+}
+.chart-wrap { height: 340px; position: relative; }
+.chart-controls {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.ctrl-btn {
+  background: transparent; border: 1px solid var(--rule); color: var(--muted);
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 12px; cursor: pointer;
+}
+.ctrl-btn.active { border-color: var(--text); color: var(--text); }
+
+/* ── Key Finding ────────────────────────────────────────── */
+.insight {
+  background: var(--accent-dim);
+  border-left: 3px solid var(--accent);
+  padding: 14px 16px; margin-bottom: 32px;
+}
+.insight-label {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+}
+.insight-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; }
+
+/* ── Data Table ─────────────────────────────────────────── */
+.table-toggle-wrap { margin-top: 12px; }
+.table-toggle-btn {
+  background: transparent; border: 1px solid var(--rule); color: var(--muted);
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 5px 12px; cursor: pointer;
+}
+.data-table-wrap { display: none; margin-top: 16px; overflow-x: auto; }
+.data-table-wrap.open { display: block; }
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 0.75rem;
+}
+.data-table th {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); padding: 8px 12px;
+  border-bottom: 1px solid var(--rule); text-align: left;
+}
+.data-table td { padding: 8px 12px; border-bottom: 1px solid var(--rule-light); }
+.data-table tr:nth-child(even) td { background: var(--surface); }
+.data-table tr.key td { color: var(--accent); font-weight: 700; }
+
+/* ── Sources ─────────────────────────────────────────────── */
+.sources {
+  margin-top: 48px; padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+.sources-label {
+  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+}
+.sources-list { font-size: 0.72rem; color: var(--muted); line-height: 1.8; }
+.sources-list a { color: var(--muted); text-decoration: underline; }
+.sources-list a:hover { color: var(--text); }
+
+/* ── Mobile ──────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .chart-wrap { height: 260px; }
+  .hero-headline { font-size: clamp(1.4rem, 6vw, 2.4rem); }
+  .stat-num { font-size: clamp(1.5rem, 5vw, 2.2rem); }
+}
+
+/* ── Bubble legend ───────────────────────────────────────── */
+.bubble-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  margin-top: 12px; margin-bottom: 8px;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--muted); cursor: pointer;
+}
+.legend-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  border: 2px solid;
+}
+.legend-item.dimmed { opacity: 0.35; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">UX Design · Mobile UX</span>
+      <span class="tag">25 Mar 2026</span>
+      <button id="theme-toggle">☀</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-headline">Mobile Captures 70% of Traffic —<br>Converts at Half the Rate</div>
+    <div class="hero-sub">Mobile devices now generate nearly three-quarters of global e-commerce traffic, yet convert at 2.2% versus desktop's 4.3%. The gap isn't random — it follows a clear pattern tied to what people are buying.</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-traffic">—</div>
+      <div class="stat-label">Mobile share<br>of web traffic</div>
+      <div class="stat-delta">↑ from 52% in 2019</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-mob-cvr">—</div>
+      <div class="stat-label">Average mobile<br>conversion rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-dsk-cvr">—</div>
+      <div class="stat-label">Average desktop<br>conversion rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-abandon">—</div>
+      <div class="stat-label">Mobile cart<br>abandonment rate</div>
+      <div class="stat-delta">vs 67% on desktop</div>
+    </div>
+  </div>
+
+  <!-- Primary Chart: Bubble -->
+  <div class="chart-section">
+    <div class="chart-label">Conversion rate vs. average order value by category (bubble size = mobile traffic share)</div>
+    <div class="chart-wrap">
+      <canvas id="bubble-chart"></canvas>
+    </div>
+    <div class="bubble-legend" id="bubble-legend"></div>
+    <div class="table-toggle-wrap">
+      <button class="table-toggle-btn" id="toggle-table-1">[ View Data ]</button>
+    </div>
+    <div class="data-table-wrap" id="table-1-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Conversion Rate</th>
+            <th>Avg Order Value</th>
+            <th>Mobile Traffic Share</th>
+          </tr>
+        </thead>
+        <tbody id="table-1-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Food &amp; Beverage converts at 6.22% on mobile — 6.9× better than Luxury/Jewelry at 0.9%. The gap isn't about screen size; it's about purchase intent and price point: $48 impulse buys close on mobile, $820 considered purchases don't.</div>
+  </div>
+
+  <!-- Secondary Chart: Grouped Bar -->
+  <div class="chart-section">
+    <div class="chart-label">Mobile vs. desktop — key UX conversion metrics</div>
+    <div class="chart-wrap" style="height:300px;">
+      <canvas id="bar-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Mobile dominates traffic 70% to 30%, but loses on every transaction metric: desktop conversion is nearly 2× higher, average order value is $36 more, and mobile cart abandonment runs 7 points above desktop.</div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <div class="sources-list">
+      Skailama — E-commerce Conversion Rate by Industry 2026 ·
+      Envive.ai — 50 E-commerce CVR Statistics 2026 ·
+      Landbase — 30 Conversion Rate Statistics 2025 ·
+      CapitalOne Shopping — Mobile E-commerce Statistics 2025 ·
+      BlendCommerce — Shopify Conversion Rate Benchmarks 2025 ·
+      SQMagazine — Mobile vs. Desktop Statistics 2025 ·
+      Venn Apps — 35 Essential Stats on Mobile Commerce 2025
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ── Theme ──────────────────────────────────────────────────────────────
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshCharts === 'function') refreshCharts();
+});
+
+// ── Accent constants ───────────────────────────────────────────────────
+const ACCENT     = '#E8C940';
+const ACCENT_MID = 'rgba(232,201,64,0.5)';
+const ACCENT_DIM = 'rgba(232,201,64,0.07)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+// ── Count-up for stat cards ────────────────────────────────────────────
+function countUp(el, target, decimals, prefix, suffix) {
+  const duration = 1000, steps = 40;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const d = decimals !== undefined ? decimals : 0;
+    el.textContent = (prefix || '') + (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) + (suffix || '');
+  }, duration / steps);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  countUp(document.getElementById('stat-traffic'),  70, 0, '', '%');
+  countUp(document.getElementById('stat-mob-cvr'),  2.2, 1, '', '%');
+  countUp(document.getElementById('stat-dsk-cvr'),  4.3, 1, '', '%');
+  countUp(document.getElementById('stat-abandon'),  74, 0, '', '%');
+});
+
+// ── Industry data ──────────────────────────────────────────────────────
+const industries = [
+  { label: 'Food & Beverage',  cvr: 6.22, aov: 48,  mobileTraffic: 80 },
+  { label: 'Health & Beauty',  cvr: 2.80, aov: 65,  mobileTraffic: 75 },
+  { label: 'Fashion',          cvr: 2.20, aov: 88,  mobileTraffic: 72 },
+  { label: 'Home & Garden',    cvr: 1.70, aov: 145, mobileTraffic: 62 },
+  { label: 'Electronics',      cvr: 2.16, aov: 385, mobileTraffic: 58 },
+  { label: 'Luxury / Jewelry', cvr: 0.90, aov: 820, mobileTraffic: 50 },
+];
+
+// Color each industry — accent for key (Food), others stepped from muted
+const industryColors = [ACCENT, '#B5A8D0', '#88B0A4', '#B0B088', '#8899BB', '#B08888'];
+
+// ── Bubble Chart ─────────────────────────────────────────────────────
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+    rule:      _cssVar('--rule'),
+  };
+}
+
+let bubbleChart, barChart;
+
+function buildBubbleChart() {
+  const c = getChartColors();
+  const ctx = document.getElementById('bubble-chart').getContext('2d');
+
+  const datasets = industries.map((ind, i) => {
+    const r = Math.sqrt(ind.mobileTraffic / 100) * 22;
+    const col = industryColors[i];
+    return {
+      label: ind.label,
+      data: [{ x: ind.aov, y: ind.cvr, r: r }],
+      backgroundColor: col === ACCENT ? ACCENT_DIM : `${col}22`,
+      borderColor: col,
+      borderWidth: col === ACCENT ? 2.5 : 1.5,
+      hoverBackgroundColor: col === ACCENT ? 'rgba(232,201,64,0.25)' : `${col}44`,
+    };
+  });
+
+  bubbleChart = new Chart(ctx, {
+    type: 'bubble',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor: c.rule,
+          borderWidth: 1,
+          titleColor: c.text,
+          bodyColor: c.muted,
+          padding: 14,
+          cornerRadius: 0,
+          callbacks: {
+            title: (items) => items[0].dataset.label,
+            label: (item) => {
+              const ind = industries[item.datasetIndex];
+              return [
+                `Conversion rate: ${ind.cvr}%`,
+                `Avg order value: $${ind.aov}`,
+                `Mobile traffic share: ${ind.mobileTraffic}%`,
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'logarithmic',
+          min: 30,
+          max: 1200,
+          grid:   { color: c.ruleLight },
+          border: { display: false },
+          ticks:  {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 10,
+            callback: (v) => v >= 1000 ? `$${v/1000}k` : `$${v}`,
+          },
+          title: {
+            display: true,
+            text: 'AVERAGE ORDER VALUE (LOG SCALE)',
+            color: c.muted,
+            font: { size: 9, weight: '700' },
+            padding: { top: 8 },
+          }
+        },
+        y: {
+          min: 0,
+          max: 8,
+          grid:   { color: c.ruleLight },
+          border: { display: false },
+          ticks:  {
+            color: c.muted,
+            font: { size: 10, weight: '600' },
+            padding: 12,
+            callback: (v) => `${v}%`,
+          },
+          title: {
+            display: true,
+            text: 'CONVERSION RATE (%)',
+            color: c.muted,
+            font: { size: 9, weight: '700' },
+            padding: { bottom: 8 },
+          }
+        }
+      }
+    }
+  });
+}
+
+function buildBarChart() {
+  const c = getChartColors();
+  const ctx = document.getElementById('bar-chart').getContext('2d');
+
+  const metrics = ['Traffic Share', 'Conv. Rate', 'Cart Completion', 'AOV Index'];
+  // Mobile values (normalized to desktop=100 scale for comparability, but showing actual where useful)
+  const mobileData = [70, 2.2, 26, 86];   // % traffic, % CVR, % cart completion (100-74), $AOV
+  const desktopData = [30, 4.3, 33, 122]; // % traffic, % CVR, % cart completion (100-67), $AOV
+
+  barChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: metrics,
+      datasets: [
+        {
+          label: 'Mobile',
+          data: mobileData,
+          backgroundColor: ACCENT,
+          borderColor: ACCENT,
+          borderWidth: 0,
+          barPercentage: 0.38,
+          categoryPercentage: 0.8,
+          isAccent: true,
+        },
+        {
+          label: 'Desktop',
+          data: desktopData,
+          backgroundColor: c.muted,
+          borderColor: c.muted,
+          borderWidth: 0,
+          barPercentage: 0.38,
+          categoryPercentage: 0.8,
+          isAccent: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: c.muted,
+            font: { size: 9, weight: '700' },
+            usePointStyle: true,
+            pointStyle: 'rect',
+            boxWidth: 10,
+            padding: 16,
+          }
+        },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor: c.rule,
+          borderWidth: 1,
+          titleColor: c.text,
+          bodyColor: c.muted,
+          padding: 14,
+          cornerRadius: 0,
+          callbacks: {
+            label: (item) => {
+              const units = ['%', '%', '%', '$'];
+              const prefix = item.datasetIndex === 1 ? '' : '';
+              const unit = units[item.dataIndex];
+              const val = item.raw;
+              const fmt = unit === '$' ? `$${val}` : `${val}${unit}`;
+              return ` ${item.dataset.label}: ${fmt}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 10 }
+        },
+        y: {
+          grid:   { color: c.ruleLight },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 12 },
+          title: {
+            display: true,
+            text: 'VALUE (% or $)',
+            color: c.muted,
+            font: { size: 9, weight: '700' },
+          }
+        }
+      }
+    }
+  });
+}
+
+function refreshCharts() {
+  const c = getChartColors();
+  if (bubbleChart) {
+    bubbleChart.options.scales.x.grid.color = c.ruleLight;
+    bubbleChart.options.scales.x.ticks.color = c.muted;
+    bubbleChart.options.scales.x.title.color = c.muted;
+    bubbleChart.options.scales.y.grid.color = c.ruleLight;
+    bubbleChart.options.scales.y.ticks.color = c.muted;
+    bubbleChart.options.scales.y.title.color = c.muted;
+    bubbleChart.options.plugins.tooltip.backgroundColor = c.surface;
+    bubbleChart.options.plugins.tooltip.borderColor = c.rule;
+    bubbleChart.options.plugins.tooltip.titleColor = c.text;
+    bubbleChart.options.plugins.tooltip.bodyColor = c.muted;
+    bubbleChart.update();
+  }
+  if (barChart) {
+    barChart.options.scales.x.grid.color = c.ruleLight;
+    barChart.options.scales.x.ticks.color = c.muted;
+    barChart.options.scales.y.grid.color = c.ruleLight;
+    barChart.options.scales.y.ticks.color = c.muted;
+    barChart.options.plugins.tooltip.backgroundColor = c.surface;
+    barChart.options.plugins.tooltip.borderColor = c.rule;
+    barChart.options.plugins.tooltip.titleColor = c.text;
+    barChart.options.plugins.tooltip.bodyColor = c.muted;
+    // Update desktop bar color to current muted
+    barChart.data.datasets[1].backgroundColor = c.muted;
+    barChart.data.datasets[1].borderColor = c.muted;
+    barChart.options.plugins.legend.labels.color = c.muted;
+    barChart.update();
+  }
+}
+
+// ── Build bubble legend ──────────────────────────────────────────────
+function buildLegend() {
+  const legendEl = document.getElementById('bubble-legend');
+  const hidden = new Set();
+
+  industries.forEach((ind, i) => {
+    const col = industryColors[i];
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+      <div class="legend-dot" style="background:${col === ACCENT ? ACCENT_DIM : col+'22'}; border-color:${col};"></div>
+      <span>${ind.label}</span>
+    `;
+    item.addEventListener('click', () => {
+      const ds = bubbleChart.data.datasets[i];
+      const isHidden = ds.hidden;
+      ds.hidden = !isHidden;
+      if (ds.hidden) {
+        hidden.add(i);
+        item.classList.add('dimmed');
+      } else {
+        hidden.delete(i);
+        item.classList.remove('dimmed');
+      }
+      bubbleChart.update();
+    });
+    legendEl.appendChild(item);
+  });
+}
+
+// ── Build data table ──────────────────────────────────────────────────
+function buildDataTable() {
+  const tbody = document.getElementById('table-1-body');
+  industries.forEach((ind, i) => {
+    const tr = document.createElement('tr');
+    if (i === 0) tr.className = 'key';
+    tr.innerHTML = `
+      <td>${ind.label}</td>
+      <td>${ind.cvr}%</td>
+      <td>$${ind.aov}</td>
+      <td>${ind.mobileTraffic}%</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Table toggle ──────────────────────────────────────────────────────
+document.getElementById('toggle-table-1').addEventListener('click', function() {
+  const wrap = document.getElementById('table-1-wrap');
+  wrap.classList.toggle('open');
+  this.textContent = wrap.classList.contains('open') ? '[ Hide Data ]' : '[ View Data ]';
+});
+
+// ── Init ───────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  buildBubbleChart();
+  buildBarChart();
+  buildLegend();
+  buildDataTable();
+});
+</script>
+</body>
+</html>
