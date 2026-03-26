@@ -252,9 +252,8 @@
         insight: "48% of US online shoppers abandon at checkout due to unexpected costs alone — more than the next three reasons combined. The typical checkout has 14.9 form fields, nearly double the 7–8 that testing shows as optimal.",
         tags: ["UX Design"],
         miniViz: {
-          type: "hbars",
-          data: [48, 26, 22, 21, 18, 16],
-          labels: ["Hidden costs", "Forced account", "Too complicated", "Cost not shown", "Security", "Slow delivery"],
+          type: "treemap",
+          data: [48, 26, 22, 21, 18, 16, 13, 9],
           keyIdx: 0,
           label: "% abandoning for each reason"
         }
@@ -1030,6 +1029,53 @@
         ctx.font         = i === spec.keyIdx ? '700 7.5px "Helvetica Neue", sans-serif' : '500 7.5px "Helvetica Neue", sans-serif';
         ctx.fillText(`${lbl} ${data[i]}%`, legendX + 10, ly);
       });
+    }
+
+    // ── Treemap ─────────────────────────────────────────────────────
+    if (spec.type === 'treemap') {
+      const values  = spec.data || [];
+      const keyIdx  = spec.keyIdx != null ? spec.keyIdx : 0;
+      const total   = values.reduce((a, b) => a + b, 0);
+      const PAD     = 4;
+      const aW      = W - PAD * 2;
+      const aH      = H - PAD * 2;
+
+      // Sort by value descending, tracking original indices
+      const items = values
+        .map((v, i) => ({ v, i }))
+        .sort((a, b) => b.v - a.v);
+
+      // Layout: largest item takes left strip proportional to its share;
+      // remaining items fill the right strip stacked vertically.
+      const firstFrac = items[0].v / total;
+      const firstW    = Math.round(aW * firstFrac);
+      const restX     = PAD + firstW + 1;
+      const restW     = aW - firstW - 1;
+
+      // Draw largest tile
+      ctx.fillStyle = items[0].i === keyIdx ? ACCENT : (BARFILL || _cssVar('--surface'));
+      ctx.fillRect(PAD + 1, PAD + 1, firstW - 2, aH - 2);
+
+      // Draw remaining tiles stacked in right column
+      const rest      = items.slice(1);
+      const restTotal = rest.reduce((a, b) => a + b.v, 0);
+      let   yOff      = 0;
+      rest.forEach(item => {
+        const frac = item.v / restTotal;
+        const ih   = aH * frac;
+        ctx.fillStyle = item.i === keyIdx ? ACCENT : (BARFILL || _cssVar('--surface'));
+        ctx.fillRect(restX + 1, PAD + yOff + 1, restW - 2, ih - 2);
+        yOff += ih;
+      });
+
+      // Grid lines (gap between tiles) in bg color
+      ctx.strokeStyle = _cssVar('--bg') || '#0E0E0E';
+      ctx.lineWidth   = 2;
+      ctx.strokeRect(PAD, PAD, aW, aH);
+      ctx.beginPath();
+      ctx.moveTo(PAD + firstW, PAD);
+      ctx.lineTo(PAD + firstW, PAD + aH);
+      ctx.stroke();
     }
   }
 
