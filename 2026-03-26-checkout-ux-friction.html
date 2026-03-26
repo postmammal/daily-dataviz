@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout Friction Kills 70% of Carts — The Signal</title>
+  <style>
+    /* ── Themes ── */
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #6E6E68;
+      --border:     #3A3A3A;
+      --accent:     #D63C2F;
+      --accent-dim: rgba(214,60,47,0.10);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #D63C2F;
+      --accent-dim: rgba(214,60,47,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: 'tnum';
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: clamp(20px, 5vw, 56px);
+    }
+
+    /* ── Nav ── */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .tag {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 10px; cursor: pointer; line-height: 1; flex-shrink: 0;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      border-left: 4px solid var(--accent);
+      padding-left: 20px;
+      margin-bottom: 40px;
+    }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem);
+      font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Stat Cards ── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--rule);
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--bg);
+      padding: 20px 16px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .stat-card:hover { background: var(--surface); }
+    .stat-num {
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      font-weight: 900; letter-spacing: -0.04em;
+      color: var(--text);
+    }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label {
+      font-size: 0.63rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-top: 6px; line-height: 1.4;
+    }
+    .stat-delta {
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--accent); margin-top: 8px;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    /* ── Chart container ── */
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Key Finding ── */
+    .insight {
+      background: var(--accent-dim);
+      border-left: 3px solid var(--accent);
+      padding: 14px 16px; margin-bottom: 40px;
+    }
+    .insight-label {
+      font-size: .58rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+    }
+    .insight-text {
+      font-size: .82rem; color: var(--text); line-height: 1.6;
+    }
+
+    /* ── Filter buttons ── */
+    .btn-row {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    }
+    .range-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 12px; cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .range-btn.active { border-color: var(--text); color: var(--text); }
+
+    /* ── Data table ── */
+    #toggle-data {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 14px; cursor: pointer; margin-bottom: 16px;
+      display: block;
+    }
+    #toggle-data:hover { border-color: var(--text); color: var(--text); }
+    #data-table-wrap {
+      display: none; overflow-x: auto; margin-bottom: 40px;
+    }
+    #data-table-wrap.open { display: block; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.75rem; font-family: 'Helvetica Neue', monospace;
+    }
+    th {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 8px 12px; text-align: left;
+      border-bottom: 1px solid var(--rule);
+    }
+    td {
+      padding: 8px 12px; border-bottom: 1px solid var(--rule-light);
+      color: var(--text);
+    }
+    tr:nth-child(even) td { background: var(--surface); }
+    tr.key-row td { color: var(--accent); }
+    td.val-col { font-weight: 700; text-align: right; }
+
+    /* ── Secondary chart (canvas dumbbell) ── */
+    .secondary-wrap {
+      position: relative;
+      height: 260px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Sources ── */
+    .sources {
+      border-top: 1px solid var(--rule);
+      padding-top: 20px;
+      margin-top: 16px;
+    }
+    .sources-label {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .sources p {
+      font-size: 0.72rem; color: var(--muted); line-height: 1.7;
+    }
+    .sources a { color: var(--muted); }
+    .sources a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-wrap { height: 260px; }
+      .secondary-wrap { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">UX Design · Checkout</span>
+      <span class="tag">26 MAR 2026</span>
+      <button id="theme-toggle" aria-label="Toggle color theme">☀</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-headline">Checkout Friction Abandons 70% of Carts — Hidden Fees Cause Half</div>
+    <div class="hero-sub">Baymard Institute's 2025 study of 4,560+ US shoppers quantifies every friction point behind e-commerce's most costly conversion failure. The typical checkout has nearly twice as many form fields as the proven-optimal design.</div>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid">
+    <div class="stat-card" id="card-0">
+      <div class="stat-num accent" id="stat-0">—</div>
+      <div class="stat-label">Average cart<br>abandonment rate</div>
+      <div class="stat-delta">↑ from 67% in 2020</div>
+    </div>
+    <div class="stat-card" id="card-1">
+      <div class="stat-num" id="stat-1">—</div>
+      <div class="stat-label">Abandon over<br>unexpected fees</div>
+    </div>
+    <div class="stat-card" id="card-2">
+      <div class="stat-num" id="stat-2">—</div>
+      <div class="stat-label">Potential uplift with<br>optimized checkout</div>
+      <div class="stat-delta">↑ Baymard estimate</div>
+    </div>
+    <div class="stat-card" id="card-3">
+      <div class="stat-num" id="stat-3">—</div>
+      <div class="stat-label">Avg form fields<br>(ideal: 7–8)</div>
+    </div>
+  </div>
+
+  <!-- Primary chart -->
+  <div class="section-label">Why shoppers abandon at checkout — % of US online shoppers (2025)</div>
+  <div class="chart-wrap">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <!-- Key Finding 1 -->
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Hidden costs alone — shipping, taxes, and fees revealed at checkout — drive 48% of all abandonments, more than the next three reasons combined. Showing landed cost earlier in the funnel is the single highest-ROI checkout fix.</div>
+  </div>
+
+  <!-- View/hide data button -->
+  <button id="toggle-data">[ View Data ]</button>
+  <div id="data-table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Abandonment reason</th>
+          <th style="text-align:right">% of shoppers</th>
+        </tr>
+      </thead>
+      <tbody id="data-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Secondary chart: form field complexity -->
+  <div class="section-label" style="margin-top:8px;">Checkout form complexity: typical vs. ideal (# of fields per step)</div>
+  <div class="btn-row">
+    <button class="range-btn active" data-view="fields" id="btn-fields">Form fields</button>
+    <button class="range-btn" data-view="mobile" id="btn-mobile">Mobile vs. desktop</button>
+  </div>
+  <div class="secondary-wrap">
+    <canvas id="secondaryChart"></canvas>
+  </div>
+
+  <!-- Key Finding 2 -->
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">The average checkout exposes 14.9 form fields — nearly double the 7–8 that Baymard's testing shows as optimal. Mobile abandonment (80%) runs 14 points above desktop (66%), yet the median mobile checkout has more friction, not less.</div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <p>
+      Baymard Institute (2025) — <em>Cart Abandonment Rate Statistics</em> · <em>Current State of Checkout UX</em> (49-study aggregate, 4,560+ surveyed shoppers, published Jan 2025) ·
+      RedStagFulfillment (2026) — <em>What Percentage of Online Shoppers Abandon Carts</em> ·
+      SellersCommerce (2025) — <em>Shopping Cart Abandonment Statistics</em>
+    </p>
+  </div>
+
+</div><!-- /page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── Accent & constants ────────────────────────────────────────────────
+const ACCENT     = '#D63C2F';
+const ACCENT_MID = 'rgba(214,60,47,0.5)';
+const ACCENT_DIM = 'rgba(214,60,47,0.10)';
+
+function _cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+function getChartColors() {
+  return {
+    muted:     _cssVar('--muted'),
+    ruleLight: _cssVar('--rule-light'),
+    bg:        _cssVar('--bg'),
+    surface:   _cssVar('--surface'),
+    text:      _cssVar('--text'),
+  };
+}
+
+// ── Theme toggle ─────────────────────────────────────────────────────
+const root = document.documentElement;
+const btn  = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+btn.textContent = '☀';
+btn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshChartColors === 'function') refreshChartColors();
+  if (typeof drawSecondary === 'function') drawSecondary();
+});
+
+// ── Count-up helper ───────────────────────────────────────────────────
+function countUp(el, target, decimals, prefix, suffix) {
+  const duration = 1000, steps = 40;
+  let current = 0;
+  const increment = target / steps;
+  const timer = setInterval(() => {
+    current += increment;
+    if (current >= target) { current = target; clearInterval(timer); }
+    const d = decimals !== undefined ? decimals : 0;
+    el.textContent = (prefix || '') +
+      (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) +
+      (suffix || '');
+  }, duration / steps);
+}
+
+// ── Data ─────────────────────────────────────────────────────────────
+const abandonReasons = [
+  { label: 'Unexpected costs (shipping, taxes, fees)', value: 48 },
+  { label: 'Forced account creation',                  value: 26 },
+  { label: 'Checkout too long / complicated',          value: 22 },
+  { label: 'Couldn\'t see total cost upfront',         value: 21 },
+  { label: 'Website security concerns',                value: 18 },
+  { label: 'Estimated delivery too slow',              value: 16 },
+  { label: 'Unsatisfactory returns policy',            value: 13 },
+  { label: 'Not enough payment methods',               value: 9  },
+];
+
+// Form fields data (typical vs ideal checkout steps)
+const formFieldData = {
+  fields: {
+    labels: ['Contact', 'Shipping', 'Billing', 'Payment', 'Review'],
+    typical: [4.2, 5.8, 3.6, 3.1, 2.2],  // ~14.9 total
+    ideal:   [2.0, 3.5, 1.5, 1.5, 1.0],  // ~7–8 total
+  },
+  mobile: {
+    labels: ['Food', 'Health', 'Apparel', 'Home & Garden', 'Electronics', 'Luxury'],
+    typical: [80, 77, 79, 81, 83, 85],  // mobile abandonment by category
+    ideal:   [67, 65, 66, 69, 71, 74],  // desktop abandonment by category
+  }
+};
+
+// ── Populate data table ───────────────────────────────────────────────
+const tbody = document.getElementById('data-tbody');
+abandonReasons.forEach((d, i) => {
+  const tr = document.createElement('tr');
+  if (i === 0) tr.className = 'key-row';
+  tr.innerHTML = `<td>${d.label}</td><td class="val-col">${d.value}%</td>`;
+  tbody.appendChild(tr);
+});
+
+// ── Primary chart (horizontal bars) ──────────────────────────────────
+let mainChart;
+let hoveredIdx = -1;
+
+function buildMainChart() {
+  const c = getChartColors();
+  const canvas = document.getElementById('mainChart');
+  const ctx = canvas.getContext('2d');
+  const labels = abandonReasons.map(d => d.label);
+  const values = abandonReasons.map(d => d.value);
+
+  mainChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: values.map((_, i) =>
+          i === 0 ? ACCENT : (_cssVar('--muted') || '#888880')
+        ),
+        borderWidth: 0,
+        borderRadius: 0,
+        barThickness: 'flex',
+        isAccent: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface,
+          borderColor: _cssVar('--rule'),
+          borderWidth: 1,
+          titleColor: c.text,
+          bodyColor: c.muted,
+          padding: 14,
+          cornerRadius: 0,
+          callbacks: {
+            title: (items) => items[0].label,
+            label: (item) => `  ${item.raw}% of US online shoppers`,
+          }
+        }
+      },
+      onHover: (event, elements) => {
+        const idx = elements.length ? elements[0].index : -1;
+        if (idx !== hoveredIdx) {
+          hoveredIdx = idx;
+          mainChart.data.datasets[0].backgroundColor = values.map((_, i) => {
+            if (idx === -1) return i === 0 ? ACCENT : (_cssVar('--muted') || '#888880');
+            return i === idx ? ACCENT : (_cssVar('--muted') || '#888880');
+          });
+          mainChart.update('none');
+        }
+      },
+      scales: {
+        x: {
+          max: 55,
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  {
+            color: c.muted, font: { size: 10, weight: '600' },
+            padding: 10,
+            callback: v => `${v}%`
+          }
+        },
+        y: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  {
+            color: c.muted, font: { size: 10, weight: '600' },
+            padding: 12,
+            callback: function(_, index) {
+              const lbl = labels[index];
+              return lbl.length > 36 ? lbl.slice(0, 35) + '…' : lbl;
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+function refreshChartColors() {
+  const c = getChartColors();
+  if (!mainChart) return;
+  mainChart.options.plugins.tooltip.backgroundColor = c.surface;
+  mainChart.options.plugins.tooltip.titleColor = c.text;
+  mainChart.options.plugins.tooltip.bodyColor = c.muted;
+  mainChart.options.scales.x.ticks.color = c.muted;
+  mainChart.options.scales.x.grid.color = c.ruleLight;
+  mainChart.options.scales.y.ticks.color = c.muted;
+  const values = abandonReasons.map(d => d.value);
+  mainChart.data.datasets[0].backgroundColor = values.map((_, i) =>
+    i === 0 ? ACCENT : (_cssVar('--muted') || '#888880')
+  );
+  mainChart.update();
+}
+
+// ── Secondary chart (Canvas 2D — grouped bars) ────────────────────────
+let currentView = 'fields';
+const secondaryCanvas = document.getElementById('secondaryChart');
+const secondaryCtx = secondaryCanvas.getContext('2d');
+
+function drawSecondary() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = secondaryCanvas.parentElement.offsetWidth || 700;
+  const H = secondaryCanvas.parentElement.offsetHeight || 260;
+  secondaryCanvas.width  = W * dpr;
+  secondaryCanvas.height = H * dpr;
+  secondaryCanvas.style.width  = '100%';
+  secondaryCanvas.style.height = '100%';
+  secondaryCtx.scale(dpr, dpr);
+  secondaryCtx.clearRect(0, 0, W, H);
+
+  const BG    = _cssVar('--bg')    || '#0E0E0E';
+  const MUTED = _cssVar('--muted') || '#888880';
+  const RULE  = _cssVar('--rule')  || '#2A2A2A';
+  const TEXT  = _cssVar('--text')  || '#F0EFE8';
+
+  secondaryCtx.fillStyle = BG;
+  secondaryCtx.fillRect(0, 0, W, H);
+
+  const d = formFieldData[currentView];
+  const labels  = d.labels;
+  const typical = d.typical;
+  const ideal   = d.ideal;
+  const n = labels.length;
+
+  const PAD_L = 48, PAD_R = 20, PAD_T = 32, PAD_B = 48;
+  const chartW = W - PAD_L - PAD_R;
+  const chartH = H - PAD_T - PAD_B;
+
+  const maxVal = Math.max(...typical, ...ideal) * 1.1;
+  const toY = v => PAD_T + chartH - (v / maxVal) * chartH;
+  const groupW = chartW / n;
+  const barW = groupW * 0.32;
+  const gap = groupW * 0.06;
+
+  // Grid lines
+  const gridLines = 4;
+  secondaryCtx.strokeStyle = RULE;
+  secondaryCtx.lineWidth = 0.75;
+  for (let g = 0; g <= gridLines; g++) {
+    const v = (maxVal / gridLines) * g;
+    const y = toY(v);
+    secondaryCtx.beginPath();
+    secondaryCtx.moveTo(PAD_L, y);
+    secondaryCtx.lineTo(PAD_L + chartW, y);
+    secondaryCtx.stroke();
+
+    secondaryCtx.font = '500 9px "Helvetica Neue", sans-serif';
+    secondaryCtx.fillStyle = MUTED;
+    secondaryCtx.textAlign = 'right';
+    secondaryCtx.textBaseline = 'middle';
+    const label = currentView === 'fields' ? v.toFixed(1) : `${Math.round(v)}%`;
+    secondaryCtx.fillText(label, PAD_L - 6, y);
+  }
+
+  // Bars
+  labels.forEach((lbl, i) => {
+    const cx = PAD_L + i * groupW + groupW / 2;
+    const x1 = cx - gap / 2 - barW;
+    const x2 = cx + gap / 2;
+
+    // Typical bar (accent)
+    const y1 = toY(typical[i]);
+    const h1 = PAD_T + chartH - y1;
+    secondaryCtx.fillStyle = ACCENT;
+    secondaryCtx.fillRect(x1, y1, barW, h1);
+
+    // Ideal bar (muted)
+    const y2 = toY(ideal[i]);
+    const h2 = PAD_T + chartH - y2;
+    secondaryCtx.fillStyle = MUTED;
+    secondaryCtx.globalAlpha = 0.6;
+    secondaryCtx.fillRect(x2, y2, barW, h2);
+    secondaryCtx.globalAlpha = 1.0;
+
+    // X labels
+    const shortLbl = lbl.length > 12 ? lbl.slice(0, 11) + '…' : lbl;
+    secondaryCtx.font = '600 9px "Helvetica Neue", sans-serif';
+    secondaryCtx.fillStyle = MUTED;
+    secondaryCtx.textAlign = 'center';
+    secondaryCtx.textBaseline = 'top';
+    secondaryCtx.fillText(shortLbl, cx, PAD_T + chartH + 8);
+  });
+
+  // Legend
+  const legendY = PAD_T - 20;
+  secondaryCtx.fillStyle = ACCENT;
+  secondaryCtx.fillRect(PAD_L, legendY, 10, 8);
+  secondaryCtx.font = '600 9px "Helvetica Neue", sans-serif';
+  secondaryCtx.fillStyle = MUTED;
+  secondaryCtx.textAlign = 'left';
+  secondaryCtx.textBaseline = 'middle';
+  const typLabel = currentView === 'fields' ? 'Typical checkout' : 'Mobile abandonment';
+  secondaryCtx.fillText(typLabel, PAD_L + 14, legendY + 4);
+
+  secondaryCtx.fillStyle = MUTED;
+  secondaryCtx.globalAlpha = 0.6;
+  secondaryCtx.fillRect(PAD_L + 130, legendY, 10, 8);
+  secondaryCtx.globalAlpha = 1.0;
+  secondaryCtx.fillStyle = MUTED;
+  const idealLabel = currentView === 'fields' ? 'Ideal checkout' : 'Desktop abandonment';
+  secondaryCtx.fillText(idealLabel, PAD_L + 144, legendY + 4);
+}
+
+// View toggle
+document.querySelectorAll('.range-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    currentView = b.dataset.view;
+    document.querySelectorAll('.range-btn').forEach(x =>
+      x.classList.toggle('active', x.dataset.view === currentView)
+    );
+    drawSecondary();
+  });
+});
+
+// ── Data table toggle ─────────────────────────────────────────────────
+document.getElementById('toggle-data').addEventListener('click', function () {
+  const wrap = document.getElementById('data-table-wrap');
+  wrap.classList.toggle('open');
+  this.textContent = wrap.classList.contains('open') ? '[ Hide Data ]' : '[ View Data ]';
+});
+
+// ── Init ──────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  buildMainChart();
+  drawSecondary();
+
+  // Count-up stat cards
+  countUp(document.getElementById('stat-0'), 70.2, 1, '', '%');
+  countUp(document.getElementById('stat-1'), 48, 0, '', '%');
+  countUp(document.getElementById('stat-2'), 35.3, 1, '+', '%');
+  countUp(document.getElementById('stat-3'), 14.9, 1, '', '');
+});
+
+window.addEventListener('resize', () => { drawSecondary(); });
+</script>
+</body>
+</html>
