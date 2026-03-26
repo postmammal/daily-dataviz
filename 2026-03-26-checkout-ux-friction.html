@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout Friction Kills 70% of Carts — The Signal</title>
   <style>
-    /* ── Themes ── */
     :root, [data-theme="dark"] {
       --bg:         #0E0E0E;
       --surface:    #1A1A1A;
@@ -32,26 +31,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
+      background: var(--bg); color: var(--text);
       font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
       font-variant-numeric: tabular-nums;
       font-feature-settings: 'tnum';
       min-height: 100vh;
     }
 
-    .page {
-      max-width: 880px;
-      margin: 0 auto;
-      padding: clamp(20px, 5vw, 56px);
-    }
+    .page { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
 
-    /* ── Nav ── */
+    /* Nav */
     .top-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 32px;
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 32px;
     }
     .back-link {
       font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
@@ -70,146 +62,115 @@
       padding: 5px 10px; cursor: pointer; line-height: 1; flex-shrink: 0;
     }
 
-    /* ── Hero ── */
-    .hero {
-      border-left: 4px solid var(--accent);
-      padding-left: 20px;
-      margin-bottom: 40px;
-    }
+    /* Hero */
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
     .hero-headline {
-      font-size: clamp(1.4rem, 5vw, 2.4rem);
-      font-weight: 900; text-transform: uppercase;
-      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+      font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900;
+      text-transform: uppercase; letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
     }
     .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
 
-    /* ── Stat Cards ── */
+    /* Stat cards */
     .stat-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--rule);
-      margin-bottom: 40px;
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--rule); margin-bottom: 40px;
     }
-    .stat-card {
-      background: var(--bg);
-      padding: 20px 16px;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .stat-card:hover { background: var(--surface); }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
     .stat-num {
-      font-size: clamp(1.5rem, 4vw, 2.2rem);
-      font-weight: 900; letter-spacing: -0.04em;
-      color: var(--text);
+      font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900;
+      letter-spacing: -0.04em; color: var(--text);
     }
     .stat-num.accent { color: var(--accent); }
     .stat-label {
-      font-size: 0.63rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted); margin-top: 6px; line-height: 1.4;
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted); margin-top: 6px; line-height: 1.4;
     }
-    .stat-delta {
-      font-size: 0.72rem; font-weight: 700;
-      color: var(--accent); margin-top: 8px;
-    }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: var(--accent); margin-top: 8px; }
 
-    /* ── Section label ── */
+    /* Section label */
     .section-label {
       font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 12px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
     }
 
-    /* ── Chart container ── */
-    .chart-wrap {
-      position: relative;
-      height: 340px;
-      margin-bottom: 16px;
+    /* Treemap container */
+    #treemap-wrap {
+      width: 100%; height: 380px;
+      position: relative; margin-bottom: 16px;
+      background: var(--bg);
     }
+    #treemap-wrap svg { display: block; }
 
-    /* ── Key Finding ── */
+    /* Treemap tooltip */
+    #treemap-tooltip {
+      position: absolute; pointer-events: none;
+      background: var(--surface); border: 1px solid var(--rule);
+      padding: 10px 14px; font-size: 0.75rem; line-height: 1.5;
+      max-width: 220px; display: none; z-index: 10;
+    }
+    #treemap-tooltip .tt-pct {
+      font-size: 1.1rem; font-weight: 900; color: var(--accent);
+      letter-spacing: -0.03em; display: block; margin-bottom: 2px;
+    }
+    #treemap-tooltip .tt-label { color: var(--text); font-weight: 600; }
+    #treemap-tooltip .tt-sub { color: var(--muted); font-size: 0.68rem; margin-top: 4px; }
+
+    /* Key finding */
     .insight {
-      background: var(--accent-dim);
-      border-left: 3px solid var(--accent);
+      background: var(--accent-dim); border-left: 3px solid var(--accent);
       padding: 14px 16px; margin-bottom: 40px;
     }
     .insight-label {
       font-size: .58rem; font-weight: 700; letter-spacing: .12em;
       text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
     }
-    .insight-text {
-      font-size: .82rem; color: var(--text); line-height: 1.6;
-    }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
 
-    /* ── Filter buttons ── */
-    .btn-row {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+    /* Data table toggle */
+    #toggle-data {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; padding: 5px 14px; cursor: pointer; margin-bottom: 16px; display: block;
     }
+    #toggle-data:hover { border-color: var(--text); color: var(--text); }
+    #data-table-wrap { display: none; overflow-x: auto; margin-bottom: 40px; }
+    #data-table-wrap.open { display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    th {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--rule);
+    }
+    td { padding: 8px 12px; border-bottom: 1px solid var(--rule-light); color: var(--text); }
+    tr:nth-child(even) td { background: var(--surface); }
+    tr.key-row td { color: var(--accent); font-weight: 700; }
+    td.val-col { font-weight: 700; text-align: right; }
+
+    /* Secondary chart (canvas) */
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
     .range-btn {
       background: transparent; border: 1px solid var(--rule); color: var(--muted);
       font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
       text-transform: uppercase; padding: 5px 12px; cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
     }
     .range-btn.active { border-color: var(--text); color: var(--text); }
+    .secondary-wrap { position: relative; height: 260px; margin-bottom: 16px; }
 
-    /* ── Data table ── */
-    #toggle-data {
-      background: transparent; border: 1px solid var(--rule); color: var(--muted);
-      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; padding: 5px 14px; cursor: pointer; margin-bottom: 16px;
-      display: block;
-    }
-    #toggle-data:hover { border-color: var(--text); color: var(--text); }
-    #data-table-wrap {
-      display: none; overflow-x: auto; margin-bottom: 40px;
-    }
-    #data-table-wrap.open { display: block; }
-    table {
-      width: 100%; border-collapse: collapse;
-      font-size: 0.75rem; font-family: 'Helvetica Neue', monospace;
-    }
-    th {
-      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 8px 12px; text-align: left;
-      border-bottom: 1px solid var(--rule);
-    }
-    td {
-      padding: 8px 12px; border-bottom: 1px solid var(--rule-light);
-      color: var(--text);
-    }
-    tr:nth-child(even) td { background: var(--surface); }
-    tr.key-row td { color: var(--accent); }
-    td.val-col { font-weight: 700; text-align: right; }
-
-    /* ── Secondary chart (canvas dumbbell) ── */
-    .secondary-wrap {
-      position: relative;
-      height: 260px;
-      margin-bottom: 16px;
-    }
-
-    /* ── Sources ── */
+    /* Sources */
     .sources {
-      border-top: 1px solid var(--rule);
-      padding-top: 20px;
-      margin-top: 16px;
+      border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 16px;
     }
     .sources-label {
       font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em;
       text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
     }
-    .sources p {
-      font-size: 0.72rem; color: var(--muted); line-height: 1.7;
-    }
+    .sources p { font-size: 0.72rem; color: var(--muted); line-height: 1.7; }
     .sources a { color: var(--muted); }
     .sources a:hover { color: var(--text); }
 
     @media (max-width: 600px) {
       .stat-grid { grid-template-columns: repeat(2, 1fr); }
-      .chart-wrap { height: 260px; }
+      #treemap-wrap { height: 280px; }
       .secondary-wrap { height: 220px; }
     }
   </style>
@@ -217,7 +178,6 @@
 <body>
 <div class="page">
 
-  <!-- Nav -->
   <div class="top-nav">
     <a href="index.html" class="back-link">← All Visualizations</a>
     <div class="nav-right">
@@ -227,47 +187,46 @@
     </div>
   </div>
 
-  <!-- Hero -->
   <div class="hero">
     <div class="hero-headline">Checkout Friction Abandons 70% of Carts — Hidden Fees Cause Half</div>
     <div class="hero-sub">Baymard Institute's 2025 study of 4,560+ US shoppers quantifies every friction point behind e-commerce's most costly conversion failure. The typical checkout has nearly twice as many form fields as the proven-optimal design.</div>
   </div>
 
-  <!-- Stat cards -->
   <div class="stat-grid">
-    <div class="stat-card" id="card-0">
+    <div class="stat-card">
       <div class="stat-num accent" id="stat-0">—</div>
       <div class="stat-label">Average cart<br>abandonment rate</div>
       <div class="stat-delta">↑ from 67% in 2020</div>
     </div>
-    <div class="stat-card" id="card-1">
+    <div class="stat-card">
       <div class="stat-num" id="stat-1">—</div>
       <div class="stat-label">Abandon over<br>unexpected fees</div>
     </div>
-    <div class="stat-card" id="card-2">
+    <div class="stat-card">
       <div class="stat-num" id="stat-2">—</div>
       <div class="stat-label">Potential uplift with<br>optimized checkout</div>
       <div class="stat-delta">↑ Baymard estimate</div>
     </div>
-    <div class="stat-card" id="card-3">
+    <div class="stat-card">
       <div class="stat-num" id="stat-3">—</div>
       <div class="stat-label">Avg form fields<br>(ideal: 7–8)</div>
     </div>
   </div>
 
-  <!-- Primary chart -->
-  <div class="section-label">Why shoppers abandon at checkout — % of US online shoppers (2025)</div>
-  <div class="chart-wrap">
-    <canvas id="mainChart"></canvas>
+  <div class="section-label">Why shoppers abandon at checkout — % of US online shoppers citing each reason (2025)</div>
+  <div id="treemap-wrap">
+    <div id="treemap-tooltip">
+      <span class="tt-pct" id="tt-pct"></span>
+      <span class="tt-label" id="tt-label"></span>
+      <span class="tt-sub" id="tt-sub"></span>
+    </div>
   </div>
 
-  <!-- Key Finding 1 -->
   <div class="insight">
     <div class="insight-label">Key Finding</div>
-    <div class="insight-text">Hidden costs alone — shipping, taxes, and fees revealed at checkout — drive 48% of all abandonments, more than the next three reasons combined. Showing landed cost earlier in the funnel is the single highest-ROI checkout fix.</div>
+    <div class="insight-text">Hidden costs alone — shipping, taxes, and fees revealed only at checkout — drive 48% of all abandonments, a block nearly twice the size of the next reason. Showing total landed cost earlier in the funnel is the single highest-ROI checkout fix available.</div>
   </div>
 
-  <!-- View/hide data button -->
   <button id="toggle-data">[ View Data ]</button>
   <div id="data-table-wrap">
     <table>
@@ -281,327 +240,314 @@
     </table>
   </div>
 
-  <!-- Secondary chart: form field complexity -->
-  <div class="section-label" style="margin-top:8px;">Checkout form complexity: typical vs. ideal (# of fields per step)</div>
+  <div class="section-label" style="margin-top: 8px;">Checkout form complexity: typical vs. ideal (fields per step)</div>
   <div class="btn-row">
-    <button class="range-btn active" data-view="fields" id="btn-fields">Form fields</button>
-    <button class="range-btn" data-view="mobile" id="btn-mobile">Mobile vs. desktop</button>
+    <button class="range-btn active" data-view="fields">Form fields</button>
+    <button class="range-btn" data-view="mobile">Mobile vs. desktop abandonment</button>
   </div>
   <div class="secondary-wrap">
     <canvas id="secondaryChart"></canvas>
   </div>
 
-  <!-- Key Finding 2 -->
   <div class="insight">
     <div class="insight-label">Key Finding</div>
-    <div class="insight-text">The average checkout exposes 14.9 form fields — nearly double the 7–8 that Baymard's testing shows as optimal. Mobile abandonment (80%) runs 14 points above desktop (66%), yet the median mobile checkout has more friction, not less.</div>
+    <div class="insight-text">The average checkout exposes 14.9 form fields — nearly double the 7–8 that Baymard's testing identifies as optimal. Mobile abandonment (80%) runs 14 points above desktop (66%), yet the median mobile checkout adds friction rather than removing it.</div>
   </div>
 
-  <!-- Sources -->
   <div class="sources">
     <div class="sources-label">Sources</div>
     <p>
-      Baymard Institute (2025) — <em>Cart Abandonment Rate Statistics</em> · <em>Current State of Checkout UX</em> (49-study aggregate, 4,560+ surveyed shoppers, published Jan 2025) ·
+      Baymard Institute (2025) — <em>Cart Abandonment Rate Statistics</em> · <em>Current State of Checkout UX</em>
+      (49-study aggregate, 4,560+ surveyed US shoppers, published Jan 2025) ·
       RedStagFulfillment (2026) — <em>What Percentage of Online Shoppers Abandon Carts</em> ·
       SellersCommerce (2025) — <em>Shopping Cart Abandonment Statistics</em>
     </p>
   </div>
 
-</div><!-- /page -->
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script>
-// ── Accent & constants ────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────
 const ACCENT     = '#D63C2F';
 const ACCENT_MID = 'rgba(214,60,47,0.5)';
 const ACCENT_DIM = 'rgba(214,60,47,0.10)';
 
-function _cssVar(name) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-function getChartColors() {
-  return {
-    muted:     _cssVar('--muted'),
-    ruleLight: _cssVar('--rule-light'),
-    bg:        _cssVar('--bg'),
-    surface:   _cssVar('--surface'),
-    text:      _cssVar('--text'),
-  };
+function _cssVar(n) {
+  return getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 }
 
-// ── Theme toggle ─────────────────────────────────────────────────────
+// ── Theme toggle ──────────────────────────────────────────────────────
 const root = document.documentElement;
-const btn  = document.getElementById('theme-toggle');
+const themeBtn = document.getElementById('theme-toggle');
 let dark = true;
 root.setAttribute('data-theme', 'dark');
-btn.textContent = '☀';
-btn.addEventListener('click', () => {
+themeBtn.textContent = '☀';
+themeBtn.addEventListener('click', () => {
   dark = !dark;
   root.setAttribute('data-theme', dark ? 'dark' : 'light');
-  btn.textContent = dark ? '☀' : '☾';
-  if (typeof refreshChartColors === 'function') refreshChartColors();
-  if (typeof drawSecondary === 'function') drawSecondary();
+  themeBtn.textContent = dark ? '☀' : '☾';
+  buildTreemap();
+  drawSecondary();
 });
 
-// ── Count-up helper ───────────────────────────────────────────────────
+// ── Count-up ─────────────────────────────────────────────────────────
 function countUp(el, target, decimals, prefix, suffix) {
-  const duration = 1000, steps = 40;
-  let current = 0;
-  const increment = target / steps;
-  const timer = setInterval(() => {
-    current += increment;
-    if (current >= target) { current = target; clearInterval(timer); }
-    const d = decimals !== undefined ? decimals : 0;
+  const steps = 40, duration = 1000;
+  let cur = 0;
+  const inc = target / steps;
+  const t = setInterval(() => {
+    cur = Math.min(cur + inc, target);
     el.textContent = (prefix || '') +
-      (d > 0 ? current.toFixed(d) : Math.round(current).toLocaleString()) +
+      (decimals > 0 ? cur.toFixed(decimals) : Math.round(cur).toLocaleString()) +
       (suffix || '');
+    if (cur >= target) clearInterval(t);
   }, duration / steps);
 }
 
 // ── Data ─────────────────────────────────────────────────────────────
-const abandonReasons = [
-  { label: 'Unexpected costs (shipping, taxes, fees)', value: 48 },
-  { label: 'Forced account creation',                  value: 26 },
-  { label: 'Checkout too long / complicated',          value: 22 },
-  { label: 'Couldn\'t see total cost upfront',         value: 21 },
-  { label: 'Website security concerns',                value: 18 },
-  { label: 'Estimated delivery too slow',              value: 16 },
-  { label: 'Unsatisfactory returns policy',            value: 13 },
-  { label: 'Not enough payment methods',               value: 9  },
+const reasons = [
+  { name: 'Unexpected costs',           sub: 'Shipping, taxes & fees revealed at checkout', value: 48 },
+  { name: 'Forced account creation',    sub: 'Required to register before purchasing',      value: 26 },
+  { name: 'Too long / complicated',     sub: 'Too many steps or fields',                    value: 22 },
+  { name: "Total cost\nnot shown early", sub: 'Price not visible until final step',          value: 21 },
+  { name: 'Security concerns',          sub: 'Did not trust the site with payment info',    value: 18 },
+  { name: 'Slow delivery',              sub: 'Estimated delivery time too long',            value: 16 },
+  { name: 'Returns policy',             sub: 'Policy unclear or unsatisfactory',            value: 13 },
+  { name: 'Payment methods',            sub: 'Preferred method not available',              value: 9  },
 ];
 
-// Form fields data (typical vs ideal checkout steps)
-const formFieldData = {
-  fields: {
-    labels: ['Contact', 'Shipping', 'Billing', 'Payment', 'Review'],
-    typical: [4.2, 5.8, 3.6, 3.1, 2.2],  // ~14.9 total
-    ideal:   [2.0, 3.5, 1.5, 1.5, 1.0],  // ~7–8 total
-  },
-  mobile: {
-    labels: ['Food', 'Health', 'Apparel', 'Home & Garden', 'Electronics', 'Luxury'],
-    typical: [80, 77, 79, 81, 83, 85],  // mobile abandonment by category
-    ideal:   [67, 65, 66, 69, 71, 74],  // desktop abandonment by category
-  }
-};
+// ── Treemap ────────────────────────────────────────────────────────────
+function buildTreemap() {
+  const wrap = document.getElementById('treemap-wrap');
+  const tooltip = document.getElementById('treemap-tooltip');
+  const W = wrap.offsetWidth;
+  const H = wrap.offsetHeight;
 
-// ── Populate data table ───────────────────────────────────────────────
-const tbody = document.getElementById('data-tbody');
-abandonReasons.forEach((d, i) => {
-  const tr = document.createElement('tr');
-  if (i === 0) tr.className = 'key-row';
-  tr.innerHTML = `<td>${d.label}</td><td class="val-col">${d.value}%</td>`;
-  tbody.appendChild(tr);
-});
+  // Clear previous
+  d3.select('#treemap-wrap').selectAll('svg').remove();
 
-// ── Primary chart (horizontal bars) ──────────────────────────────────
-let mainChart;
-let hoveredIdx = -1;
+  const BG      = _cssVar('--bg')      || '#0E0E0E';
+  const SURFACE = _cssVar('--surface') || '#1A1A1A';
+  const MUTED   = _cssVar('--muted')   || '#6E6E68';
+  const TEXT    = _cssVar('--text')    || '#F0EFE8';
+  const RULE    = _cssVar('--rule')    || '#2A2A2A';
 
-function buildMainChart() {
-  const c = getChartColors();
-  const canvas = document.getElementById('mainChart');
-  const ctx = canvas.getContext('2d');
-  const labels = abandonReasons.map(d => d.label);
-  const values = abandonReasons.map(d => d.value);
+  const svg = d3.select('#treemap-wrap')
+    .append('svg')
+    .attr('width', W)
+    .attr('height', H);
 
-  mainChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: values.map((_, i) =>
-          i === 0 ? ACCENT : (_cssVar('--muted') || '#888880')
-        ),
-        borderWidth: 0,
-        borderRadius: 0,
-        barThickness: 'flex',
-        isAccent: false,
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: { duration: 900, easing: 'easeOutQuart' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: c.surface,
-          borderColor: _cssVar('--rule'),
-          borderWidth: 1,
-          titleColor: c.text,
-          bodyColor: c.muted,
-          padding: 14,
-          cornerRadius: 0,
-          callbacks: {
-            title: (items) => items[0].label,
-            label: (item) => `  ${item.raw}% of US online shoppers`,
-          }
-        }
-      },
-      onHover: (event, elements) => {
-        const idx = elements.length ? elements[0].index : -1;
-        if (idx !== hoveredIdx) {
-          hoveredIdx = idx;
-          mainChart.data.datasets[0].backgroundColor = values.map((_, i) => {
-            if (idx === -1) return i === 0 ? ACCENT : (_cssVar('--muted') || '#888880');
-            return i === idx ? ACCENT : (_cssVar('--muted') || '#888880');
-          });
-          mainChart.update('none');
-        }
-      },
-      scales: {
-        x: {
-          max: 55,
-          grid:   { color: c.ruleLight, drawTicks: false },
-          border: { display: false },
-          ticks:  {
-            color: c.muted, font: { size: 10, weight: '600' },
-            padding: 10,
-            callback: v => `${v}%`
-          }
-        },
-        y: {
-          grid:   { display: false },
-          border: { display: false },
-          ticks:  {
-            color: c.muted, font: { size: 10, weight: '600' },
-            padding: 12,
-            callback: function(_, index) {
-              const lbl = labels[index];
-              return lbl.length > 36 ? lbl.slice(0, 35) + '…' : lbl;
+  const hierarchy = d3.hierarchy({ name: 'root', children: reasons })
+    .sum(d => d.value)
+    .sort((a, b) => b.value - a.value);
+
+  d3.treemap()
+    .size([W, H])
+    .padding(2)
+    .paddingOuter(0)
+    (hierarchy);
+
+  const cells = svg.selectAll('g')
+    .data(hierarchy.leaves())
+    .enter()
+    .append('g')
+    .attr('transform', d => `translate(${d.x0},${d.y0})`);
+
+  // Tile rectangles
+  cells.append('rect')
+    .attr('width',  d => Math.max(0, d.x1 - d.x0))
+    .attr('height', d => Math.max(0, d.y1 - d.y0))
+    .attr('fill', (d, i) => i === 0 ? ACCENT : SURFACE)
+    .attr('stroke', BG)
+    .attr('stroke-width', 2)
+    .style('cursor', 'default')
+    .on('mouseenter', function(event, d) {
+      const i = hierarchy.leaves().indexOf(d);
+      // Highlight: dim non-hovered tiles
+      cells.selectAll('rect')
+        .attr('fill', (dd, ii) => {
+          if (ii === i) return ii === 0 ? ACCENT : SURFACE;
+          return ii === 0 ? ACCENT_MID : RULE;
+        });
+      // Show tooltip
+      document.getElementById('tt-pct').textContent   = d.data.value + '%';
+      document.getElementById('tt-label').textContent  = d.data.name.replace(/\n/g, ' ');
+      document.getElementById('tt-sub').textContent    = d.data.sub;
+      tooltip.style.display = 'block';
+    })
+    .on('mousemove', function(event) {
+      const rect = wrap.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const ttW = tooltip.offsetWidth  || 200;
+      const ttH = tooltip.offsetHeight || 80;
+      tooltip.style.left = (x + 16 + ttW > W ? x - ttW - 8 : x + 16) + 'px';
+      tooltip.style.top  = (y + 16 + ttH > H ? y - ttH - 8 : y + 16) + 'px';
+    })
+    .on('mouseleave', function() {
+      cells.selectAll('rect')
+        .attr('fill', (dd, ii) => ii === 0 ? ACCENT : SURFACE);
+      tooltip.style.display = 'none';
+    });
+
+  // Percentage label
+  cells.each(function(d, i) {
+    const cellW = d.x1 - d.x0;
+    const cellH = d.y1 - d.y0;
+    if (cellW < 28 || cellH < 20) return;
+
+    const g = d3.select(this);
+    const isKey = i === 0;
+    const textColor = isKey ? BG : TEXT;
+    const mutedColor = isKey ? 'rgba(0,0,0,0.55)' : MUTED;
+
+    // Large percentage
+    const pctSize = Math.min(Math.max(cellW * 0.22, 14), isKey ? 52 : 28);
+    g.append('text')
+      .attr('x', 10)
+      .attr('y', 10 + pctSize * 0.85)
+      .attr('fill', textColor)
+      .attr('font-size', pctSize)
+      .attr('font-weight', 900)
+      .attr('font-family', "-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif")
+      .attr('letter-spacing', '-0.03em')
+      .text(d.data.value + '%');
+
+    // Label below (only if room)
+    if (cellH > pctSize * 1.5 + 24) {
+      const labelLines = d.data.name.split('\n');
+      const labelSize = Math.min(Math.max(cellW * 0.085, 9), 12);
+      labelLines.forEach((line, li) => {
+        g.append('text')
+          .attr('x', 10)
+          .attr('y', 10 + pctSize + 6 + (li * (labelSize + 3)) + labelSize)
+          .attr('fill', mutedColor)
+          .attr('font-size', labelSize)
+          .attr('font-weight', 700)
+          .attr('font-family', "-apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif")
+          .attr('letter-spacing', '0.06em')
+          .text(line.toUpperCase())
+          .each(function() {
+            // Clip if too wide
+            const available = cellW - 20;
+            if (this.getComputedTextLength && this.getComputedTextLength() > available) {
+              let t = line.toUpperCase();
+              while (t.length > 3 && this.getComputedTextLength() > available) {
+                t = t.slice(0, -1);
+                d3.select(this).text(t + '…');
+              }
             }
-          }
-        }
-      }
+          });
+      });
     }
   });
 }
 
-function refreshChartColors() {
-  const c = getChartColors();
-  if (!mainChart) return;
-  mainChart.options.plugins.tooltip.backgroundColor = c.surface;
-  mainChart.options.plugins.tooltip.titleColor = c.text;
-  mainChart.options.plugins.tooltip.bodyColor = c.muted;
-  mainChart.options.scales.x.ticks.color = c.muted;
-  mainChart.options.scales.x.grid.color = c.ruleLight;
-  mainChart.options.scales.y.ticks.color = c.muted;
-  const values = abandonReasons.map(d => d.value);
-  mainChart.data.datasets[0].backgroundColor = values.map((_, i) =>
-    i === 0 ? ACCENT : (_cssVar('--muted') || '#888880')
-  );
-  mainChart.update();
-}
-
-// ── Secondary chart (Canvas 2D — grouped bars) ────────────────────────
-let currentView = 'fields';
+// ── Secondary (canvas grouped bars) ─────────────────────────────────
 const secondaryCanvas = document.getElementById('secondaryChart');
-const secondaryCtx = secondaryCanvas.getContext('2d');
+const secCtx = secondaryCanvas.getContext('2d');
+let currentView = 'fields';
+
+const viewData = {
+  fields: {
+    labels:  ['Contact', 'Shipping', 'Billing', 'Payment', 'Review'],
+    typical: [4.2, 5.8, 3.6, 3.1, 2.2],
+    ideal:   [2.0, 3.5, 1.5, 1.5, 1.0],
+    yLabel: 'Form fields',
+    seriesA: 'Typical checkout',
+    seriesB: 'Ideal checkout',
+  },
+  mobile: {
+    labels:  ['Food & Bev', 'Health', 'Apparel', 'Home', 'Electronics', 'Luxury'],
+    typical: [80, 77, 79, 81, 83, 85],
+    ideal:   [67, 65, 66, 69, 71, 74],
+    yLabel: 'Abandonment %',
+    seriesA: 'Mobile',
+    seriesB: 'Desktop',
+  }
+};
 
 function drawSecondary() {
   const dpr = window.devicePixelRatio || 1;
-  const W = secondaryCanvas.parentElement.offsetWidth || 700;
+  const W = secondaryCanvas.parentElement.offsetWidth  || 700;
   const H = secondaryCanvas.parentElement.offsetHeight || 260;
   secondaryCanvas.width  = W * dpr;
   secondaryCanvas.height = H * dpr;
   secondaryCanvas.style.width  = '100%';
   secondaryCanvas.style.height = '100%';
-  secondaryCtx.scale(dpr, dpr);
-  secondaryCtx.clearRect(0, 0, W, H);
+  secCtx.scale(dpr, dpr);
+  secCtx.clearRect(0, 0, W, H);
 
   const BG    = _cssVar('--bg')    || '#0E0E0E';
   const MUTED = _cssVar('--muted') || '#888880';
   const RULE  = _cssVar('--rule')  || '#2A2A2A';
   const TEXT  = _cssVar('--text')  || '#F0EFE8';
 
-  secondaryCtx.fillStyle = BG;
-  secondaryCtx.fillRect(0, 0, W, H);
+  secCtx.fillStyle = BG;
+  secCtx.fillRect(0, 0, W, H);
 
-  const d = formFieldData[currentView];
-  const labels  = d.labels;
-  const typical = d.typical;
-  const ideal   = d.ideal;
-  const n = labels.length;
+  const d = viewData[currentView];
+  const n = d.labels.length;
+  const PAD_L = 44, PAD_R = 20, PAD_T = 32, PAD_B = 44;
+  const cW = W - PAD_L - PAD_R;
+  const cH = H - PAD_T - PAD_B;
+  const maxVal = Math.max(...d.typical, ...d.ideal) * 1.12;
+  const toY = v => PAD_T + cH - (v / maxVal) * cH;
+  const groupW = cW / n;
+  const barW = groupW * 0.3;
+  const gap  = groupW * 0.06;
 
-  const PAD_L = 48, PAD_R = 20, PAD_T = 32, PAD_B = 48;
-  const chartW = W - PAD_L - PAD_R;
-  const chartH = H - PAD_T - PAD_B;
-
-  const maxVal = Math.max(...typical, ...ideal) * 1.1;
-  const toY = v => PAD_T + chartH - (v / maxVal) * chartH;
-  const groupW = chartW / n;
-  const barW = groupW * 0.32;
-  const gap = groupW * 0.06;
-
-  // Grid lines
-  const gridLines = 4;
-  secondaryCtx.strokeStyle = RULE;
-  secondaryCtx.lineWidth = 0.75;
-  for (let g = 0; g <= gridLines; g++) {
-    const v = (maxVal / gridLines) * g;
+  // Grid
+  const gridN = 4;
+  for (let g = 0; g <= gridN; g++) {
+    const v = (maxVal / gridN) * g;
     const y = toY(v);
-    secondaryCtx.beginPath();
-    secondaryCtx.moveTo(PAD_L, y);
-    secondaryCtx.lineTo(PAD_L + chartW, y);
-    secondaryCtx.stroke();
-
-    secondaryCtx.font = '500 9px "Helvetica Neue", sans-serif';
-    secondaryCtx.fillStyle = MUTED;
-    secondaryCtx.textAlign = 'right';
-    secondaryCtx.textBaseline = 'middle';
-    const label = currentView === 'fields' ? v.toFixed(1) : `${Math.round(v)}%`;
-    secondaryCtx.fillText(label, PAD_L - 6, y);
+    secCtx.strokeStyle = RULE; secCtx.lineWidth = 0.75;
+    secCtx.beginPath(); secCtx.moveTo(PAD_L, y); secCtx.lineTo(PAD_L + cW, y); secCtx.stroke();
+    secCtx.font = '500 9px "Helvetica Neue", sans-serif';
+    secCtx.fillStyle = MUTED; secCtx.textAlign = 'right'; secCtx.textBaseline = 'middle';
+    secCtx.fillText(
+      currentView === 'fields' ? v.toFixed(v < 1 ? 1 : 0) : Math.round(v) + '%',
+      PAD_L - 6, y
+    );
   }
 
   // Bars
-  labels.forEach((lbl, i) => {
+  d.labels.forEach((lbl, i) => {
     const cx = PAD_L + i * groupW + groupW / 2;
-    const x1 = cx - gap / 2 - barW;
-    const x2 = cx + gap / 2;
+    const xA = cx - gap / 2 - barW;
+    const xB = cx + gap / 2;
 
-    // Typical bar (accent)
-    const y1 = toY(typical[i]);
-    const h1 = PAD_T + chartH - y1;
-    secondaryCtx.fillStyle = ACCENT;
-    secondaryCtx.fillRect(x1, y1, barW, h1);
+    // Series A (accent)
+    const yA = toY(d.typical[i]), hA = PAD_T + cH - yA;
+    secCtx.fillStyle = ACCENT;
+    secCtx.fillRect(xA, yA, barW, hA);
 
-    // Ideal bar (muted)
-    const y2 = toY(ideal[i]);
-    const h2 = PAD_T + chartH - y2;
-    secondaryCtx.fillStyle = MUTED;
-    secondaryCtx.globalAlpha = 0.6;
-    secondaryCtx.fillRect(x2, y2, barW, h2);
-    secondaryCtx.globalAlpha = 1.0;
+    // Series B (muted)
+    const yB = toY(d.ideal[i]), hB = PAD_T + cH - yB;
+    secCtx.fillStyle = MUTED; secCtx.globalAlpha = 0.55;
+    secCtx.fillRect(xB, yB, barW, hB);
+    secCtx.globalAlpha = 1;
 
     // X labels
-    const shortLbl = lbl.length > 12 ? lbl.slice(0, 11) + '…' : lbl;
-    secondaryCtx.font = '600 9px "Helvetica Neue", sans-serif';
-    secondaryCtx.fillStyle = MUTED;
-    secondaryCtx.textAlign = 'center';
-    secondaryCtx.textBaseline = 'top';
-    secondaryCtx.fillText(shortLbl, cx, PAD_T + chartH + 8);
+    const s = lbl.length > 10 ? lbl.slice(0, 9) + '…' : lbl;
+    secCtx.font = '600 9px "Helvetica Neue", sans-serif';
+    secCtx.fillStyle = MUTED; secCtx.textAlign = 'center'; secCtx.textBaseline = 'top';
+    secCtx.fillText(s, cx, PAD_T + cH + 8);
   });
 
   // Legend
-  const legendY = PAD_T - 20;
-  secondaryCtx.fillStyle = ACCENT;
-  secondaryCtx.fillRect(PAD_L, legendY, 10, 8);
-  secondaryCtx.font = '600 9px "Helvetica Neue", sans-serif';
-  secondaryCtx.fillStyle = MUTED;
-  secondaryCtx.textAlign = 'left';
-  secondaryCtx.textBaseline = 'middle';
-  const typLabel = currentView === 'fields' ? 'Typical checkout' : 'Mobile abandonment';
-  secondaryCtx.fillText(typLabel, PAD_L + 14, legendY + 4);
+  const legY = PAD_T - 20;
+  secCtx.fillStyle = ACCENT; secCtx.fillRect(PAD_L, legY, 10, 8);
+  secCtx.font = '600 9px "Helvetica Neue", sans-serif';
+  secCtx.fillStyle = MUTED; secCtx.textAlign = 'left'; secCtx.textBaseline = 'middle';
+  secCtx.fillText(d.seriesA, PAD_L + 14, legY + 4);
 
-  secondaryCtx.fillStyle = MUTED;
-  secondaryCtx.globalAlpha = 0.6;
-  secondaryCtx.fillRect(PAD_L + 130, legendY, 10, 8);
-  secondaryCtx.globalAlpha = 1.0;
-  secondaryCtx.fillStyle = MUTED;
-  const idealLabel = currentView === 'fields' ? 'Ideal checkout' : 'Desktop abandonment';
-  secondaryCtx.fillText(idealLabel, PAD_L + 144, legendY + 4);
+  secCtx.fillStyle = MUTED; secCtx.globalAlpha = 0.55;
+  secCtx.fillRect(PAD_L + 110, legY, 10, 8);
+  secCtx.globalAlpha = 1;
+  secCtx.fillStyle = MUTED; secCtx.fillText(d.seriesB, PAD_L + 124, legY + 4);
 }
 
 // View toggle
@@ -615,26 +561,33 @@ document.querySelectorAll('.range-btn').forEach(b => {
   });
 });
 
-// ── Data table toggle ─────────────────────────────────────────────────
-document.getElementById('toggle-data').addEventListener('click', function () {
+// Data table toggle
+document.getElementById('toggle-data').addEventListener('click', function() {
   const wrap = document.getElementById('data-table-wrap');
   wrap.classList.toggle('open');
   this.textContent = wrap.classList.contains('open') ? '[ Hide Data ]' : '[ View Data ]';
 });
 
+// Populate data table
+const tbody = document.getElementById('data-tbody');
+reasons.forEach((r, i) => {
+  const tr = document.createElement('tr');
+  if (i === 0) tr.className = 'key-row';
+  tr.innerHTML = `<td>${r.name.replace(/\n/g,' ')} — <em style="font-weight:400;color:var(--muted)">${r.sub}</em></td><td class="val-col">${r.value}%</td>`;
+  tbody.appendChild(tr);
+});
+
 // ── Init ──────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  buildMainChart();
+  buildTreemap();
   drawSecondary();
-
-  // Count-up stat cards
   countUp(document.getElementById('stat-0'), 70.2, 1, '', '%');
-  countUp(document.getElementById('stat-1'), 48, 0, '', '%');
+  countUp(document.getElementById('stat-1'), 48,   0, '', '%');
   countUp(document.getElementById('stat-2'), 35.3, 1, '+', '%');
   countUp(document.getElementById('stat-3'), 14.9, 1, '', '');
 });
 
-window.addEventListener('resize', () => { drawSecondary(); });
+window.addEventListener('resize', () => { buildTreemap(); drawSecondary(); });
 </script>
 </body>
 </html>
