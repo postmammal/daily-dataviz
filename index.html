@@ -1036,6 +1036,7 @@
       const values  = spec.data || [];
       const keyIdx  = spec.keyIdx != null ? spec.keyIdx : 0;
       const total   = values.reduce((a, b) => a + b, 0);
+      const GAP     = 2;   // px gap between tiles
       const PAD     = 4;
       const aW      = W - PAD * 2;
       const aH      = H - PAD * 2;
@@ -1045,37 +1046,49 @@
         .map((v, i) => ({ v, i }))
         .sort((a, b) => b.v - a.v);
 
-      // Layout: largest item takes left strip proportional to its share;
-      // remaining items fill the right strip stacked vertically.
-      const firstFrac = items[0].v / total;
-      const firstW    = Math.round(aW * firstFrac);
-      const restX     = PAD + firstW + 1;
-      const restW     = aW - firstW - 1;
+      // Layout: 3 columns
+      //   col 0 — largest item alone (proportional width)
+      //   col 1 — items 1–3 stacked (next ~40% of total)
+      //   col 2 — items 4–7 stacked (remainder)
+      const group0 = items.slice(0, 1);
+      const group1 = items.slice(1, 4);
+      const group2 = items.slice(4);
 
-      // Draw largest tile
-      ctx.fillStyle = items[0].i === keyIdx ? ACCENT : (BARFILL || _cssVar('--surface'));
-      ctx.fillRect(PAD + 1, PAD + 1, firstW - 2, aH - 2);
+      const sum0 = group0.reduce((s, x) => s + x.v, 0);
+      const sum1 = group1.reduce((s, x) => s + x.v, 0);
+      const sum2 = group2.reduce((s, x) => s + x.v, 0);
 
-      // Draw remaining tiles stacked in right column
-      const rest      = items.slice(1);
-      const restTotal = rest.reduce((a, b) => a + b.v, 0);
-      let   yOff      = 0;
-      rest.forEach(item => {
-        const frac = item.v / restTotal;
-        const ih   = aH * frac;
-        ctx.fillStyle = item.i === keyIdx ? ACCENT : (BARFILL || _cssVar('--surface'));
-        ctx.fillRect(restX + 1, PAD + yOff + 1, restW - 2, ih - 2);
+      const w0 = Math.round(aW * sum0 / total);
+      const w1 = Math.round(aW * sum1 / total);
+      const w2 = aW - w0 - w1 - GAP * 2;
+
+      const x0 = PAD;
+      const x1 = x0 + w0 + GAP;
+      const x2 = x1 + w1 + GAP;
+
+      // col 0 — single accent tile
+      ctx.fillStyle = ACCENT;
+      ctx.fillRect(x0, PAD, w0, aH);
+
+      // col 1 — muted tiles stacked
+      let yOff = 0;
+      group1.forEach(item => {
+        const ih = Math.round(aH * item.v / sum1);
+        ctx.fillStyle = TEXTMUT;
+        ctx.fillRect(x1, PAD + yOff, w1, ih - GAP);
         yOff += ih;
       });
 
-      // Grid lines (gap between tiles) in bg color
-      ctx.strokeStyle = _cssVar('--bg') || '#0E0E0E';
-      ctx.lineWidth   = 2;
-      ctx.strokeRect(PAD, PAD, aW, aH);
-      ctx.beginPath();
-      ctx.moveTo(PAD + firstW, PAD);
-      ctx.lineTo(PAD + firstW, PAD + aH);
-      ctx.stroke();
+      // col 2 — muted tiles stacked (slightly dimmer)
+      yOff = 0;
+      group2.forEach(item => {
+        const ih = Math.round(aH * item.v / sum2);
+        ctx.globalAlpha = 0.6;
+        ctx.fillStyle = TEXTMUT;
+        ctx.fillRect(x2, PAD + yOff, w2, ih - GAP);
+        ctx.globalAlpha = 1;
+        yOff += ih;
+      });
     }
   }
 
