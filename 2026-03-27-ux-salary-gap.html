@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The UX Pay Gap · The Signal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* ── Theme Variables ─────────────────────────────────────────────── */
+    :root, [data-theme="dark"] {
+      --bg:         #0E0E0E;
+      --surface:    #1A1A1A;
+      --rule:       #2A2A2A;
+      --rule-light: #222222;
+      --text:       #F0EFE8;
+      --muted:      #6E6E68;
+      --border:     #3A3A3A;
+      --accent:     #2B5FD9;
+      --accent-dim: rgba(43,95,217,0.07);
+    }
+    [data-theme="light"] {
+      --bg:         #F4F3EE;
+      --surface:    #ECEAE3;
+      --rule:       #CCCAC2;
+      --rule-light: #D8D6CE;
+      --text:       #1C1C1A;
+      --muted:      #888880;
+      --border:     #BEBCB4;
+      --accent:     #2B5FD9;
+      --accent-dim: rgba(43,95,217,0.10);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-variant-numeric: tabular-nums; font-feature-settings: 'tnum';
+      min-height: 100vh;
+    }
+    .page { max-width: 880px; margin: 0 auto; padding: clamp(20px, 5vw, 56px); }
+
+    /* ── Nav ── */
+    .top-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+    .back-link {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 6px;
+    }
+    .back-link:hover { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .tag { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    #theme-toggle {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 10px; cursor: pointer; line-height: 1; flex-shrink: 0;
+    }
+
+    /* ── Hero ── */
+    .hero { border-left: 4px solid var(--accent); padding-left: 20px; margin-bottom: 40px; }
+    .hero-headline {
+      font-size: clamp(1.4rem, 5vw, 2.4rem); font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 10px;
+    }
+    .hero-sub { font-size: 0.9rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── Stat Cards ── */
+    .stat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--rule); margin-bottom: 40px;
+    }
+    .stat-card { background: var(--bg); padding: 20px 16px; }
+    .stat-num { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900; letter-spacing: -0.04em; color: var(--text); }
+    .stat-num.accent { color: var(--accent); }
+    .stat-label { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .stat-delta { font-size: 0.72rem; font-weight: 700; color: var(--accent); margin-top: 8px; }
+
+    /* ── Section Label ── */
+    .section-label {
+      font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+    }
+
+    /* ── Chart ── */
+    .chart-wrap { height: 340px; position: relative; margin-bottom: 4px; }
+
+    /* ── Legend ── */
+    .legend { display: flex; gap: 20px; margin-bottom: 14px; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+    .legend-swatch { width: 12px; height: 12px; flex-shrink: 0; }
+    .legend-label { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .legend-item.active .legend-label { color: var(--text); }
+    .legend-item.faded { opacity: 0.35; }
+
+    /* ── Controls ── */
+    .controls { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .ctrl-btn {
+      background: transparent; border: 1px solid var(--rule); color: var(--muted);
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 12px; cursor: pointer;
+    }
+    .ctrl-btn.active { border-color: var(--text); color: var(--text); }
+
+    /* ── Insight ── */
+    .insight { background: var(--accent-dim); border-left: 3px solid var(--accent); padding: 14px 16px; margin-bottom: 36px; }
+    .insight-label { font-size: .58rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .insight-text { font-size: .82rem; color: var(--text); line-height: 1.6; }
+
+    /* ── Data Table ── */
+    .table-row { display: flex; justify-content: flex-end; margin: 10px 0 16px; }
+    .data-table-wrap { display: none; margin-bottom: 24px; border: 1px solid var(--rule); overflow: hidden; }
+    .data-table-wrap.open { display: block; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+    .data-table th {
+      font-size: 0.58rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); padding: 8px 14px; text-align: left;
+      border-bottom: 1px solid var(--rule); background: var(--surface);
+    }
+    .data-table th:not(:first-child) { text-align: right; }
+    .data-table td { padding: 8px 14px; border-bottom: 1px solid var(--rule-light); }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:nth-child(even) td { background: var(--surface); }
+    .data-table td:not(:first-child) { text-align: right; font-weight: 600; }
+    .data-table .accent-cell { color: var(--accent); font-weight: 700; }
+
+    /* ── Dumbbell Canvas ── */
+    .dumbbell-wrap { height: 200px; position: relative; margin-bottom: 4px; }
+
+    /* ── Sources ── */
+    .sources { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 0.7rem; color: var(--muted); line-height: 1.7; }
+    .sources-label { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; color: var(--muted); }
+    .sources a { color: var(--muted); }
+    .sources a:hover { color: var(--text); }
+
+    @media (max-width: 600px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+      .chart-wrap { height: 280px; }
+      .dumbbell-wrap { height: 180px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Nav -->
+  <div class="top-nav">
+    <a href="index.html" class="back-link">← All Visualizations</a>
+    <div class="nav-right">
+      <span class="tag">UX Design</span>
+      <span class="tag">27 Mar 2026</span>
+      <button id="theme-toggle">☀</button>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-headline">Three UX Careers, Three Pay Stories — Writers Earn 41% Less Than Researchers at Entry Level</div>
+    <div class="hero-sub">The User Interviews 2026 UX Salary Report — analyzing nearly 20,000 global compensation records — reveals a dramatic pay gap between UX roles that narrows, but never closes, at the senior level.</div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-num accent" id="stat-1">—</div>
+      <div class="stat-label">Senior UX researcher<br>median US salary</div>
+      <div class="stat-delta">↑ highest UX role</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-2">—</div>
+      <div class="stat-label">UX writer entry<br>level median</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-3">—</div>
+      <div class="stat-label">of US researchers<br>earn over $100K</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-4">—</div>
+      <div class="stat-label">US freelance UX<br>median salary</div>
+    </div>
+  </div>
+
+  <!-- Primary Chart: Grouped Bar -->
+  <div class="section-label">Median annual salary by UX role and seniority level — United States, 2025</div>
+  <div class="legend" id="legend"></div>
+  <div class="chart-wrap">
+    <canvas id="grouped-bar"></canvas>
+  </div>
+  <div class="table-row">
+    <button class="ctrl-btn" id="toggle-data">[ View Data ]</button>
+  </div>
+  <div class="data-table-wrap" id="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr><th>Seniority</th><th>UX Researcher</th><th>UX Designer</th><th>UX Writer</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Junior (0–2 yrs)</td><td class="accent-cell">$120K</td><td>$95K</td><td>$56K</td></tr>
+        <tr><td>Mid (3–5 yrs)</td><td class="accent-cell">$140K</td><td>$114K</td><td>$91K</td></tr>
+        <tr><td>Senior (6+ yrs)</td><td class="accent-cell">$165K</td><td>$156K</td><td>$130K</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">UX Researchers out-earn Designers by $25K at the junior level — a 26% premium that shrinks to just $9K (6%) at senior level, as designer ceiling catches up. UX Writers begin at $56K, a $64K gap from researchers, but their career trajectory shows 132% growth from junior to senior — the steepest arc of any UX role.</div>
+  </div>
+
+  <!-- Secondary: Dumbbell - Growth Arc -->
+  <div class="section-label">Career growth arc — junior to senior salary range (US)</div>
+  <div class="dumbbell-wrap">
+    <canvas id="dumbbell-canvas"></canvas>
+  </div>
+  <p style="font-size:0.63rem; color:var(--muted); margin-bottom:8px; margin-top:6px; line-height:1.5;">
+    Horizontal dumbbell: left dot = junior median, right dot = senior median. Percentage shows total salary growth across career. Hover for values.
+  </p>
+
+  <div class="insight">
+    <div class="insight-label">Key Finding</div>
+    <div class="insight-text">Despite the lowest entry salary, UX Writers see the most dramatic career trajectory — 132% growth from junior to senior, versus 37% for Researchers and 64% for Designers. Writers who reach senior level ($130K) close most of the gap, but the researcher-writer spread widens in absolute dollar terms as careers progress: $64K at entry, $35K at the top.</div>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <div class="sources-label">Sources</div>
+    <p>
+      User Interviews — <a href="https://www.userinterviews.com/ux-salary-report" target="_blank">2026 UX Salary Report</a> (analysis of ~20,000 global compensation records, 2023–2025, in partnership with Levels.fyi) ·
+      Looppanel — <a href="https://www.looppanel.com/blog/ux-salary" target="_blank">UX Salaries: What UX Researchers and Designers Are Earning</a> (2025) ·
+      UX Content Collective — <a href="https://uxcontent.com/content-design-and-ux-writer-salary-survey/" target="_blank">Content Design Salary Survey</a> (UX Writer data by years of experience) ·
+      Salary figures are US medians; Researcher junior/senior derived from reported ranges ($100–140K / $140–180K).
+    </p>
+  </div>
+
+</div><!-- /.page -->
+
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const ACCENT     = '#2B5FD9';
+const ACCENT_MID = 'rgba(43,95,217,0.5)';
+const ACCENT_DIM = 'rgba(43,95,217,0.07)';
+
+function _cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function gc() {
+  return {
+    muted: _cssVar('--muted'), ruleLight: _cssVar('--rule-light'), rule: _cssVar('--rule'),
+    bg: _cssVar('--bg'), surface: _cssVar('--surface'), text: _cssVar('--text'),
+  };
+}
+
+// ── Theme toggle ───────────────────────────────────────────────────────────
+const root = document.documentElement;
+const themeBtn = document.getElementById('theme-toggle');
+let dark = true;
+root.setAttribute('data-theme', 'dark');
+themeBtn.textContent = '☀';
+themeBtn.addEventListener('click', () => {
+  dark = !dark;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeBtn.textContent = dark ? '☀' : '☾';
+  if (typeof refreshGrouped === 'function') refreshGrouped();
+  drawDumbbell();
+});
+
+// ── Salary Data ────────────────────────────────────────────────────────────
+const levels    = ['Junior (0–2 yrs)', 'Mid (3–5 yrs)', 'Senior (6+ yrs)'];
+const roles = [
+  { name: 'UX Researcher', key: 'researcher', data: [120, 140, 165], isAccent: true  },
+  { name: 'UX Designer',   key: 'designer',   data: [ 95, 114, 156], isAccent: false },
+  { name: 'UX Writer',     key: 'writer',     data: [ 56,  91, 130], isAccent: false },
+];
+
+// Dataset visibility state
+const visible = { researcher: true, designer: true, writer: true };
+
+// ── Legend ──────────────────────────────────────────────────────────────────
+function buildLegend() {
+  const container = document.getElementById('legend');
+  container.innerHTML = '';
+  roles.forEach(role => {
+    const item = document.createElement('div');
+    item.className = `legend-item active`;
+    item.dataset.key = role.key;
+
+    const swatch = document.createElement('div');
+    swatch.className = 'legend-swatch';
+    swatch.style.background = role.isAccent ? ACCENT : (gc().muted || '#888880');
+    item.appendChild(swatch);
+
+    const label = document.createElement('span');
+    label.className = 'legend-label';
+    label.textContent = role.name;
+    item.appendChild(label);
+
+    item.addEventListener('click', () => {
+      visible[role.key] = !visible[role.key];
+      item.classList.toggle('faded', !visible[role.key]);
+      updateGroupedVisibility();
+    });
+    container.appendChild(item);
+  });
+}
+
+// ── Grouped Bar Chart ──────────────────────────────────────────────────────
+let gChart;
+
+function buildGrouped() {
+  const c = gc();
+  const datasets = roles.map(r => ({
+    label: r.name,
+    data: r.data,
+    backgroundColor: r.isAccent ? ACCENT : (c.muted || '#888880'),
+    borderWidth: 0,
+    hidden: false,
+    isAccent: r.isAccent,
+    roleKey: r.key,
+  }));
+
+  const ctx = document.getElementById('grouped-bar').getContext('2d');
+  gChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: levels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 800, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: c.surface, borderColor: c.rule, borderWidth: 1,
+          titleColor: c.text, bodyColor: c.muted, padding: 12, cornerRadius: 0,
+          displayColors: true, boxWidth: 10, boxHeight: 10,
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${ctx.raw}K`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid:   { display: false },
+          border: { display: false },
+          ticks:  { color: c.text, font: { size: 11, weight: '600' }, padding: 8 }
+        },
+        y: {
+          grid:   { color: c.ruleLight, drawTicks: false },
+          border: { display: false },
+          ticks:  { color: c.muted, font: { size: 10, weight: '600' }, padding: 12, callback: v => '$' + v + 'K' },
+          min: 0,
+          max: 190,
+        }
+      },
+      onHover: (evt, els) => {
+        if (els.length) {
+          const dsIdx  = els[0].datasetIndex;
+          const barIdx = els[0].index;
+          gChart.data.datasets.forEach((ds, di) => {
+            ds.backgroundColor = di === dsIdx
+              ? (ds.isAccent ? ACCENT : (gc().muted || '#888880'))
+              : ACCENT_MID.replace('0.5', '0.18');
+          });
+          gChart.update('none');
+        } else {
+          resetGroupedColors();
+          gChart.update('none');
+        }
+      }
+    }
+  });
+}
+
+function resetGroupedColors() {
+  const c = gc();
+  if (!gChart) return;
+  gChart.data.datasets.forEach(ds => {
+    ds.backgroundColor = ds.isAccent ? ACCENT : (c.muted || '#888880');
+  });
+}
+
+function refreshGrouped() {
+  if (!gChart) return;
+  const c = gc();
+  resetGroupedColors();
+  gChart.options.plugins.tooltip.backgroundColor = c.surface;
+  gChart.options.plugins.tooltip.borderColor      = c.rule;
+  gChart.options.plugins.tooltip.titleColor       = c.text;
+  gChart.options.plugins.tooltip.bodyColor        = c.muted;
+  gChart.options.scales.x.ticks.color             = c.text;
+  gChart.options.scales.y.ticks.color             = c.muted;
+  gChart.options.scales.y.grid.color              = c.ruleLight;
+  // Update legend swatches
+  document.querySelectorAll('.legend-swatch').forEach((sw, i) => {
+    sw.style.background = roles[i].isAccent ? ACCENT : (c.muted || '#888880');
+  });
+  gChart.update('active');
+}
+
+function updateGroupedVisibility() {
+  if (!gChart) return;
+  gChart.data.datasets.forEach(ds => { ds.hidden = !visible[ds.roleKey]; });
+  gChart.update();
+  drawDumbbell();
+}
+
+// Data table toggle
+document.getElementById('toggle-data').addEventListener('click', function() {
+  const wrap = document.getElementById('data-table-wrap');
+  wrap.classList.toggle('open');
+  this.textContent = wrap.classList.contains('open') ? '[ Hide Data ]' : '[ View Data ]';
+});
+
+// ── Dumbbell Canvas ────────────────────────────────────────────────────────
+const dumbCanvas = document.getElementById('dumbbell-canvas');
+let hovDumb = -1;
+
+function drawDumbbell() {
+  const dpr = window.devicePixelRatio || 1;
+  const W = dumbCanvas.parentElement.offsetWidth  || 700;
+  const H = dumbCanvas.parentElement.offsetHeight || 200;
+  dumbCanvas.width  = W * dpr;
+  dumbCanvas.height = H * dpr;
+  dumbCanvas.style.width  = '100%';
+  dumbCanvas.style.height = '100%';
+  const ctx = dumbCanvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const MUTED = _cssVar('--muted') || '#6E6E68';
+  const RULE  = _cssVar('--rule')  || '#2A2A2A';
+  const RULEL = _cssVar('--rule-light') || '#222222';
+  const TEXT  = _cssVar('--text')  || '#F0EFE8';
+  const SURF  = _cssVar('--surface') || '#1A1A1A';
+
+  const ML = W > 480 ? 100 : 80;
+  const MR = 70;
+  const MT = 16;
+  const MB = 28;
+  const rowH = (H - MT - MB) / roles.length;
+
+  // x scale: 40 → 180 (thousands)
+  const minSal = 40, maxSal = 185;
+  const toX = v => ML + ((v - minSal) / (maxSal - minSal)) * (W - ML - MR);
+
+  // Grid lines at 50, 75, 100, 125, 150, 175
+  [50, 75, 100, 125, 150, 175].forEach(v => {
+    ctx.strokeStyle = RULEL;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(toX(v), MT);
+    ctx.lineTo(toX(v), MT + rowH * roles.length);
+    ctx.stroke();
+    ctx.font = '600 9px -apple-system, Helvetica, Arial, sans-serif';
+    ctx.fillStyle = MUTED;
+    ctx.textAlign = 'center';
+    ctx.fillText('$' + v + 'K', toX(v), H - 6);
+  });
+
+  roles.forEach((role, ri) => {
+    if (!visible[role.key]) return;
+
+    const junVal = role.data[0]; // junior
+    const senVal = role.data[2]; // senior
+    const cy = MT + ri * rowH + rowH / 2;
+    const x0 = toX(junVal);
+    const x1 = toX(senVal);
+    const isHov = hovDumb === ri;
+    const color = role.isAccent ? ACCENT : MUTED;
+    const r = isHov ? 7 : 5.5;
+
+    // Connector line
+    ctx.strokeStyle = role.isAccent ? ACCENT_MID : RULEL;
+    ctx.lineWidth = isHov ? 2 : 1.5;
+    ctx.beginPath(); ctx.moveTo(x0, cy); ctx.lineTo(x1, cy); ctx.stroke();
+
+    // Junior dot (hollow)
+    ctx.beginPath(); ctx.arc(x0, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = _cssVar('--bg') || '#0E0E0E';
+    ctx.fill();
+    ctx.strokeStyle = color; ctx.lineWidth = isHov ? 2.5 : 2;
+    ctx.stroke();
+
+    // Senior dot (filled)
+    ctx.beginPath(); ctx.arc(x1, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = color; ctx.fill();
+
+    // Role label (left)
+    ctx.font = `${isHov ? 700 : 600} 10px -apple-system, Helvetica, Arial, sans-serif`;
+    ctx.fillStyle = role.isAccent ? ACCENT : TEXT;
+    ctx.textAlign = 'right';
+    ctx.fillText(role.name, ML - 10, cy + 3.5);
+
+    // Growth % label (right of senior dot)
+    const growth = Math.round(((senVal - junVal) / junVal) * 100);
+    ctx.font = '700 9px -apple-system, Helvetica, Arial, sans-serif';
+    ctx.fillStyle = role.isAccent ? ACCENT : MUTED;
+    ctx.textAlign = 'left';
+    ctx.fillText(`+${growth}%`, x1 + r + 6, cy + 3.5);
+
+    // Hover tooltip
+    if (isHov) {
+      const TW = 170;
+      let tx = x0 - 10;
+      if (tx < 4) tx = 4;
+      if (tx + TW > W - 4) tx = W - TW - 4;
+      const TH = 52;
+      const ty = cy - TH - 10;
+
+      ctx.fillStyle = SURF; ctx.strokeStyle = RULE; ctx.lineWidth = 1;
+      ctx.fillRect(tx, ty, TW, TH); ctx.strokeRect(tx, ty, TW, TH);
+
+      ctx.font = '700 9px -apple-system, Helvetica, Arial, sans-serif';
+      ctx.fillStyle = TEXT; ctx.textAlign = 'left';
+      ctx.fillText(role.name, tx + 9, ty + 14);
+
+      ctx.font = '600 9px -apple-system, Helvetica, Arial, sans-serif';
+      ctx.fillStyle = MUTED;
+      ctx.fillText(`Junior: $${junVal}K  →  Senior: $${senVal}K`, tx + 9, ty + 28);
+
+      ctx.fillStyle = ACCENT;
+      ctx.fillText(`+$${senVal - junVal}K (+${growth}%) career growth`, tx + 9, ty + 42);
+    }
+  });
+
+  // Legend: hollow = junior, filled = senior
+  if (W > 400) {
+    const lx = toX((minSal + maxSal) / 2) - 60;
+    const ly = H - MB + 14;
+    ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI * 2);
+    ctx.fillStyle = _cssVar('--bg') || '#0E0E0E';
+    ctx.fill(); ctx.strokeStyle = MUTED; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.font = '600 9px -apple-system, Helvetica, Arial, sans-serif';
+    ctx.fillStyle = MUTED; ctx.textAlign = 'left';
+    ctx.fillText('Junior', lx + 8, ly + 3);
+
+    const lx2 = lx + 70;
+    ctx.beginPath(); ctx.arc(lx2, ly, 4, 0, Math.PI * 2);
+    ctx.fillStyle = MUTED; ctx.fill();
+    ctx.fillStyle = MUTED; ctx.textAlign = 'left';
+    ctx.fillText('Senior', lx2 + 8, ly + 3);
+  }
+}
+
+// Dumbbell hover
+function dumbAt(mx, my) {
+  const W = dumbCanvas.parentElement.offsetWidth  || 700;
+  const H = dumbCanvas.parentElement.offsetHeight || 200;
+  const ML = W > 480 ? 100 : 80;
+  const MR = 70;
+  const MT = 16;
+  const MB = 28;
+  const rowH = (H - MT - MB) / roles.length;
+  for (let ri = 0; ri < roles.length; ri++) {
+    const cy = MT + ri * rowH + rowH / 2;
+    if (Math.abs(my - cy) < rowH / 2 + 4) return ri;
+  }
+  return -1;
+}
+
+dumbCanvas.addEventListener('mousemove', e => {
+  const rect = dumbCanvas.getBoundingClientRect();
+  const i = dumbAt(e.clientX - rect.left, e.clientY - rect.top);
+  if (i !== hovDumb) {
+    hovDumb = i; dumbCanvas.style.cursor = i >= 0 ? 'crosshair' : 'default';
+    drawDumbbell();
+  }
+});
+dumbCanvas.addEventListener('mouseleave', () => { hovDumb = -1; drawDumbbell(); });
+
+// ── Count-up ──────────────────────────────────────────────────────────────
+function countUp(el, target, dec, pre, suf) {
+  const steps = 40, dur = 1000; let cur = 0;
+  const inc = target / steps;
+  const t = setInterval(() => {
+    cur += inc;
+    if (cur >= target) { cur = target; clearInterval(t); }
+    el.textContent = (pre||'') + (dec > 0 ? cur.toFixed(dec) : Math.round(cur)) + (suf||'');
+  }, dur / steps);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  buildLegend();
+  buildGrouped();
+  drawDumbbell();
+
+  countUp(document.getElementById('stat-1'), 165, 0, '$', 'K');
+  countUp(document.getElementById('stat-2'), 56,  0, '$', 'K');
+  countUp(document.getElementById('stat-3'), 67,  0, '', '%');
+  countUp(document.getElementById('stat-4'), 125, 0, '$', 'K');
+});
+
+window.addEventListener('resize', drawDumbbell);
+</script>
+</body>
+</html>
